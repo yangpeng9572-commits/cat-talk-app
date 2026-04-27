@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/cat.dart';
 import '../models/translation.dart';
+import 'pose_recognition_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -376,6 +377,28 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Text(
             '長按開始自動翻譯',
             style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 24),
+          // 姿勢辨識按鈕（我們的差異化功能！）
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              side: const BorderSide(color: Colors.orange),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PoseRecognitionPage()),
+              );
+            },
+            icon: const Icon(Icons.camera_alt, color: Colors.orange),
+            label: const Text(
+              '或試試姿勢辨識',
+              style: TextStyle(color: Colors.orange),
+            ),
           ),
         ],
       ),
