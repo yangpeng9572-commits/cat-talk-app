@@ -8,7 +8,6 @@ class AddCatPage extends StatefulWidget {
 }
 
 class _AddCatPageState extends State<AddCatPage> {
-  String _name = '';
   bool _isMale = false;
   double _age = 0;
   String _breed = '';
@@ -87,12 +86,6 @@ class _AddCatPageState extends State<AddCatPage> {
             ),
             const SizedBox(height: 32),
 
-            // 名字
-            _buildInputField('貓咪的名字', (value) {
-              setState(() => _name = value);
-            }),
-            const SizedBox(height: 24),
-
             // 性別
             _buildGenderSelector(),
             const SizedBox(height: 24),
@@ -126,26 +119,6 @@ class _AddCatPageState extends State<AddCatPage> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildInputField(String label, Function(String) onChanged) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 8),
-        TextField(
-          decoration: InputDecoration(
-            hintText: '例如：奶茶、咪咪',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          ),
-          onChanged: onChanged,
-        ),
-      ],
     );
   }
 

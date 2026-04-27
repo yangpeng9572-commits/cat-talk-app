@@ -11,8 +11,6 @@ class PoseRecognitionPage extends StatefulWidget {
 class _PoseRecognitionPageState extends State<PoseRecognitionPage>
     with SingleTickerProviderStateMixin {
   bool _isAnalyzing = false;
-  String? _currentPose;
-  TranslationMeaning? _currentEmotion;
   late AnimationController _pulseController;
 
   @override
@@ -54,8 +52,6 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
 
     final result = results[DateTime.now().second % results.length];
     setState(() {
-      _currentPose = result.$1;
-      _currentEmotion = result.$2;
       _isAnalyzing = false;
     });
     _pulseController.stop();

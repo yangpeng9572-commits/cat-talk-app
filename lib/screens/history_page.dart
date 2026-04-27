@@ -1,7 +1,27 @@
 import 'package:flutter/material.dart';
+import '../models/translation_result.dart';
+import '../models/cat.dart';
+import '../services/translation_history_service.dart';
+import '../widgets/emotion_card.dart';
 
-class HistoryPage extends StatelessWidget {
+class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
+
+  @override
+  State<HistoryPage> createState() => _HistoryPageState();
+}
+
+class _HistoryPageState extends State<HistoryPage> {
+  final TranslationHistoryService _historyService = TranslationHistoryService();
+
+  @override
+  void initState() {
+    super.initState();
+    // 載入 Mock 資料（未來改為從資料庫讀取）
+    if (_historyService.count == 0) {
+      _historyService.addMockData();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,67 +33,339 @@ class HistoryPage extends StatelessWidget {
         foregroundColor: Colors.black,
         elevation: 0,
         actions: [
-          TextButton(
-            onPressed: () {
-              // 自定義語言
-            },
+          if (_historyService.count > 0)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              onPressed: _showClearAllDialog,
+            ),
+        ],
+      ),
+      body: _historyService.count == 0
+          ? _buildEmptyState()
+          : _buildHistoryList(),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              shape: BoxShape.circle,
+            ),
             child: const Text(
-              '自定義語言',
-              style: TextStyle(color: Colors.orange),
+              '😺',
+              style: TextStyle(fontSize: 60),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              '還沒有翻譯記錄\n長按首頁的翻譯按鈕開始吧！',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, height: 1.5),
             ),
           ),
         ],
       ),
-      body: Center(
+    );
+  }
+
+  Widget _buildHistoryList() {
+    final history = _historyService.getAll();
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: history.length,
+      itemBuilder: (context, index) {
+        final result = history[index];
+        return _buildHistoryCard(result);
+      },
+    );
+  }
+
+  Widget _buildHistoryCard(TranslationResult result) {
+    // 取得貓咪名稱
+    final cat = Cat.getDemoCats().firstWhere(
+      (c) => c.id == result.catId,
+      orElse: () => Cat.getDemoCats().first,
+    );
+
+    // 是否有使用者回饋修正
+    final hasCorrection = result.userFeedback != null && !result.userFeedback!.isCorrect;
+    final isCorrect = result.userFeedback?.isCorrect ?? false;
+
+    return GestureDetector(
+      onTap: () => _showDetailSheet(result),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: hasCorrection
+                ? Colors.orange.withValues(alpha: 0.5)
+                : Colors.grey.shade200,
+            width: hasCorrection ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 插圖
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                shape: BoxShape.circle,
-              ),
-              child: const Text(
-                '😺',
-                style: TextStyle(fontSize: 60),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 24),
-            // 說明文字
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
-              child: Text(
-                '您可以收聽舊的喵喵聲或將它們下載到您的設備。要開始使用歷史記錄或訪問您的存檔翻譯，請升級。',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, height: 1.5),
-              ),
-            ),
-            const SizedBox(height: 32),
-            // 升級按鈕
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+            // 第一列：貓咪名稱 + 時間
+            Row(
+              children: [
+                // 貓咪頭像
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade100,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.pets, color: Colors.orange, size: 20),
                 ),
+                const SizedBox(width: 12),
+                // 貓咪名稱
+                Text(
+                  cat.name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                // 時間
+                Text(
+                  _formatTime(result.createdAt),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // 第二列：情緒 + 翻譯文字
+            Row(
+              children: [
+                // 情緒 Emoji
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Color(result.emotionType.colorValue).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(result.emotionType.emoji, style: const TextStyle(fontSize: 18)),
+                      const SizedBox(width: 6),
+                      Text(
+                        result.emotionType.label,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(result.emotionType.colorValue),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // 修正標籤
+                if (hasCorrection)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      '已修正',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                else if (isCorrect)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      '✓ 正確',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // 第三列：翻譯文字
+            Text(
+              result.humanText,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
               ),
-              onPressed: () {
-                // 升級
-              },
-              child: const Text(
-                '取得高級版',
-                style: TextStyle(fontSize: 18),
-              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+
+            const SizedBox(height: 12),
+
+            // 第四列：信心值
+            Row(
+              children: [
+                const Text(
+                  '💪',
+                  style: TextStyle(fontSize: 14),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '信心度',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                      FractionallySizedBox(
+                        widthFactor: result.confidence,
+                        child: Container(
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: _getConfidenceColor(result.confidence),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${(result.confidence * 100).round()}%',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: _getConfidenceColor(result.confidence),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  void _showDetailSheet(TranslationResult result) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => EmotionCard(
+        result: result,
+        onFeedback: (feedback) {
+          Navigator.pop(context);
+          // 更新歷史記錄
+          _historyService.updateWithFeedback(result, feedback);
+          setState(() {});
+          // 顯示感謝
+          showFeedbackThanksDialog(
+            context,
+            '謝謝修正，之後會更懂牠 🐱',
+          );
+        },
+        onClose: () => Navigator.pop(context),
+      ),
+    );
+  }
+
+  void _showClearAllDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('清除所有記錄？'),
+        content: const Text('這個動作無法撤銷，所有翻譯記錄將被刪除。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              _historyService.clearAll();
+              Navigator.pop(context);
+              setState(() {});
+            },
+            child: const Text('清除'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatTime(DateTime time) {
+    final now = DateTime.now();
+    final diff = now.difference(time);
+
+    if (diff.inMinutes < 1) return '剛剛';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}分鐘前';
+    if (diff.inHours < 24) return '${diff.inHours}小時前';
+    if (diff.inDays < 7) return '${diff.inDays}天前';
+    return '${time.month}/${time.day}';
+  }
+
+  Color _getConfidenceColor(double confidence) {
+    if (confidence >= 0.8) return Colors.green;
+    if (confidence >= 0.6) return Colors.orange;
+    return Colors.red;
   }
 }

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/cat.dart';
 import '../models/translation.dart';
+import '../models/translation_result.dart';
+import '../services/meow_translation_service.dart';
+import '../services/translation_history_service.dart';
+import '../services/cat_learning_service.dart';
 import 'pose_recognition_page.dart';
+import '../widgets/emotion_card.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,6 +22,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
   late AnimationController _waveController;
+
+  // 翻譯服務
+  final MeowTranslationService _translationService = MeowTranslationService();
+  final TranslationHistoryService _historyService = TranslationHistoryService();
+  final CatLearningService _learningService = CatLearningService();
 
   @override
   void initState() {
@@ -45,6 +55,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _startRecording() {
+    // 檢查是否有選擇貓咪
+    if (selectedCat == null) {
+      _showNoCatSelectedDialog();
+      return;
+    }
+
     setState(() => isRecording = true);
     _pulseController.repeat(reverse: true);
     _waveController.repeat();
@@ -59,112 +75,142 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _simulateTranslation();
   }
 
-  void _simulateTranslation() {
-    final meanings = [
-      TranslationMeaning.hungry,
-      TranslationMeaning.callOwner,
-      TranslationMeaning.love,
-      TranslationMeaning.play,
-    ];
-    final meaning = meanings[DateTime.now().second % meanings.length];
-
-    final translation = Translation(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      catId: selectedCat?.id ?? '1',
-      originalSound: '喵～',
-      translation: meaning.label,
-      meaning: meaning,
-      timestamp: DateTime.now(),
-    );
-
-    setState(() {
-      translations.insert(0, translation);
-    });
-
-    _showTranslationResult(translation);
-  }
-
-  void _showTranslationResult(Translation translation) {
-    showModalBottomSheet(
+  void _showNoCatSelectedDialog() {
+    showDialog(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
           children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              translation.meaning.emoji,
-              style: const TextStyle(fontSize: 72),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              translation.translation,
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              _getMeaningDescription(translation.meaning),
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.grey.shade600, height: 1.5),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.edit),
-                    label: const Text('修正'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                    ),
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.check),
-                    label: const Text('正確'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+            Text('🐱 ', style: TextStyle(fontSize: 28)),
+            Text('請先選擇貓咪'),
           ],
         ),
+        content: const Text(
+          '翻譯功能需要知道是哪一隻貓在叫，這樣才能參考過去的回饋紀錄喔！',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('了解'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+              _showCatSwitcher();
+            },
+            child: const Text('選擇貓咪'),
+          ),
+        ],
       ),
     );
   }
 
-  String _getMeaningDescription(TranslationMeaning meaning) {
-    switch (meaning) {
-      case TranslationMeaning.hungry:
-        return '你的貓咪肚子餓了！\n快去準備食物吧～';
-      case TranslationMeaning.callOwner:
-        return '你的貓咪在呼喚你！\n可能想要你的注意';
-      case TranslationMeaning.love:
-        return '你的貓咪在表達愛意！\n這是最溫馨的時刻';
-      case TranslationMeaning.play:
-        return '你的貓咪想玩遊戲！\n拿出逗貓棒吧';
-      default:
-        return '你的貓咪有話想說～';
+  void _simulateTranslation() async {
+    if (selectedCat == null) return;
+
+    // 顯示錄音中提示
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 20, height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white.withValues(alpha: 0.8),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('分析中...'),
+          ],
+        ),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+
+    // 使用 Rule-based 翻譯服務（傳入貓咪 ID）
+    final audioPath = '/mock/cat_meow_${DateTime.now().millisecondsSinceEpoch}';
+    final result = await _translationService.analyzeAudio(
+      audioPath,
+      catId: selectedCat!.id,
+    );
+
+    // 加入貓咪學習調整
+    final adjustedResult = _learningService.adjustResultWithLearning(
+      result,
+      result.audioFeatures!,
+    );
+
+    // 保存到歷史記錄
+    _historyService.add(adjustedResult);
+
+    // 顯示情緒卡片
+    _showEmotionCard(adjustedResult);
+  }
+
+  void _showEmotionCard(TranslationResult result) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => EmotionCard(
+        result: result,
+        onFeedback: (feedback) {
+          // 處理回饋
+          Navigator.pop(context);
+          _handleFeedback(result, feedback);
+        },
+        onClose: () => Navigator.pop(context),
+      ),
+    );
+  }
+
+  void _handleFeedback(TranslationResult result, UserFeedback feedback) {
+    // 保存回饋到歷史記錄
+    _historyService.updateWithFeedback(result, feedback);
+
+    // 學習：如果是修正，更新貓咪學習資料
+    if (!feedback.isCorrect && feedback.correctedEmotion != null) {
+      final correctedEmotion = EmotionType.values.firstWhere(
+        (e) => e.name == feedback.correctedEmotion,
+        orElse: () => EmotionType.other,
+      );
+      _learningService.learnFromCorrection(result.catId, correctedEmotion);
+    } else if (feedback.isCorrect) {
+      // 確認也是一種學習
+      _learningService.learnFromConfirmation(result.catId, result.emotionType);
     }
+
+    // 根據回饋類型顯示不同的感謝訊息
+    String thanksMessage;
+    if (feedback.isCorrect) {
+      thanksMessage = '謝謝你的回饋！🐱\n我越來越懂牠了～';
+    } else if (feedback.correctedEmotion != null) {
+      final correctedEmotion = EmotionType.values.firstWhere(
+        (e) => e.name == feedback.correctedEmotion,
+        orElse: () => EmotionType.other,
+      );
+      thanksMessage = '好的，我記住了！\n${correctedEmotion.emoji} ${correctedEmotion.label}';
+    } else if (feedback.comment != null && feedback.comment!.isNotEmpty) {
+      thanksMessage = '📝 已記錄你的備註\n"${feedback.comment!}"';
+    } else {
+      thanksMessage = '謝謝修正，之後會更懂牠 🐱';
+    }
+
+    // 顯示感謝彈窗
+    showFeedbackThanksDialog(context, thanksMessage);
+
+    // TODO: 未來可以把回饋存入本地端，用於個別貓咪學習
+    // _saveFeedbackForLearning(result.catId, feedback);
   }
 
   @override
@@ -279,6 +325,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               title: const Text('添加新貓咪'),
               onTap: () {
                 Navigator.pop(context);
+                // TODO: 導航到添加貓咪頁面
               },
             ),
             const SizedBox(height: 16),
@@ -374,6 +421,35 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             },
           ),
           const SizedBox(height: 40),
+          // 新手提示（第一次使用時）
+          if (selectedCat != null) ...[
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange.shade100),
+              ),
+              child: Row(
+                children: [
+                  const Text('💡', style: TextStyle(fontSize: 16)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '長按橘色按鈕錄下貓叫聲，我會推測${selectedCat!.name}可能想表達什麼',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade700,
+                        height: 1.3,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
           Text(
             '長按開始自動翻譯',
             style: TextStyle(fontSize: 16, color: Colors.grey.shade600),

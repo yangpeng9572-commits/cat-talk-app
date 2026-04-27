@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cat_talk/main.dart';
-import 'package:cat_talk/screens/home_page.dart';
-import 'package:cat_talk/screens/cats_page.dart';
 import 'package:cat_talk/screens/add_cat_page.dart';
 
 void main() {
@@ -42,7 +40,6 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: AddCatPage()));
     
     // 驗證所有欄位存在
-    expect(find.text('貓咪的名字'), findsOneWidget);
     expect(find.text('性別'), findsOneWidget);
     expect(find.text('年齡'), findsOneWidget);
     expect(find.text('品種'), findsOneWidget);

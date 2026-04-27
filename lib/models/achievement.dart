@@ -1,5 +1,5 @@
-/// 成就系統 - 遊戲化設計
-/// 讓使用者在使用 App 的同時學習貓咪知識
+// 成就系統 - 遊戲化設計
+// 讓使用者在使用 App 的同時學習貓咪知識
 
 class Achievement {
   final String id;
