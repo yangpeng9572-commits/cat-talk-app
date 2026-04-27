@@ -3,13 +3,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cat.dart';
 import '../models/translation.dart';
 import '../models/translation_result.dart';
+import '../models/daily_task.dart';
 import '../services/meow_translation_service.dart';
 import '../services/translation_history_service.dart';
 import '../services/cat_learning_service.dart';
+import '../services/daily_task_service.dart';
+import '../services/streak_service.dart';
 import 'pose_recognition_page.dart';
 import 'daily_report_page.dart';
 import '../widgets/emotion_card.dart';
 import '../widgets/onboarding_overlay.dart';
+import '../widgets/daily_task_card.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,6 +28,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool isRecording = false;
   bool _showOnboarding = false;
   bool _isAnalyzing = false;
+  bool _isLoading = true;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
   late AnimationController _waveController;
@@ -33,10 +38,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final TranslationHistoryService _historyService = TranslationHistoryService();
   final CatLearningService _learningService = CatLearningService();
 
+  // 任務服務
+  late DailyTaskService _taskService;
+  late StreakService _streakService;
+  List<DailyTask> _todayTasks = [];
+  int _currentStreak = 0;
+
   @override
   void initState() {
     super.initState();
     selectedCat = Cat.getDemoCats().first;
+    _initServices();
     _checkOnboarding();
 
     _pulseController = AnimationController(
@@ -51,6 +63,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
+  }
+
+  Future<void> _initServices() async {
+    final prefs = await SharedPreferences.getInstance();
+    _taskService = DailyTaskService(prefs);
+    _streakService = StreakService(prefs);
+    _loadTaskData();
+  }
+
+  void _loadTaskData() {
+    setState(() {
+      _todayTasks = _taskService.getTodayTasks();
+      _currentStreak = _streakService.getCurrentStreak();
+      _isLoading = false;
+    });
   }
 
   Future<void> _checkOnboarding() async {
@@ -131,7 +158,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  void _simulateTranslation() async {
+  Future<void> _simulateTranslation() async {
     if (selectedCat == null) return;
 
     setState(() => _isAnalyzing = true);
@@ -155,10 +182,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     // 保存到歷史記錄
     _historyService.add(adjustedResult);
 
+    // 更新任務進度
+    await _updateTaskProgress(TaskType.translate_meow);
+
     setState(() => _isAnalyzing = false);
 
     // 顯示情緒卡片
     _showEmotionCard(adjustedResult);
+  }
+
+  Future<void> _updateTaskProgress(TaskType type, {int delta = 1}) async {
+    final updatedTask = await _taskService.updateTaskProgress(type, delta: delta);
+    
+    if (updatedTask != null && updatedTask.isCompleted) {
+      // 任務完成，獎勵 exp 並記錄連續
+      await _streakService.recordActivity(expReward: updatedTask.rewardExp);
+    }
+
+    _loadTaskData();
   }
 
   void _showEmotionCard(TranslationResult result) {
@@ -178,7 +219,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  void _handleFeedback(TranslationResult result, UserFeedback feedback) {
+  Future<void> _handleFeedback(TranslationResult result, UserFeedback feedback) async {
     // 保存回饋到歷史記錄
     _historyService.updateWithFeedback(result, feedback);
 
@@ -192,6 +233,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     } else if (feedback.isCorrect) {
       _learningService.learnFromConfirmation(result.catId, result.emotionType);
     }
+
+    // 更新回饋任務進度
+    await _updateTaskProgress(TaskType.give_feedback);
 
     // 顯示感謝 + 已加入報告提示
     _showThanksAndReportSnackbar(feedback);
@@ -237,14 +281,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  void _onDailyReportViewed() {
+    _updateTaskProgress(TaskType.view_daily_report);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_showOnboarding) {
       return OnboardingOverlay(onComplete: _completeOnboarding);
     }
 
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.orange),
+        ),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
       body: SafeArea(
         child: Column(
           children: [
@@ -255,6 +311,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   children: [
                     _buildMainButton(),
                     _buildDailyReportCard(),
+                    // 今日任務卡片
+                    DailyTaskCard(
+                      tasks: _todayTasks,
+                      currentStreak: _currentStreak,
+                    ),
                   ],
                 ),
               ),
@@ -266,7 +327,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildCatSelector() {
-    return Padding(
+    return Container(
+      color: Colors.white,
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
@@ -333,126 +395,127 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildMainButton() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(height: 40),
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Center(
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
 
-          // 波紋效果
-          AnimatedBuilder(
-            animation: _waveController,
-            builder: (context, child) {
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  if (isRecording)
-                    ...List.generate(3, (index) {
-                      final delay = index * 0.3;
-                      final value = (_waveController.value - delay).clamp(0.0, 1.0);
-                      final size = 200 + (value * 80);
-                      final opacity = (1 - value) * 0.3;
-                      return Container(
-                        width: size,
-                        height: size,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.orange.withValues(alpha: opacity),
-                            width: 2,
-                          ),
-                        ),
-                      );
-                    }),
-
-                  // 主按鈕
-                  GestureDetector(
-                    onTapDown: (_) => _startRecording(),
-                    onTapUp: (_) => _stopRecording(),
-                    onTapCancel: _stopRecording,
-                    child: AnimatedBuilder(
-                      animation: _pulseAnimation,
-                      builder: (context, child) {
-                        return Transform.scale(
-                          scale: isRecording ? _pulseAnimation.value : 1.0,
-                          child: Container(
-                            width: 180,
-                            height: 180,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFFFF8C00), Color(0xFFFF6B00)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.orange.withValues(alpha: 0.4),
-                                  blurRadius: isRecording ? 40 : 20,
-                                  spreadRadius: isRecording ? 10 : 0,
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  isRecording
-                                      ? Icons.hearing
-                                      : (_isAnalyzing ? Icons.psychology : Icons.pets),
-                                  size: 56,
-                                  color: Colors.white,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  _isAnalyzing
-                                      ? '正在聽...'
-                                      : (isRecording ? '正在聽牠說話' : '長按翻譯'),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+            // 波紋效果
+            AnimatedBuilder(
+              animation: _waveController,
+              builder: (context, child) {
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (isRecording)
+                      ...List.generate(3, (index) {
+                        final delay = index * 0.3;
+                        final value = (_waveController.value - delay).clamp(0.0, 1.0);
+                        final size = 200 + (value * 80);
+                        final opacity = (1 - value) * 0.3;
+                        return Container(
+                          width: size,
+                          height: size,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.orange.withValues(alpha: opacity),
+                              width: 2,
                             ),
                           ),
                         );
-                      },
+                      }),
+
+                    // 主按鈕
+                    GestureDetector(
+                      onTapDown: (_) => _startRecording(),
+                      onTapUp: (_) => _stopRecording(),
+                      onTapCancel: _stopRecording,
+                      child: AnimatedBuilder(
+                        animation: _pulseAnimation,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: isRecording ? _pulseAnimation.value : 1.0,
+                            child: Container(
+                              width: 180,
+                              height: 180,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFFFF8C00), Color(0xFFFF6B00)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.orange.withValues(alpha: 0.4),
+                                    blurRadius: isRecording ? 40 : 20,
+                                    spreadRadius: isRecording ? 10 : 0,
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    isRecording
+                                        ? Icons.hearing
+                                        : (_isAnalyzing ? Icons.psychology : Icons.pets),
+                                    size: 56,
+                                    color: Colors.white,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    _isAnalyzing
+                                        ? '正在聽...'
+                                        : (isRecording ? '正在聽牠說話' : '長按翻譯'),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              );
-            },
-          ),
-
-          const SizedBox(height: 32),
-
-          // 錄音提示
-          if (isRecording)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                '🎤 放開就翻譯',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.orange,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            )
-          else if (!_isAnalyzing)
-            Text(
-              '長按開始翻譯',
-              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                  ],
+                );
+              },
             ),
 
-          const SizedBox(height: 40),
-        ],
+            const SizedBox(height: 24),
+
+            // 錄音提示
+            if (isRecording)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  '🎤 放開就翻譯',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.orange,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              )
+            else if (!_isAnalyzing)
+              Text(
+                '長按開始翻譯',
+                style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -460,6 +523,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget _buildDailyReportCard() {
     return GestureDetector(
       onTap: () {
+        // 更新任務進度
+        _onDailyReportViewed();
+        
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -470,7 +536,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         );
       },
       child: Container(
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
