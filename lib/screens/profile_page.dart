@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'achievement_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -71,6 +72,16 @@ class ProfilePage extends StatelessWidget {
           // 功能列表
           SliverList(
             delegate: SliverChildListDelegate([
+              _buildMenuItem(
+                icon: Icons.emoji_events,
+                title: '成就',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AchievementPage()),
+                  );
+                },
+              ),
               _buildMenuItem(
                 icon: Icons.lock,
                 title: '修改密碼',
