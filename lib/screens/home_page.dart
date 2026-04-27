@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../models/cat.dart';
 import '../models/translation.dart';
 import '../models/translation_result.dart';
@@ -9,6 +12,7 @@ import '../services/translation_history_service.dart';
 import '../services/cat_learning_service.dart';
 import '../services/daily_task_service.dart';
 import '../services/streak_service.dart';
+import '../services/audio_recorder_service.dart';
 import 'pose_recognition_page.dart';
 import 'daily_report_page.dart';
 import '../widgets/emotion_card.dart';
@@ -29,6 +33,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _showOnboarding = false;
   bool _isAnalyzing = false;
   bool _isLoading = true;
+  bool _isPermissionDenied = false;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
   late AnimationController _waveController;
@@ -44,12 +49,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   List<DailyTask> _todayTasks = [];
   int _currentStreak = 0;
 
+  // 錄音服務
+  final AudioRecorderService _recorderService = AudioRecorderService();
+
+  // Timer for max recording duration
+  Timer? _maxDurationTimer;
+
   @override
   void initState() {
     super.initState();
     selectedCat = Cat.getDemoCats().first;
     _initServices();
     _checkOnboarding();
+    _checkPermission();
 
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 800),
@@ -88,6 +100,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
+  Future<void> _checkPermission() async {
+    final status = await Permission.microphone.status;
+    if (status.isPermanentlyDenied) {
+      setState(() => _isPermissionDenied = true);
+    }
+  }
+
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('hasSeenOnboarding', true);
@@ -98,27 +117,166 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void dispose() {
     _pulseController.dispose();
     _waveController.dispose();
+    _maxDurationTimer?.cancel();
+    _recorderService.dispose();
     super.dispose();
   }
 
-  void _startRecording() {
+  Future<void> _startRecording() async {
     if (selectedCat == null) {
       _showNoCatSelectedDialog();
+      return;
+    }
+
+    // 檢查權限
+    if (_isPermissionDenied) {
+      _showPermissionDeniedDialog();
+      return;
+    }
+
+    final hasPermission = await _recorderService.checkAndRequestPermission();
+    if (!hasPermission) {
+      // 檢查是否是永久拒絕
+      final status = await Permission.microphone.status;
+      if (status.isPermanentlyDenied) {
+        setState(() => _isPermissionDenied = true);
+        _showPermissionDeniedDialog();
+      } else {
+        _showSnackBar('需要麥克風權限才能錄音喔！', isError: true);
+      }
+      return;
+    }
+
+    // 開始錄音
+    final success = await _recorderService.startRecording();
+    if (!success) {
+      // Fallback to mock
+      debugPrint('錄音失敗，使用 Mock');
+      _startMockRecording();
       return;
     }
 
     setState(() => isRecording = true);
     _pulseController.repeat(reverse: true);
     _waveController.repeat();
+
+    // 設定 10 秒最大錄音計時器
+    _maxDurationTimer?.cancel();
+    _maxDurationTimer = Timer(
+      const Duration(milliseconds: AudioRecorderService.maxDurationMs),
+      () {
+        if (isRecording) {
+          debugPrint('達到最大錄音時長，自動停止');
+          _stopRecording();
+        }
+      },
+    );
   }
 
-  void _stopRecording() {
+  void _startMockRecording() {
+    // Mock 錄音（用於測試或沒有權限時）
+    setState(() => isRecording = true);
+    _pulseController.repeat(reverse: true);
+    _waveController.repeat();
+
+    // Mock 最多 3 秒
+    _maxDurationTimer?.cancel();
+    _maxDurationTimer = Timer(const Duration(seconds: 3), () {
+      if (isRecording) {
+        _stopRecording();
+      }
+    });
+  }
+
+  Future<void> _stopRecording() async {
+    _maxDurationTimer?.cancel();
+
     setState(() => isRecording = false);
     _pulseController.stop();
     _pulseController.reset();
     _waveController.stop();
     _waveController.reset();
-    _simulateTranslation();
+
+    // 嘗試真實錄音
+    final realRecording = await _recorderService.stopRecording();
+
+    if (realRecording != null && realRecording.isSuccess) {
+      // 真實錄音成功
+      await _processTranslation(realRecording.path!);
+    } else if (realRecording != null && realRecording.isTooShort) {
+      // 錄音太短
+      _showSnackBar('錄音太短，再試一次 🐱', isError: true);
+    } else {
+      // 錄音失敗，使用 Mock
+      await _processMockTranslation();
+    }
+  }
+
+  Future<void> _processTranslation(String audioPath) async {
+    if (selectedCat == null) return;
+
+    setState(() => _isAnalyzing = true);
+
+    try {
+      // 使用翻譯服務分析音訊
+      final result = await _translationService.analyzeAudio(
+        audioPath,
+        catId: selectedCat!.id,
+      );
+
+      // 加入貓咪學習調整
+      final adjustedResult = _learningService.adjustResultWithLearning(
+        result,
+        result.audioFeatures!,
+      );
+
+      // 保存到歷史記錄
+      _historyService.add(adjustedResult);
+
+      // 更新任務進度
+      await _updateTaskProgress(TaskType.translate_meow);
+
+      setState(() => _isAnalyzing = false);
+
+      // 顯示情緒卡片
+      _showEmotionCard(adjustedResult);
+    } catch (e) {
+      debugPrint('翻譯失敗: $e');
+      setState(() => _isAnalyzing = false);
+      _showSnackBar('翻譯失敗了，再試一次吧 🐱', isError: true);
+    }
+  }
+
+  Future<void> _processMockTranslation() async {
+    if (selectedCat == null) return;
+
+    setState(() => _isAnalyzing = true);
+
+    // 使用 Mock 音訊路徑
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    final audioPath = '/mock/cat_meow_${DateTime.now().millisecondsSinceEpoch}';
+    final result = await _translationService.analyzeAudio(
+      audioPath,
+      catId: selectedCat!.id,
+    );
+
+    // 加入貓咪學習調整
+    final adjustedResult = _learningService.adjustResultWithLearning(
+      result,
+      result.audioFeatures!,
+    );
+
+    // 保存到歷史記錄
+    _historyService.add(adjustedResult);
+
+    // 更新任務進度
+    await _updateTaskProgress(TaskType.translate_meow);
+
+    setState(() => _isAnalyzing = false);
+
+    // 顯示情緒卡片
+    _showEmotionCard(adjustedResult);
   }
 
   void _showNoCatSelectedDialog() {
@@ -158,37 +316,61 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  Future<void> _simulateTranslation() async {
-    if (selectedCat == null) return;
-
-    setState(() => _isAnalyzing = true);
-
-    // 模擬錄音延遲（至少 1 秒）
-    await Future.delayed(const Duration(milliseconds: 1200));
-
-    // 使用 Rule-based 翻譯服務
-    final audioPath = '/mock/cat_meow_${DateTime.now().millisecondsSinceEpoch}';
-    final result = await _translationService.analyzeAudio(
-      audioPath,
-      catId: selectedCat!.id,
+  void _showPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Text('🎤 ', style: TextStyle(fontSize: 28)),
+            Text('需要麥克風權限'),
+          ],
+        ),
+        content: const Text(
+          '貓語通需要麥克風權限才能錄下貓咪的叫聲。\n\n請到設定中開啟麥克風權限，這樣才能使用翻譯功能喔！',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () async {
+              Navigator.pop(context);
+              await openAppSettings();
+            },
+            child: const Text('開啟設定'),
+          ),
+        ],
+      ),
     );
+  }
 
-    // 加入貓咪學習調整
-    final adjustedResult = _learningService.adjustResultWithLearning(
-      result,
-      result.audioFeatures!,
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              isError ? Icons.error_outline : Icons.check_circle,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
-
-    // 保存到歷史記錄
-    _historyService.add(adjustedResult);
-
-    // 更新任務進度
-    await _updateTaskProgress(TaskType.translate_meow);
-
-    setState(() => _isAnalyzing = false);
-
-    // 顯示情緒卡片
-    _showEmotionCard(adjustedResult);
   }
 
   Future<void> _updateTaskProgress(TaskType type, {int delta = 1}) async {
