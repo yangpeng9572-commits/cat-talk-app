@@ -15,6 +15,7 @@ class DailyCatReport {
   final String suggestedAction;
   final WarningLevel warningLevel;
   final DateTime createdAt;
+  final String headlineText; // 一句話摘要（最多20字）
 
   DailyCatReport({
     required this.id,
@@ -28,6 +29,7 @@ class DailyCatReport {
     required this.suggestedAction,
     required this.warningLevel,
     required this.createdAt,
+    required this.headlineText,
   });
 
   /// 是否為空狀態（今天沒有任何紀錄）
@@ -49,6 +51,7 @@ class DailyCatReport {
       'suggestedAction': suggestedAction,
       'warningLevel': warningLevel.name,
       'createdAt': createdAt.toIso8601String(),
+      'headlineText': headlineText,
     };
   }
 
@@ -79,6 +82,7 @@ class DailyCatReport {
         orElse: () => WarningLevel.normal,
       ),
       createdAt: DateTime.parse(json['createdAt'] as String),
+      headlineText: json['headlineText'] as String? ?? '今天還沒有紀錄',
     );
   }
 
@@ -98,6 +102,7 @@ class DailyCatReport {
       summaryText: '今天還沒有貓咪紀錄，試著錄下第一聲喵，看看牠想表達什麼吧！',
       suggestedAction: '點擊首頁的翻譯按鈕，錄下貓叫聲開始翻譯！',
       warningLevel: WarningLevel.normal,
+      headlineText: '今天還沒有紀錄',
       createdAt: DateTime.now(),
     );
   }

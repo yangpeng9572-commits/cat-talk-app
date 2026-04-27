@@ -244,72 +244,127 @@ class _DailyReportPageState extends State<DailyReportPage> {
 
   /// 貓咪資訊卡片
   Widget _buildCatInfoCard(Cat cat, DailyCatReport report) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFF8C00), Color(0xFFFF6B00)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          // 貓咪頭像
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
+    return Column(
+      children: [
+        // 一句話摘要（最顯眼）
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(report.dominantEmotion?.colorValue ?? 0xFFFF8C00),
+                Color(report.dominantEmotion?.colorValue ?? 0xFFFF6B00),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            child: const Center(
-              child: Text('🐱', style: TextStyle(fontSize: 40)),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          const SizedBox(width: 16),
-          // 資訊
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  cat.name,
+          child: Column(
+            children: [
+              Text(
+                report.headlineText,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  height: 1.3,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (report.dominantEmotion != null) ...[
+                    Text(
+                      report.dominantEmotion!.emoji,
+                      style: const TextStyle(fontSize: 28),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      report.dominantEmotion!.label,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+        // 貓咪資訊（橘色底，白色內容）
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFFF8C00), Color(0xFFFF6B00)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+          ),
+          child: Row(
+            children: [
+              // 貓咪頭像
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Text('🐱', style: TextStyle(fontSize: 30)),
+                ),
+              ),
+              const SizedBox(width: 16),
+              // 資訊
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      cat.name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      cat.breed,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // 日期
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  _formatDate(report.date),
                   style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  cat.breed,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.8),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '📅 ${_formatDate(report.date)}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

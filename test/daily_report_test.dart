@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cat_talk/models/daily_cat_report.dart';
 import 'package:cat_talk/models/translation_result.dart';
@@ -17,7 +16,7 @@ void main() {
       expect(report.isEmpty, true);
       expect(report.totalTranslations, 0);
       expect(report.dominantEmotion, null);
-      expect(report.summaryText.isNotEmpty, true);
+      expect(report.headlineText, '今天還沒有紀錄');
     });
 
     test('应该能正确计算 isEmpty', () {
@@ -33,6 +32,7 @@ void main() {
         suggestedAction: '',
         warningLevel: WarningLevel.normal,
         createdAt: DateTime.now(),
+        headlineText: '今天還沒有紀錄',
       );
 
       final nonEmptyReport = DailyCatReport(
@@ -47,6 +47,7 @@ void main() {
         suggestedAction: 'Test',
         warningLevel: WarningLevel.normal,
         createdAt: DateTime.now(),
+        headlineText: '今天牠有點愛吃',
       );
 
       expect(emptyReport.isEmpty, true);
@@ -66,6 +67,7 @@ void main() {
         suggestedAction: '去看看猫碗',
         warningLevel: WarningLevel.notice,
         createdAt: DateTime(2026, 4, 27, 12, 0),
+        headlineText: '今天牠一直在討吃',
       );
 
       final json = report.toJson();
@@ -77,6 +79,7 @@ void main() {
       expect(fromJson.dominantEmotion, EmotionType.hungry);
       expect(fromJson.averageConfidence, 0.85);
       expect(fromJson.warningLevel, WarningLevel.notice);
+      expect(fromJson.headlineText, '今天牠一直在討吃');
     });
 
     test('应该能正确显示情续分布文字', () {
@@ -96,6 +99,7 @@ void main() {
         suggestedAction: 'Test',
         warningLevel: WarningLevel.normal,
         createdAt: DateTime.now(),
+        headlineText: '今天牠一直在討吃',
       );
 
       final text = report.emotionDistributionText;

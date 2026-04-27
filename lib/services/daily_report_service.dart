@@ -44,6 +44,7 @@ class DailyReportService {
     final emotionCounts = calculateEmotionCounts(dayHistory);
     final dominantEmotion = calculateDominantEmotion(emotionCounts, catId);
     final averageConfidence = calculateAverageConfidence(dayHistory);
+    final headlineText = generateHeadlineText(dominantEmotion, dayHistory.length);
     final summaryText = generateSummaryText(
       catId: catId,
       dominantEmotion: dominantEmotion,
@@ -70,6 +71,7 @@ class DailyReportService {
       suggestedAction: suggestedAction,
       warningLevel: warningLevel,
       createdAt: DateTime.now(),
+      headlineText: headlineText,
     );
   }
 
@@ -194,6 +196,63 @@ class DailyReportService {
     }
 
     return baseText + extraText + confidenceNote + personalizedNote;
+  }
+
+  /// 生成一句話摘要（最多20字）
+  /// 
+  /// 根據 dominantEmotion + totalTranslations 生成簡短摘要
+  String generateHeadlineText(EmotionType? dominantEmotion, int totalTranslations) {
+    if (dominantEmotion == null) {
+      return '今天還沒有紀錄';
+    }
+
+    // 根據翻譯次數決定語氣
+    final isManyTimes = totalTranslations > 5;
+    final isALot = totalTranslations > 10;
+
+    switch (dominantEmotion) {
+      case EmotionType.hungry:
+        if (isALot) return '今天牠一直在討吃';
+        if (isManyTimes) return '今天牠有點愛吃';
+        return '今天牠想吃東西';
+
+      case EmotionType.affectionate:
+        if (isALot) return '今天牠一直要撒嬌';
+        if (isManyTimes) return '今天牠有點愛撒嬌';
+        return '今天牠想撒嬌';
+
+      case EmotionType.playful:
+        if (isALot) return '今天牠精力超級旺盛';
+        if (isManyTimes) return '今天牠很想玩';
+        return '今天牠想玩耍';
+
+      case EmotionType.attention:
+        if (isALot) return '今天牠一直刷存在感';
+        if (isManyTimes) return '今天牠有點黏人';
+        return '今天牠需要關注';
+
+      case EmotionType.anxious:
+        if (isALot) return '今天牠有點焦躁不安';
+        if (isManyTimes) return '今天牠有點焦慮';
+        return '今天牠有點緊張';
+
+      case EmotionType.angry:
+        if (isALot) return '今天牠脾氣不太好';
+        if (isManyTimes) return '今天牠有點不高興';
+        return '今天牠不太高興';
+
+      case EmotionType.uncomfortable:
+        if (isALot) return '今天牠看起來不太舒服';
+        if (isManyTimes) return '今天牠有點不舒服';
+        return '今天牠感覺怪怪的';
+
+      case EmotionType.greeting:
+        if (isManyTimes) return '今天牠頻頻打招呼';
+        return '今天牠跟你打招呼';
+
+      case EmotionType.other:
+        return '今天牠很難捉摸';
+    }
   }
 
   /// 生成建議行動
