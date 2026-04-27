@@ -78,6 +78,34 @@ class CatLearningService {
     return boosts;
   }
 
+  /// 取得情緒權重（用於報告生成）
+  /// 
+  /// 與 getEmotionBoosts 相同，但名稱更直觀
+  Map<EmotionType, double> getEmotionWeights(String catId) {
+    return getEmotionBoosts(catId);
+  }
+
+  /// 取得最常被修正的情緒
+  EmotionType? getMostCorrectedEmotion(String catId) {
+    if (!_catEmotionBoosts.containsKey(catId)) {
+      return null;
+    }
+
+    final catBoosts = _catEmotionBoosts[catId]!;
+    if (catBoosts.isEmpty) return null;
+
+    // 找出權重最高的
+    final sorted = catBoosts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    if (sorted.isEmpty) return null;
+
+    return EmotionType.values.firstWhere(
+      (e) => e.name == sorted.first.key,
+      orElse: () => EmotionType.other,
+    );
+  }
+
   /// 根據貓咪歷史調整翻譯結果
   /// 
   /// 這個方法會：
