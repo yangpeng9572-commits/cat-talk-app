@@ -18,19 +18,19 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
     _OnboardingStep(
       emoji: '🐱',
       title: '歡迎使用貓語通',
-      description: '透過 AI 翻譯你家貓咪的叫聲，了解牠在想什麼',
+      description: '透過聲音特徵分析，幫你推測你家貓咪可能在表達什麼',
       highlight: null,
     ),
     _OnboardingStep(
       emoji: '🎤',
       title: '長按錄音',
-      description: '長按橘色按鈕，錄下貓叫聲，我會即時翻譯',
+      description: '長按橘色按鈕，錄下貓叫聲，我會嘗試翻譯看看',
       highlight: 'button',
     ),
     _OnboardingStep(
       emoji: '📊',
       title: '每日情緒報告',
-      description: '每天看看你家貓咪的情緒報告，更懂牠的需求',
+      description: '每天看看你家貓咪的情緒趨勢，更了解牠的需求',
       highlight: 'report',
     ),
   ];
