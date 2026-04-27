@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'achievement_page.dart';
+import 'about_page.dart';
+import 'privacy_policy_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -99,13 +101,23 @@ class ProfilePage extends StatelessWidget {
               ),
               _buildMenuItem(
                 icon: Icons.campaign,
-                title: '在 Cat Talk 上做廣告',
-                onTap: () {},
+                title: '關於貓語通',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AboutPage()),
+                  );
+                },
               ),
               _buildMenuItem(
                 icon: Icons.privacy_tip,
-                title: '個人隱私保護政策',
-                onTap: () {},
+                title: '隱私政策',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PrivacyPolicyPage()),
+                  );
+                },
               ),
               _buildMenuItem(
                 icon: Icons.delete_forever,
