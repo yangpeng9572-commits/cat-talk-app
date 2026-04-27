@@ -7,12 +7,14 @@ class EmotionCard extends StatelessWidget {
   final TranslationResult result;
   final void Function(UserFeedback feedback) onFeedback;
   final VoidCallback onClose;
+  final String catName; // 貓咪名稱，用於個人化文字
 
   const EmotionCard({
     super.key,
     required this.result,
     required this.onFeedback,
     required this.onClose,
+    this.catName = '你的貓',
   });
 
   @override
@@ -121,21 +123,37 @@ class EmotionCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Text(
-            '🐱 貓咪想說：',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
+          // 情緒 Emoji
+          Text(
+            result.emotionType.emoji,
+            style: const TextStyle(fontSize: 48),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
+          // 主要翻譯文字
           Text(
             result.humanText,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
-              height: 1.3,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
+          // 你覺得準嗎？
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Color(result.emotionType.colorValue).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '你覺得準嗎？',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(result.emotionType.colorValue),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -238,75 +256,44 @@ class EmotionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.shade100),
       ),
       child: Column(
         children: [
-          // 可能原因
+          // 原因（簡化）
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('🔍', style: TextStyle(fontSize: 18)),
+              const Text('🔍', style: TextStyle(fontSize: 16)),
               const SizedBox(width: 8),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '為什麼我這樣說？',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      result.reason,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade700,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  result.reason,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade700,
+                    height: 1.4,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Container(height: 1, color: Colors.orange.shade100),
-          const SizedBox(height: 12),
           // 建議行動
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('💡', style: TextStyle(fontSize: 18)),
+              const Text('💡', style: TextStyle(fontSize: 16)),
               const SizedBox(width: 8),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '建議這樣做',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      result.suggestedAction,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade700,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  result.suggestedAction,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade700,
+                    height: 1.4,
+                  ),
                 ),
               ),
             ],
