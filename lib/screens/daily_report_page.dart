@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/daily_cat_report.dart';
 import '../models/cat.dart';
 import '../models/translation_result.dart';
@@ -8,6 +9,8 @@ import '../services/daily_report_service.dart';
 import '../services/cat_service.dart';
 import '../services/cat_diary_service.dart';
 import '../services/bond_service.dart';
+import '../services/share_card_service.dart';
+import '../widgets/share_card_widget.dart';
 import '../theme/kawaii_theme.dart';
 
 /// 每日貓咪報告頁面
@@ -23,11 +26,17 @@ class DailyReportPage extends StatefulWidget {
 class _DailyReportPageState extends State<DailyReportPage> {
   final DailyReportService _reportService = DailyReportService();
   final CatDiaryService _diaryService = CatDiaryService();
+  final ShareCardService _shareService = ShareCardService();
   
   String? _selectedCatId;
   late List<Cat> _cats;
   DailyCatReport? _report;
   Bond? _currentBond;
+  CatDiary? _currentDiary;
+  Cat? _currentCat;
+  
+  // Key for share card screenshot
+  final GlobalKey _shareCardKey = GlobalKey();
 
   @override
   void initState() {
@@ -50,9 +59,35 @@ class _DailyReportPageState extends State<DailyReportPage> {
 
   void _loadReport() {
     if (_selectedCatId != null) {
+      final report = _reportService.getTodayReport(_selectedCatId!);
+      final bond = BondService().getBond(_selectedCatId!);
+      
+      // Get cat
+      final cats = _cats;
+      final cat = cats.firstWhere(
+        (c) => c.id == _selectedCatId,
+        orElse: () => cats.first,
+      );
+      
+      // Generate diary if report is not empty
+      CatDiary? diary;
+      if (!report.isEmpty) {
+        diary = _diaryService.generateDiary(
+          catName: cat.name,
+          dominantEmotion: report.dominantEmotion,
+          totalTranslations: report.totalTranslations,
+          emotionCounts: report.emotionCounts,
+          averageConfidence: report.averageConfidence,
+          bondScore: bond?.bondScore ?? 0,
+          taskCompleted: false,
+        );
+      }
+      
       setState(() {
-        _report = _reportService.getTodayReport(_selectedCatId!);
-        _currentBond = BondService().getBond(_selectedCatId!);
+        _report = report;
+        _currentBond = bond;
+        _currentDiary = diary;
+        _currentCat = cat;
       });
     }
   }
@@ -220,23 +255,24 @@ class _DailyReportPageState extends State<DailyReportPage> {
 
   /// 報告內容
   Widget _buildReportContent(DailyCatReport report) {
-    final cat = _cats.firstWhere(
+    final cat = _currentCat ?? _cats.firstWhere(
       (c) => c.id == report.catId,
       orElse: () => _cats.first,
     );
 
     // 取得默契值
     final bondScore = _currentBond?.bondScore ?? 0;
+    final bondLevel = _currentBond?.levelName ?? '剛認識';
     
-    // 產生日記
-    final diary = _diaryService.generateDiary(
+    // 產生日記（如果還沒有）
+    final diary = _currentDiary ?? _diaryService.generateDiary(
       catName: cat.name,
       dominantEmotion: report.dominantEmotion,
       totalTranslations: report.totalTranslations,
       emotionCounts: report.emotionCounts,
       averageConfidence: report.averageConfidence,
       bondScore: bondScore,
-      taskCompleted: false, // TODO: 從 DailyTaskService 取得
+      taskCompleted: false,
     );
 
     return SingleChildScrollView(
@@ -380,56 +416,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           
           // 分享按鈕
           Center(
-            child: GestureDetector(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Row(
-                      children: [
-                        Icon(Icons.heart_broken, color: Colors.white, size: 20),
-                        SizedBox(width: 12),
-                        Text('分享卡片功能即將開放 🐾'),
-                      ],
-                    ),
-                    backgroundColor: KawaiiTheme.primaryPink,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
-                    ),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
-                  boxShadow: [
-                    BoxShadow(
-                      color: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.share, color: KawaiiTheme.primaryPink, size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      '分享今天的小日記',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: KawaiiTheme.primaryPink,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            child: _buildShareButton(),
           ),
         ],
       ),
@@ -972,5 +959,346 @@ class _DailyReportPageState extends State<DailyReportPage> {
     } else {
       return '${date.month}/${date.day}';
     }
+  }
+
+  /// 分享按鈕
+  Widget _buildShareButton() {
+    final hasDiary = _currentDiary != null;
+    final hasCat = _currentCat != null;
+    
+    return GestureDetector(
+      onTap: hasDiary ? () => _showShareMenu() : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: hasDiary ? Colors.white : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
+          boxShadow: [
+            BoxShadow(
+              color: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.share, 
+              color: hasDiary ? KawaiiTheme.primaryPink : Colors.grey,
+              size: 18,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              hasDiary ? '分享今天的小日記' : '今天還沒有小日記可以分享 🐾',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: hasDiary ? KawaiiTheme.primaryPink : Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 顯示分享選單
+  void _showShareMenu() {
+    if (_currentDiary == null || _currentCat == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('今天還沒有小日記可以分享 🐾'),
+          backgroundColor: KawaiiTheme.primaryPink,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
+          ),
+        ),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              '分享今天的小日記 🐾',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: KawaiiTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 24),
+            
+            // 分享可愛卡片（IG/FB/LINE）
+            _ShareOption(
+              icon: Icons.image,
+              title: '分享可愛卡片',
+              subtitle: 'IG / FB / LINE',
+              color: KawaiiTheme.coral,
+              onTap: () {
+                Navigator.pop(context);
+                _shareCardImage();
+              },
+            ),
+            const SizedBox(height: 12),
+            
+            // 分享到 Threads
+            _ShareOption(
+              icon: Icons.article,
+              title: '分享到 Threads',
+              subtitle: '脆鳥專用文案',
+              color: Colors.black87,
+              onTap: () {
+                Navigator.pop(context);
+                _shareToThreads();
+              },
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 分享卡片圖片（IG/FB/LINE）
+  Future<void> _shareCardImage() async {
+    if (_currentDiary == null || _currentCat == null) return;
+
+    // Show loading
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(width: 12),
+            Text('產生分享卡片中...'),
+          ],
+        ),
+        backgroundColor: KawaiiTheme.primaryPink,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
+        ),
+      ),
+    );
+
+    // Get top speech (from latest translation if available)
+    final topSpeech = _report?.totalTranslations != null && _report!.totalTranslations > 0
+        ? '今天也很想跟你說說話 💕'
+        : _currentDiary!.moodSentence;
+
+    // Get emotion sentence
+    final emotion = _report?.dominantEmotion;
+    final emotionSentence = _getEmotionSentence(emotion);
+
+    // Build share card widget wrapped in RepaintBoundary
+    final shareWidget = RepaintBoundary(
+      key: _shareCardKey,
+      child: ShareCardWidget(
+        catName: _currentCat!.name,
+        diaryTitle: _currentDiary!.title,
+        emotionSentence: emotionSentence,
+        topSpeech: topSpeech,
+        bondScore: _currentBond?.bondScore ?? 0,
+        bondLevel: _currentBond?.levelName ?? '剛認識',
+      ),
+    );
+
+    try {
+      // Use the global key to capture the widget
+      final imageBytes = await _shareService.generateShareCardImage(
+        catName: _currentCat!.name,
+        diaryText: _currentDiary!.diaryText,
+        emotion: _report?.dominantEmotion,
+        topSpeech: topSpeech,
+        bondScore: _currentBond?.bondScore ?? 0,
+        repaintBoundaryKey: _shareCardKey,
+      );
+
+      if (imageBytes == null) {
+        _showShareError();
+        return;
+      }
+
+      // Save to temp file and share
+      final filePath = await _shareService.saveShareCardImage(
+        catName: _currentCat!.name,
+        diaryText: _currentDiary!.diaryText,
+        emotion: _report?.dominantEmotion,
+        topSpeech: topSpeech,
+        bondScore: _currentBond?.bondScore ?? 0,
+        repaintBoundaryKey: _shareCardKey,
+      );
+
+      if (filePath != null) {
+        await Share.shareXFiles(
+          [XFile(filePath)],
+          text: '${_currentCat!.name} 今天的小日記 🐱 #貓語通 #貓咪日記',
+        );
+      } else {
+        _showShareError();
+      }
+    } catch (e) {
+      _showShareError();
+    }
+  }
+
+  /// 分享到 Threads
+  Future<void> _shareToThreads() async {
+    if (_currentDiary == null || _currentCat == null) return;
+
+    // Get speech to share
+    final speech = _report?.totalTranslations != null && _report!.totalTranslations > 0
+        ? '今天也很想跟你說說話 💕'
+        : _currentDiary!.moodSentence;
+
+    // Generate Threads caption
+    final caption = _shareService.generateThreadsCaption(
+      catName: _currentCat!.name,
+      speech: speech,
+      emotion: _report?.dominantEmotion,
+    );
+
+    // Share via system share
+    await Share.share(caption);
+  }
+
+  /// 顯示分享錯誤
+  void _showShareError() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.error_outline, color: Colors.white, size: 20),
+            SizedBox(width: 12),
+            Text('分享失敗了，請再試一次 🐾'),
+          ],
+        ),
+        backgroundColor: Colors.red.shade400,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
+        ),
+      ),
+    );
+  }
+
+  /// 取得情緒句
+  String _getEmotionSentence(EmotionType? emotion) {
+    if (emotion == null) {
+      return 'Today she is special';
+    }
+    const sentences = {
+      EmotionType.affectionate: 'Today she wanted to cuddle all day',
+      EmotionType.hungry: 'Today she kept reminding about food',
+      EmotionType.playful: 'Today she really wanted to play',
+      EmotionType.attention: 'Today she wanted attention',
+      EmotionType.anxious: 'Today she seemed a bit worried',
+      EmotionType.angry: 'Today she did not want to be disturbed',
+      EmotionType.uncomfortable: 'Today she felt a bit uncomfortable',
+      EmotionType.greeting: 'Today she was greeting me',
+      EmotionType.other: 'Today she had her own little mood',
+    };
+    return sentences[emotion] ?? 'Today she is special';
+  }
+}
+
+/// 分享選項 widget
+class _ShareOption extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ShareOption({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: color.withOpacity(0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, color: color, size: 18),
+          ],
+        ),
+      ),
+    );
   }
 }
