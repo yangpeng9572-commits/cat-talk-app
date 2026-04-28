@@ -11,6 +11,7 @@ class _AddCatPageState extends State<AddCatPage> {
   bool _isMale = false;
   double _age = 0;
   String _breed = '';
+  final TextEditingController _nameController = TextEditingController();
 
   final List<String> _breeds = [
     '英國短毛貓',
@@ -86,6 +87,10 @@ class _AddCatPageState extends State<AddCatPage> {
             ),
             const SizedBox(height: 32),
 
+            // 名字
+            _buildNameField(),
+            const SizedBox(height: 24),
+
             // 性別
             _buildGenderSelector(),
             const SizedBox(height: 24),
@@ -111,6 +116,17 @@ class _AddCatPageState extends State<AddCatPage> {
                   ),
                 ),
                 onPressed: () {
+                  // 驗證名字
+                  final name = _nameController.text.trim();
+                  if (name.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('請輸入貓咪的名字 🐱'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
                   Navigator.pop(context);
                 },
                 child: const Text('添加', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -119,6 +135,30 @@ class _AddCatPageState extends State<AddCatPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildNameField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('名字', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _nameController,
+          decoration: InputDecoration(
+            hintText: '給你的貓取個名字',
+            prefixIcon: const Icon(Icons.pets, color: Colors.orange),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.orange, width: 2),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
