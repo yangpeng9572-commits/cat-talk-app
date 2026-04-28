@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/translation_result.dart';
+import '../services/audio_player_service.dart';
 
 /// 情緒卡片 widget
 /// 溫暖可愛的設計，適合一般貓咪飼主理解
-class EmotionCard extends StatelessWidget {
+class EmotionCard extends StatefulWidget {
   final TranslationResult result;
   final void Function(UserFeedback feedback) onFeedback;
   final VoidCallback onClose;
@@ -18,6 +19,14 @@ class EmotionCard extends StatelessWidget {
   });
 
   @override
+  State<EmotionCard> createState() => _EmotionCardState();
+}
+
+class _EmotionCardState extends State<EmotionCard> {
+  final AudioPlayerService _playerService = AudioPlayerService();
+  bool _isPlaying = false;
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
@@ -25,7 +34,7 @@ class EmotionCard extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(result.emotionType.colorValue).withValues(alpha: 0.1),
+            Color(widget.result.emotionType.colorValue).withValues(alpha: 0.1),
             Colors.white,
           ],
         ),
@@ -63,11 +72,15 @@ class EmotionCard extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // 低信心提示（< 50%）
-                if (result.confidence < 0.5) _buildLowConfidenceHint(),
+                if (widget.result.confidence < 0.5) _buildLowConfidenceHint(),
 
                 // 原因和建議（一起顯示）
                 _buildReasonAndAction(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+
+                // 播放錄音按鈕
+                _buildPlayRecordingButton(),
+                const SizedBox(height: 16),
 
                 // 按鈕區域
                 _buildActionButtons(context),
@@ -83,23 +96,23 @@ class EmotionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: Color(result.emotionType.colorValue).withValues(alpha: 0.15),
+        color: Color(widget.result.emotionType.colorValue).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            result.emotionType.emoji,
+            widget.result.emotionType.emoji,
             style: const TextStyle(fontSize: 32),
           ),
           const SizedBox(width: 12),
           Text(
-            result.emotionType.label,
+            widget.result.emotionType.label,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(result.emotionType.colorValue),
+              color: Color(widget.result.emotionType.colorValue),
             ),
           ),
         ],
@@ -125,13 +138,13 @@ class EmotionCard extends StatelessWidget {
         children: [
           // 情緒 Emoji
           Text(
-            result.emotionType.emoji,
+            widget.result.emotionType.emoji,
             style: const TextStyle(fontSize: 48),
           ),
           const SizedBox(height: 12),
           // 主要翻譯文字
           Text(
-            result.humanText,
+            widget.result.humanText,
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 22,
@@ -144,14 +157,14 @@ class EmotionCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Color(result.emotionType.colorValue).withValues(alpha: 0.1),
+              color: Color(widget.result.emotionType.colorValue).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               '你覺得準嗎？',
               style: TextStyle(
                 fontSize: 14,
-                color: Color(result.emotionType.colorValue),
+                color: Color(widget.result.emotionType.colorValue),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -162,8 +175,8 @@ class EmotionCard extends StatelessWidget {
   }
 
   Widget _buildConfidenceBar() {
-    final confidencePercent = (result.confidence * 100).round();
-    final color = _getConfidenceColor(result.confidence);
+    final confidencePercent = (widget.result.confidence * 100).round();
+    final color = _getConfidenceColor(widget.result.confidence);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,11 +185,11 @@ class EmotionCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              result.confidence < 0.5 ? '🤔 這次不太確定' : '💪 翻譯信心度',
+              widget.result.confidence < 0.5 ? '🤔 這次不太確定' : '💪 翻譯信心度',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: result.confidence < 0.5 ? Colors.orange : Colors.black,
+                color: widget.result.confidence < 0.5 ? Colors.orange : Colors.black,
               ),
             ),
             Container(
@@ -207,7 +220,7 @@ class EmotionCard extends StatelessWidget {
               ),
             ),
             FractionallySizedBox(
-              widthFactor: result.confidence,
+              widthFactor: widget.result.confidence,
               child: Container(
                 height: 10,
                 decoration: BoxDecoration(
@@ -269,7 +282,7 @@ class EmotionCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  result.reason,
+                  widget.result.reason,
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey.shade700,
@@ -288,7 +301,7 @@ class EmotionCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  result.suggestedAction,
+                  widget.result.suggestedAction,
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey.shade700,
@@ -301,6 +314,62 @@ class EmotionCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildPlayRecordingButton() {
+    // 如果沒有錄音路徑，不顯示播放按鈕
+    if (widget.result.recordingPath == null) {
+      return const SizedBox.shrink();
+    }
+    
+    return GestureDetector(
+      onTap: _togglePlayRecording,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        decoration: BoxDecoration(
+          color: _isPlaying ? Colors.orange : Colors.orange.shade50,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.orange.shade200),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _isPlaying ? Icons.stop : Icons.play_arrow,
+              color: _isPlaying ? Colors.white : Colors.orange,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _isPlaying ? '停止播放' : '播放錄音',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: _isPlaying ? Colors.white : Colors.orange,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _togglePlayRecording() async {
+    if (widget.result.recordingPath == null) return;
+
+    if (_isPlaying) {
+      await _playerService.stop();
+      if (mounted) setState(() => _isPlaying = false);
+    } else {
+      final success = await _playerService.play(widget.result.recordingPath!);
+      if (success) {
+        if (mounted) setState(() => _isPlaying = true);
+        // 監聽播放完成
+        _playerService.player.onPlayerComplete.listen((_) {
+          if (mounted) setState(() => _isPlaying = false);
+        });
+      }
+    }
   }
 
   Widget _buildActionButtons(BuildContext context) {
@@ -323,7 +392,7 @@ class EmotionCard extends StatelessWidget {
                 ),
                 onPressed: () {
                   final feedback = UserFeedback.correct();
-                  onFeedback(feedback);
+                  widget.onFeedback(feedback);
                 },
                 icon: const Icon(Icons.check_circle, size: 20),
                 label: const Text(
@@ -384,7 +453,7 @@ class EmotionCard extends StatelessWidget {
             comment: customNote,
             timestamp: DateTime.now(),
           );
-          onFeedback(feedback);
+          widget.onFeedback(feedback);
         },
       ),
     );
@@ -432,7 +501,7 @@ class EmotionCard extends StatelessWidget {
                   timestamp: DateTime.now(),
                 );
                 Navigator.pop(context);
-                onFeedback(feedback);
+                widget.onFeedback(feedback);
               }
             },
             child: const Text('送出'),

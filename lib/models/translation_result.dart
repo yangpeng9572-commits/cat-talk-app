@@ -9,6 +9,7 @@ class TranslationResult {
   final String reason;
   final String suggestedAction;
   final AudioFeatures? audioFeatures;
+  final String? recordingPath;
   final DateTime createdAt;
   final UserFeedback? userFeedback;
 
@@ -21,6 +22,7 @@ class TranslationResult {
     required this.reason,
     required this.suggestedAction,
     this.audioFeatures,
+    this.recordingPath,
     required this.createdAt,
     this.userFeedback,
   });
