@@ -3,8 +3,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/daily_cat_report.dart';
 import '../models/cat.dart';
 import '../models/translation_result.dart';
+import '../models/bond.dart';
 import '../services/daily_report_service.dart';
 import '../services/cat_service.dart';
+import '../services/cat_diary_service.dart';
+import '../services/bond_service.dart';
+import '../theme/kawaii_theme.dart';
 
 /// 每日貓咪報告頁面
 class DailyReportPage extends StatefulWidget {
@@ -18,10 +22,12 @@ class DailyReportPage extends StatefulWidget {
 
 class _DailyReportPageState extends State<DailyReportPage> {
   final DailyReportService _reportService = DailyReportService();
+  final CatDiaryService _diaryService = CatDiaryService();
   
   String? _selectedCatId;
   late List<Cat> _cats;
   DailyCatReport? _report;
+  Bond? _currentBond;
 
   @override
   void initState() {
@@ -31,6 +37,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
 
   Future<void> _loadCats() async {
     final prefs = await SharedPreferences.getInstance();
+    await BondService().init(prefs);
     final catService = CatService(prefs);
     _cats = catService.getAllCats();
     if (mounted) {
@@ -45,6 +52,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
     if (_selectedCatId != null) {
       setState(() {
         _report = _reportService.getTodayReport(_selectedCatId!);
+        _currentBond = BondService().getBond(_selectedCatId!);
       });
     }
   }
@@ -217,38 +225,212 @@ class _DailyReportPageState extends State<DailyReportPage> {
       orElse: () => _cats.first,
     );
 
+    // 取得默契值
+    final bondScore = _currentBond?.bondScore ?? 0;
+    
+    // 產生日記
+    final diary = _diaryService.generateDiary(
+      catName: cat.name,
+      dominantEmotion: report.dominantEmotion,
+      totalTranslations: report.totalTranslations,
+      emotionCounts: report.emotionCounts,
+      averageConfidence: report.averageConfidence,
+      bondScore: bondScore,
+      taskCompleted: false, // TODO: 從 DailyTaskService 取得
+    );
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 貓咪資訊卡片
+          // ===== 貓咪日記卡片（情感主角）=====
+          _buildDiaryCard(diary),
+          const SizedBox(height: 16),
+
+          // ===== 今日心情 headline =====
           _buildCatInfoCard(cat, report),
           const SizedBox(height: 16),
 
-          // 今日總結卡片
+          // ===== 今日翻譯次數 =====
           _buildSummaryCard(report),
           const SizedBox(height: 16),
 
-          // 情緒分布卡片
+          // ===== 情緒分布 =====
           _buildEmotionDistributionCard(report),
           const SizedBox(height: 16),
 
-          // 建議行動卡片
+          // ===== 建議行動 =====
           _buildSuggestionCard(report),
           const SizedBox(height: 16),
 
-          // 警示提示（如果需要）
+          // ===== 安全提醒（如果需要）=====
           if (report.warningLevel != WarningLevel.normal)
             _buildWarningCard(report),
           const SizedBox(height: 16),
 
-          // 信心值說明
-          _buildConfidenceCard(report),
-          const SizedBox(height: 24),
-
-          // 查看歷史按鈕
+          // ===== 歷史按鈕 =====
           _buildHistoryButton(),
+        ],
+      ),
+    );
+  }
+
+  /// 貓咪日記卡片（情感主角）
+  Widget _buildDiaryCard(CatDiary diary) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            KawaiiTheme.softPink.withValues(alpha: 0.8),
+            KawaiiTheme.peach.withValues(alpha: 0.6),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
+        boxShadow: [
+          BoxShadow(
+            color: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 標題
+          Row(
+            children: [
+              const Icon(Icons.auto_stories, color: KawaiiTheme.primaryPink, size: 24),
+              const SizedBox(width: 12),
+              Text(
+                diary.title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: KawaiiTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          
+          // 日記內容
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(KawaiiTheme.radiusMedium),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 日記文字（每行單獨顯示）
+                ...diary.diaryText.split('\n').map((line) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('🌸 ', style: TextStyle(fontSize: 14)),
+                      Expanded(
+                        child: Text(
+                          line,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            height: 1.6,
+                            color: KawaiiTheme.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          // 心情短句
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.favorite, color: KawaiiTheme.coral, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  diary.moodSentence,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: KawaiiTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          
+          // 分享按鈕
+          Center(
+            child: GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Row(
+                      children: [
+                        Icon(Icons.heart_broken, color: Colors.white, size: 20),
+                        SizedBox(width: 12),
+                        Text('分享卡片功能即將開放 🐾'),
+                      ],
+                    ),
+                    backgroundColor: KawaiiTheme.primaryPink,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
+                    ),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
+                  boxShadow: [
+                    BoxShadow(
+                      color: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.share, color: KawaiiTheme.primaryPink, size: 18),
+                    SizedBox(width: 8),
+                    Text(
+                      '分享今天的小日記',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: KawaiiTheme.primaryPink,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
