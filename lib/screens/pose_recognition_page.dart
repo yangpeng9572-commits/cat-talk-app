@@ -81,6 +81,9 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
   }
 
   Future<void> _takePhotoAndAnalyze() async {
+    // 防止重複點擊
+    if (_isAnalyzing) return;
+    
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       _showErrorDialog('相機無法使用，請稍後再試');
       return;
