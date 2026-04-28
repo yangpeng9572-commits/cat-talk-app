@@ -269,12 +269,13 @@ class PushNotificationService {
     final enabled = await isNotificationEnabled();
     if (!enabled) return;
 
-    // 檢查今天是否已有互動（若是，則跳過陪伴提醒）
-    final hadInteraction = await _hadInteractionToday();
-    
-    // 檢查冷卻機制：當天是否已開 App（透過記錄推播發送時間）
+    // 1️⃣ 當天互動檢查：如果今天有任何互動（翻譯、查看日記、任務），不發推播
+    final hadAnyInteraction = await _hadAnyInteractionToday();
+    if (hadAnyInteraction) return;
+
+    // 檢查冷卻機制：當天是否已發送過
     final alreadySentToday = await _wasNotificationSentToday();
-    if (alreadySentToday) return; // 當天已發過，不重複推播
+    if (alreadySentToday) return;
     
     // 更新連續未點擊天數
     await _updateConsecutiveMissDays();
@@ -288,6 +289,9 @@ class PushNotificationService {
       return;
     }
 
+    // 2️⃣ 避免重複文案：檢查昨天發送的推播類型
+    final yesterdayType = await _getLastNotificationType();
+    
     // 取消舊的推播
     await cancelAll();
 
@@ -308,8 +312,8 @@ class PushNotificationService {
     // 取得今日互動次數
     final todayCount = await _getTodayInteractionCount();
 
-    // 如果沒有互動，優先推「貓咪找你」
-    if (!hadInteraction) {
+    // 如果沒有互動，優先推「貓咪找你」（但避免和昨天重複）
+    if (!hadAnyInteraction && yesterdayType != 'cat_call') {
       await _scheduleNotification(
         id: _catCallId,
         title: '🐱',
@@ -317,8 +321,9 @@ class PushNotificationService {
         scheduledTime: _nextInstanceOfTime(hour: noonHour, minute: noonMinute),
         payload: 'cat_call:home',
       );
-    } else if (hasDiary) {
-      // 如果有日記，推「今日小日記」
+      await _markLastNotificationType('cat_call');
+    } else if (hasDiary && yesterdayType != 'daily_diary') {
+      // 如果有日記，推「今日小日記」（避免和昨天重複）
       await _scheduleNotification(
         id: _dailyDiaryId,
         title: '📖',
@@ -326,11 +331,12 @@ class PushNotificationService {
         scheduledTime: _nextInstanceOfTime(hour: noonHour, minute: noonMinute),
         payload: 'daily_diary:report',
       );
+      await _markLastNotificationType('daily_diary');
     }
 
-    // 晚上的推播：撒嬌或陪伴或輕提醒
+    // 晚上的推播：撒嬌或陪伴或輕提醒（避免和昨天重複）
     final eveningType = random.nextInt(10);
-    if (eveningType < 4) {
+    if (eveningType < 4 && yesterdayType != 'affectionate') {
       // 40%: 撒嬌提醒
       await _scheduleNotification(
         id: _affectionateId,
@@ -339,8 +345,9 @@ class PushNotificationService {
         scheduledTime: _nextInstanceOfTime(hour: eveningHour, minute: eveningMinute),
         payload: 'affectionate:home',
       );
-    } else if (eveningType < 7 && !hadInteraction) {
-      // 30%: 陪伴提醒（如果沒有互動）
+      await _markLastNotificationType('affectionate');
+    } else if (eveningType < 7 && !hadAnyInteraction && yesterdayType != 'companion') {
+      // 30%: 陪伴提醒（如果沒有互動，避免和昨天重複）
       await _scheduleNotification(
         id: _companionId,
         title: '🐾',
@@ -348,8 +355,9 @@ class PushNotificationService {
         scheduledTime: _nextInstanceOfTime(hour: eveningHour, minute: eveningMinute),
         payload: 'companion:translate',
       );
-    } else {
-      // 30%: 輕提醒
+      await _markLastNotificationType('companion');
+    } else if (yesterdayType != 'light') {
+      // 30%: 輕提醒（避免和昨天重複）
       await _scheduleNotification(
         id: _lightId,
         title: '🐱',
@@ -357,10 +365,14 @@ class PushNotificationService {
         scheduledTime: _nextInstanceOfTime(hour: eveningHour, minute: eveningMinute),
         payload: 'light:home',
       );
+      await _markLastNotificationType('light');
     }
     
     // 記錄今日已發送（避免當天重複推播）
     await _markNotificationSentToday();
+    
+    // 3️⃣ 低頻成就推播（3~5天一次）
+    await _maybeScheduleAchievementNotification(catName, bond?.bondScore ?? 0);
   }
 
   /// 立即發送測試推播
@@ -565,6 +577,107 @@ class PushNotificationService {
     
     // 記錄已發送
     await _markNotificationSentToday();
+  }
+
+  /// 檢查今天是否有任何互動（翻譯、查看日記、任務）
+  Future<bool> _hadAnyInteractionToday() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month}-${today.day}';
+    
+    // 檢查翻譯互動
+    final lastInteraction = prefs.getString(_lastInteractionDateKey);
+    if (lastInteraction == todayStr) return true;
+    
+    // 檢查任務完成
+    final lastTaskComplete = prefs.getString('last_task_completed_date');
+    if (lastTaskComplete == todayStr) return true;
+    
+    // 檢查日記查看
+    final lastDiaryView = prefs.getString('last_diary_view_date');
+    if (lastDiaryView == todayStr) return true;
+    
+    return false;
+  }
+
+  /// 記錄任務完成（當用戶完成任務時呼叫）
+  Future<void> recordTaskCompleted() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month}-${today.day}';
+    await prefs.setString('last_task_completed_date', todayStr);
+  }
+
+  /// 記錄日記查看（當用戶查看日記時呼叫）
+  Future<void> recordDiaryViewed() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month}-${today.day}';
+    await prefs.setString('last_diary_view_date', todayStr);
+  }
+
+  /// 取得昨天的推播類型（用於避免重複）
+  Future<String?> _getLastNotificationType() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastDate = prefs.getString('last_notification_type_date');
+    final today = DateTime.now();
+    final yesterday = today.subtract(const Duration(days: 1));
+    final yesterdayStr = '${yesterday.year}-${yesterday.month}-${yesterday.day}';
+    
+    // 如果不是昨天，重置
+    if (lastDate != yesterdayStr) {
+      return null;
+    }
+    
+    return prefs.getString('last_notification_type');
+  }
+
+  /// 記錄今天的推播類型（用於避免明天重複）
+  Future<void> _markLastNotificationType(String type) async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month}-${today.day}';
+    await prefs.setString('last_notification_type_date', todayStr);
+    await prefs.setString('last_notification_type', type);
+  }
+
+  /// 低頻成就推播（3~5天一次）
+  Future<void> _maybeScheduleAchievementNotification(String catName, int bondScore) async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastAchievementDate = prefs.getString('last_achievement_notification_date');
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month}-${today.day}';
+    
+    // 檢查是否在 3-5 天內發送過
+    if (lastAchievementDate != null) {
+      final lastDate = DateTime.parse(lastAchievementDate);
+      final daysDiff = today.difference(lastDate).inDays;
+      if (daysDiff < 3 || daysDiff > 5) return; // 不在 3-5 天範圍內
+    }
+    
+    // 隨機決定是否發送（50% 機率）
+    final random = Random();
+    if (random.nextBool()) return;
+    
+    // 根據默契值產生不同文案
+    String message;
+    if (bondScore >= 80) {
+      message = '你們的默契好像又更好了 💕';
+    } else if (bondScore >= 50) {
+      message = '她今天好像更懂你了 🐾';
+    } else {
+      message = '你們的距離好像近了一點點 🐱';
+    }
+    
+    await _scheduleNotification(
+      id: 6, // 成就推播專用 ID
+      title: '🎉',
+      body: message,
+      scheduledTime: _nextInstanceOfTime(hour: 18, minute: 0),
+      payload: 'achievement:home',
+    );
+    
+    await prefs.setString('last_achievement_notification_date', todayStr);
   }
 
   /// 計算下一個指定時間的 DateTime
