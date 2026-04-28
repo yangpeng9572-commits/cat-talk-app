@@ -7,12 +7,14 @@ import '../models/cat.dart';
 import '../models/translation.dart';
 import '../models/translation_result.dart';
 import '../models/daily_task.dart';
+import '../models/achievement.dart';
 import '../services/meow_translation_service.dart';
 import '../services/translation_history_service.dart';
 import '../services/cat_learning_service.dart';
 import '../services/daily_task_service.dart';
 import '../services/streak_service.dart';
 import '../services/audio_recorder_service.dart';
+import '../services/achievement_service.dart';
 import 'pose_recognition_page.dart';
 import 'daily_report_page.dart';
 import '../widgets/emotion_card.dart';
@@ -51,6 +53,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   // 錄音服務
   final AudioRecorderService _recorderService = AudioRecorderService();
+  
+  // 成就服務
+  AchievementService? _achievementService;
 
   // Timer for max recording duration
   Timer? _maxDurationTimer;
@@ -81,6 +86,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final prefs = await SharedPreferences.getInstance();
     _taskService = DailyTaskService(prefs);
     _streakService = StreakService(prefs);
+    _achievementService = AchievementService(prefs);
     _loadTaskData();
   }
 
@@ -105,6 +111,48 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (status.isPermanentlyDenied) {
       setState(() => _isPermissionDenied = true);
     }
+  }
+  
+  Future<void> _checkAndUnlockAchievements() async {
+    if (_achievementService == null) return;
+    
+    final newUnlocked = await _achievementService!.recordAction('translation');
+    
+    // 如果有新解鎖的成就，顯示通知
+    for (final achievement in newUnlocked) {
+      if (mounted) {
+        _showAchievementUnlockedSnackbar(achievement);
+      }
+    }
+  }
+  
+  void _showAchievementUnlockedSnackbar(Achievement achievement) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Text(achievement.emoji, style: const TextStyle(fontSize: 24)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    '🎉 成就解鎖！',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(achievement.name),
+                ],
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.orange,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   Future<void> _completeOnboarding() async {
@@ -241,6 +289,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
       // 更新任務進度
       await _updateTaskProgress(TaskType.translate_meow);
+      
+      // 更新成就進度
+      await _checkAndUnlockAchievements();
 
       setState(() => _isAnalyzing = false);
 
