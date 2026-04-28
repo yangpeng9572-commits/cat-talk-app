@@ -26,6 +26,7 @@ import '../services/review_service.dart';
 import 'pose_recognition_page.dart';
 import 'daily_report_page.dart';
 import 'add_cat_page.dart';
+import 'home_interaction_page.dart';
 import '../widgets/emotion_card.dart';
 import '../widgets/onboarding_overlay.dart';
 import '../widgets/achievement_celebration.dart';
@@ -897,6 +898,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   children: [
                     _buildMainButton(),
                     _buildDailyReportCard(),
+                    _buildInteractionCard(),
                     // 今日任務卡片
                     DailyTaskCard(
                       tasks: _todayTasks,
@@ -1475,6 +1477,86 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
       ),
     );
+
+  /// 貓咪小日常互動卡片
+  Widget _buildInteractionCard() {
+    return GestureDetector(
+      onTap: () {
+        if (selectedCat != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeInteractionPage(cat: selectedCat!),
+            ),
+          );
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFFFFB6C1).withAlpha(230),
+              const Color(0xFFFFE4E1),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFFFB6C1).withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Text('🐱', style: TextStyle(fontSize: 28)),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '🐱 貓咪小日常',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF6B4B4B),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    '陪她玩一下 💗',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF9B8B8B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Color(0xFF9B8B8B),
+              size: 18,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   }
 
   void _showCatSwitcher() {
