@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'achievement_page.dart';
 import 'about_page.dart';
 import 'privacy_policy_page.dart';
+import '../theme/kawaii_theme.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -9,19 +10,15 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: KawaiiTheme.cardBackground,
       body: CustomScrollView(
         slivers: [
           // 頂部個人資訊
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF8B4513), Color(0xFFD2691E)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+              decoration: BoxDecoration(
+                gradient: KawaiiTheme.primaryGradient,
               ),
               child: Column(
                 children: [
@@ -54,8 +51,8 @@ class ProfilePage extends StatelessWidget {
                   // 升級按鈕
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.orange,
+                      backgroundColor: KawaiiTheme.cardBackground,
+                      foregroundColor: KawaiiTheme.primaryPink,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -127,7 +124,7 @@ class ProfilePage extends StatelessWidget {
               _buildMenuItem(
                 icon: Icons.logout,
                 title: '退出帳號',
-                textColor: Colors.red,
+                textColor: KawaiiTheme.coral,
                 onTap: () {},
               ),
             ]),
@@ -140,7 +137,7 @@ class ProfilePage extends StatelessWidget {
               child: Center(
                 child: Text(
                   '版本 1.0.0',
-                  style: TextStyle(color: Colors.grey.shade500),
+                  style: TextStyle(color: KawaiiTheme.textLight),
                 ),
               ),
             ),
