@@ -22,7 +22,14 @@ import '../services/cat_service.dart';
 import '../services/bond_service.dart';
 import '../services/emotional_headline_service.dart';
 import '../services/push_notification_service.dart';
+import '../services/review_service.dart';
 import 'pose_recognition_page.dart';
+import 'daily_report_page.dart';
+import 'add_cat_page.dart';
+import '../widgets/emotion_card.dart';
+import '../widgets/onboarding_overlay.dart';
+import '../widgets/achievement_celebration.dart';
+import '../widgets/review_prompt_dialog.dart';
 import 'daily_report_page.dart';
 import 'add_cat_page.dart';
 import '../widgets/emotion_card.dart';
@@ -410,13 +417,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       _historyService.add(adjustedResult);
 
       // 更新默契值 +2
-      await _addBondScore(BondService.eventTranslation, adjustedResult.id);
+      await _addBondScore(BondService.eventTranslation, adjustedResult.id, adjustedResult.confidence);
 
       // 更新任務進度
       await _updateTaskProgress(TaskType.translate_meow);
       
       // 更新成就進度
       await _checkAndUnlockAchievements();
+      
+      // 檢查是否顯示評價提示
+      await showReviewPromptIfNeeded(context);
 
       setState(() => _isAnalyzing = false);
 
@@ -453,10 +463,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _historyService.add(adjustedResult);
 
     // 更新默契值 +2
-    await _addBondScore(BondService.eventTranslation, adjustedResult.id);
+    await _addBondScore(BondService.eventTranslation, adjustedResult.id, adjustedResult.confidence);
 
     // 更新任務進度
     await _updateTaskProgress(TaskType.translate_meow);
+    
+    // 檢查是否顯示評價提示
+    await showReviewPromptIfNeeded(context);
 
     setState(() => _isAnalyzing = false);
 
@@ -465,7 +478,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   /// 新增默契值並顯示提示
-  Future<void> _addBondScore(String eventType, [String? translationId]) async {
+  /// [confidence] 翻譯結果信心度，僅當 >= 70 或 null 時才記錄成功互動
+  Future<void> _addBondScore(String eventType, [String? translationId, double? confidence]) async {
     if (selectedCat == null) return;
     
     final gain = await BondService().addBond(
@@ -479,6 +493,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       _showBondGainMessage(eventType, gain);
       // 刷新情感資料
       _refreshEmotionalData();
+      // 記錄成功互動（翻譯需 confidence >= 70，其他事件直接記錄）
+      final shouldRecord = confidence == null || confidence >= 70;
+      if (shouldRecord) {
+        await ReviewService().recordSuccessfulInteraction();
+      }
     }
   }
   
@@ -632,6 +651,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       await _addBondScore(BondService.eventTaskComplete);
       // 顯示陪伴型完成提示
       _showBriefToast(_taskService.getTaskCompletionMessage(type));
+      // 檢查是否顯示評價提示
+      await showReviewPromptIfNeeded(context);
     }
 
     _loadTaskData();
@@ -759,6 +780,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _refreshEmotionalData();
     // 顯示了解提示
     _showBriefToast(_feedbackMessageService.getReportViewedMessage());
+    // 檢查是否顯示評價提示
+    showReviewPromptIfNeeded(context);
   }
 
   @override
