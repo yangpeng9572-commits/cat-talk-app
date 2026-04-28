@@ -23,6 +23,7 @@ import '../widgets/emotion_card.dart';
 import '../widgets/onboarding_overlay.dart';
 import '../widgets/achievement_celebration.dart';
 import '../widgets/daily_task_card.dart';
+import '../theme/kawaii_theme.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -683,11 +684,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               height: 160,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFF8C00), Color(0xFFFF6B00)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                gradient: KawaiiTheme.primaryGradient,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.orange.withValues(alpha: isRecording ? 0.5 : 0.3),
@@ -773,7 +770,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: const LinearGradient(
-            colors: [Color(0xFF6B5B95), Color(0xFF9B8DC7)],
+            colors: [Color(0xFF9B8DC7), Color(0xFF6B5B95)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
