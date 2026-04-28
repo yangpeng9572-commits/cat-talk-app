@@ -10,6 +10,7 @@ class EmotionCard extends StatefulWidget {
   final TranslationResult result;
   final void Function(UserFeedback feedback) onFeedback;
   final VoidCallback onClose;
+  final VoidCallback? onActionTap; // 建議行動被點擊時回調
   final String catName; // 貓咪名稱，用於個人化文字
 
   const EmotionCard({
@@ -17,6 +18,7 @@ class EmotionCard extends StatefulWidget {
     required this.result,
     required this.onFeedback,
     required this.onClose,
+    this.onActionTap,
     this.catName = '你的貓',
   });
 
@@ -422,6 +424,9 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
   }
 
   void _onActionTapped(String action) {
+    // 呼叫回調通知 HomePage
+    widget.onActionTap?.call();
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(

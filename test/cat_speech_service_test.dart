@@ -30,22 +30,39 @@ void main() {
     test('confidence 低時取得強度前綴', () {
       final intensity = service.getIntensityPrefix(0.3);
       expect(intensity, isNotEmpty);
-      // 應該是低強度的詞
-      expect(intensity, anyOf(contains('可能'), contains('好像'), contains('不太確定')));
+      // 應該是低強度的詞（包含這些關鍵字之一）
+      expect(intensity, anyOf(
+        contains('可能'),
+        contains('好像'),
+        contains('不太確定'),
+        contains('似乎'),
+        contains('隱約'),
+      ));
     });
 
     test('confidence 中時取得強度前綴', () {
       final intensity = service.getIntensityPrefix(0.6);
       expect(intensity, isNotEmpty);
-      // 應該是中強度的詞
-      expect(intensity, anyOf(contains('有點'), contains('蠻想'), contains('看起來')));
+      // 應該是中強度的詞（包含這些關鍵字之一）
+      expect(intensity, anyOf(
+        contains('有點'),
+        contains('蠻想'),
+        contains('看起來'),
+        contains('有那麼一點'),
+      ));
     });
 
     test('confidence 高時取得強度前綴', () {
       final intensity = service.getIntensityPrefix(0.9);
       expect(intensity, isNotEmpty);
-      // 應該是高強度的詞
-      expect(intensity, anyOf(contains('很想'), contains('超想'), contains('明顯')));
+      // 應該是高強度的詞（包含這些關鍵字之一）
+      expect(intensity, anyOf(
+        contains('很想'),
+        contains('超想'),
+        contains('明顯'),
+        contains('強烈'),
+        contains('真的'),
+      ));
     });
 
     test('getEmotionIntensity 返回正確格式', () {

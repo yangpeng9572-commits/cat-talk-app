@@ -8,6 +8,7 @@ import '../models/translation.dart';
 import '../models/translation_result.dart';
 import '../models/daily_task.dart';
 import '../models/daily_cat_report.dart';
+import '../models/bond.dart';
 import '../models/achievement.dart';
 import '../services/meow_translation_service.dart';
 import '../services/translation_history_service.dart';
@@ -18,6 +19,7 @@ import '../services/streak_service.dart';
 import '../services/audio_recorder_service.dart';
 import '../services/achievement_service.dart';
 import '../services/cat_service.dart';
+import '../services/bond_service.dart';
 import '../services/emotional_headline_service.dart';
 import 'pose_recognition_page.dart';
 import 'daily_report_page.dart';
@@ -67,8 +69,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   String _todaySubtitle = '';
   int _todayInteractionCount = 0;
   
-  // 貓咪默契值（mock）
-  int _chemistryValue = 0;
+  // 默契值
+  Bond? _currentBond;
 
   // 任務服務
   late DailyTaskService _taskService;
@@ -118,6 +120,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _streakService = StreakService(prefs);
     _achievementService = AchievementService(prefs);
     _catService = CatService(prefs);
+    
+    // 初始化默契值服務
+    await BondService().init(prefs);
+    
     _loadCatData();
     _loadTaskData();
     _refreshEmotionalData();
@@ -146,7 +152,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         _todayHeadline = '';
         _todaySubtitle = '';
         _todayInteractionCount = 0;
-        _chemistryValue = 0;
+        _currentBond = null;
         _todayReport = null;
       });
       return;
@@ -176,10 +182,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       dominantEmotion,
     );
     
-    // 計算默契值（根據翻譯次數和歷史）
-    // 簡單 mock：翻譯次數越多，默契值越高
-    final totalTranslations = _historyService.getByCatId(selectedCat!.id).length;
-    _chemistryValue = ((totalTranslations * 2) % 100).clamp(20, 95);
+    // 取得默契值
+    _currentBond = BondService().getBond(selectedCat!.id);
     
     setState(() {});
   }
@@ -352,6 +356,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       // 保存到歷史記錄
       _historyService.add(adjustedResult);
 
+      // 更新默契值 +2
+      await _addBondScore(BondService.eventTranslation, adjustedResult.id);
+
       // 更新任務進度
       await _updateTaskProgress(TaskType.translate_meow);
       
@@ -392,6 +399,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     // 保存到歷史記錄
     _historyService.add(adjustedResult);
 
+    // 更新默契值 +2
+    await _addBondScore(BondService.eventTranslation, adjustedResult.id);
+
     // 更新任務進度
     await _updateTaskProgress(TaskType.translate_meow);
 
@@ -399,6 +409,70 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     // 顯示情緒卡片
     _showEmotionCard(adjustedResult);
+  }
+
+  /// 新增默契值並顯示提示
+  Future<void> _addBondScore(String eventType, [String? translationId]) async {
+    if (selectedCat == null) return;
+    
+    final gain = await BondService().addBond(
+      selectedCat!.id,
+      eventType,
+      translationId: translationId,
+    );
+    
+    if (gain > 0) {
+      // 顯示加分提示
+      _showBondGainMessage(eventType, gain);
+      // 刷新情感資料
+      _refreshEmotionalData();
+    }
+  }
+  
+  /// 顯示默契值增加提示
+  void _showBondGainMessage(String eventType, int gain) {
+    String message;
+    switch (eventType) {
+      case BondService.eventTranslation:
+        message = '你又更懂她一點了 🐾';
+        break;
+      case BondService.eventFeedback:
+        message = '她的習慣被你記住了 💕';
+        break;
+      case BondService.eventTaskComplete:
+        message = '今天的陪伴完成了！';
+        break;
+      case BondService.eventStreakBonus:
+        message = '連續陪伴讓你們更有默契了 ✨';
+        break;
+      case BondService.eventActionTap:
+        message = '她感受到你的回應了 🐾';
+        break;
+      case BondService.eventViewReport:
+        message = '今天更了解她一點了 💕';
+        break;
+      default:
+        message = '+${gain}';
+    }
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.favorite, color: KawaiiTheme.primaryPink, size: 20),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: Colors.white,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
+        ),
+        duration: const Duration(milliseconds: 1500),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 
   void _showNoCatSelectedDialog() {
@@ -501,6 +575,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (updatedTask != null && updatedTask.isCompleted) {
       // 任務完成，獎勵 exp 並記錄連續
       await _streakService.recordActivity(expReward: updatedTask.rewardExp);
+      // 更新默契值 +5
+      await _addBondScore(BondService.eventTaskComplete);
     }
 
     _loadTaskData();
@@ -523,6 +599,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           _refreshEmotionalData();
           // 顯示完成提示
           _showBriefToast(_feedbackMessageService.getTranslationCompletedMessage());
+        },
+        onActionTap: () {
+          // 更新默契值 +1（每筆翻譯最多一次）
+          _addBondScore(BondService.eventActionTap, result.id);
         },
         catName: selectedCat?.name ?? '你的貓',
       ),
@@ -565,6 +645,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     } else if (feedback.isCorrect) {
       _learningService.learnFromConfirmation(result.catId, result.emotionType);
     }
+
+    // 更新默契值 +3
+    await _addBondScore(BondService.eventFeedback, result.id);
 
     // 更新回饋任務進度
     await _updateTaskProgress(TaskType.give_feedback);
@@ -615,6 +698,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void _onDailyReportViewed() {
     _updateTaskProgress(TaskType.view_daily_report);
+    // 更新默契值 +1
+    _addBondScore(BondService.eventViewReport);
     // 刷新情感資料
     _refreshEmotionalData();
     // 顯示了解提示
@@ -908,50 +993,102 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 12),
           // 默契值 progress bar
-          Row(
-            children: [
-              const Icon(Icons.favorite, size: 16, color: KawaiiTheme.coral),
-              const SizedBox(width: 8),
-              const Text(
-                '默契值',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: KawaiiTheme.textSecondary,
-                ),
+          _buildBondProgressBar(),
+        ],
+      ),
+    );
+  }
+
+  /// 默契值進度條
+  Widget _buildBondProgressBar() {
+    final bond = _currentBond;
+    
+    if (bond == null) {
+      // 沒有默契值資料
+      return Row(
+        children: [
+          const Icon(Icons.favorite, size: 16, color: KawaiiTheme.primaryPink),
+          const SizedBox(width: 8),
+          Text(
+            '默契值：剛開始建立中',
+            style: TextStyle(
+              fontSize: 13,
+              color: KawaiiTheme.textSecondary,
+            ),
+          ),
+        ],
+      );
+    }
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.favorite, size: 16, color: KawaiiTheme.coral),
+            const SizedBox(width: 8),
+            Text(
+              '默契值',
+              style: TextStyle(
+                fontSize: 13,
+                color: KawaiiTheme.textSecondary,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: _chemistryValue / 100,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: KawaiiTheme.coral,
-                        borderRadius: BorderRadius.circular(4),
+            ),
+            const Spacer(),
+            Text(
+              bond.levelEmoji,
+              style: const TextStyle(fontSize: 14),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              bond.levelName,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: KawaiiTheme.coral,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: bond.bondScore / 100,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          KawaiiTheme.primaryPink,
+                          KawaiiTheme.coral,
+                        ],
                       ),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Text(
-                '$_chemistryValue%',
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: KawaiiTheme.coral,
-                ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '${bond.bondScore}%',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: KawaiiTheme.coral,
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
