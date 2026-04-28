@@ -21,6 +21,7 @@ import '../services/achievement_service.dart';
 import '../services/cat_service.dart';
 import '../services/bond_service.dart';
 import '../services/emotional_headline_service.dart';
+import '../services/push_notification_service.dart';
 import 'pose_recognition_page.dart';
 import 'daily_report_page.dart';
 import 'add_cat_page.dart';
@@ -71,6 +72,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   
   // 默契值
   Bond? _currentBond;
+  
+  // 推播點擊提示
+  bool _showNotificationHint = false;
+  String _notificationHintText = '';
 
   // 任務服務
   late DailyTaskService _taskService;
@@ -127,6 +132,54 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _loadCatData();
     _loadTaskData();
     _refreshEmotionalData();
+    _checkNotificationPayload();
+  }
+
+  /// 檢查推播點擊payload，顯示提示
+  void _checkNotificationPayload() async {
+    // 從 SharedPreferences 讀取推播點擊標記
+    final prefs = await SharedPreferences.getInstance();
+    final clicked = prefs.getBool('notification_clicked');
+    
+    if (clicked == true) {
+      // 清除標記
+      await prefs.setBool('notification_clicked', false);
+      
+      // 根據點擊的推播類型顯示對應提示
+      final notificationType = prefs.getString('last_notification_type') ?? 'cat_call';
+      
+      String hintText;
+      switch (notificationType) {
+        case 'cat_call':
+          hintText = '剛剛她好像在找你 🐾';
+          break;
+        case 'affectionate':
+          hintText = '她今天好像有點黏人 💕';
+          break;
+        case 'companion':
+          hintText = '她在等你陪她喔 🐱';
+          break;
+        case 'daily_diary':
+          hintText = '今天的小日記寫好了 📖';
+          break;
+        default:
+          hintText = '她好像在找你 🐾';
+      }
+      
+      setState(() {
+        _showNotificationHint = true;
+        _notificationHintText = hintText;
+      });
+      
+      // 2秒後自動隱藏
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() {
+            _showNotificationHint = false;
+          });
+        }
+      });
+    }
   }
 
   void _loadCatData() {
@@ -810,6 +863,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         child: Column(
           children: [
             _buildCatSelector(),
+            // 推播點擊提示（2秒後消失）
+            if (_showNotificationHint)
+              _buildNotificationHintBanner(),
             // 今日情感狀態區塊（新增）
             _buildEmotionalStatusBlock(),
             Expanded(
@@ -830,6 +886,47 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ],
         ),
       ),
+    );
+  }
+
+  /// 推播點擊提示橫幅（2秒後自動消失）
+  Widget _buildNotificationHintBanner() {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 300),
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  KawaiiTheme.primaryPink.withOpacity(0.8),
+                  KawaiiTheme.coral.withOpacity(0.8),
+                ],
+              ),
+            ),
+            child: Row(
+              children: [
+                const Text('🐱', style: TextStyle(fontSize: 20)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _notificationHintText,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

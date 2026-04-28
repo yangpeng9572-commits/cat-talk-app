@@ -67,13 +67,18 @@ class PushNotificationService {
   }
 
   /// 處理通知點擊
-  void _onNotificationTapped(NotificationResponse response) {
+  void _onNotificationTapped(NotificationResponse response) async {
     final payload = response.payload;
     if (payload == null) return;
 
-    // 根據 payload 導向不同頁面
-    // payload 格式: "type:page"
-    // 例如: "cat_call:home", "daily_diary:report", "companion:translate"
+    // 解析 payload（例如: "cat_call:home"）
+    final parts = payload.split(':');
+    final type = parts.isNotEmpty ? parts[0] : '';
+    
+    // 記錄點擊狀態（供首頁讀取顯示提示）
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notification_clicked', true);
+    await prefs.setString('last_notification_type', type);
   }
 
   /// 請求通知權限
