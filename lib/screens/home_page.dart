@@ -200,10 +200,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     // 嘗試真實錄音
     final realRecording = await _recorderService.stopRecording();
 
-    if (realRecording != null && realRecording.isSuccess) {
+    if (realRecording == null) {
+      // 錄音尚未開始（用戶按了按鈕但還沒開始就放開）
+      debugPrint('錄音尚未開始');
+      return;
+    }
+
+    if (realRecording.isSuccess) {
       // 真實錄音成功
       await _processTranslation(realRecording.path!);
-    } else if (realRecording != null && realRecording.isTooShort) {
+    } else if (realRecording.isTooShort) {
       // 錄音太短
       _showSnackBar('錄音太短，再試一次 🐱', isError: true);
     } else {
