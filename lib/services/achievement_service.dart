@@ -20,6 +20,7 @@ class AchievementService {
   Achievement _loadAchievement(Achievement template) {
     final count = _prefs.getInt('$_prefix${template.id}_count') ?? 0;
     final unlocked = _prefs.getBool('$_prefix${template.id}_unlocked') ?? false;
+    final unlockedAtStr = _prefs.getString('$_prefix${template.id}_unlocked_at');
     
     return Achievement(
       id: template.id,
@@ -29,31 +30,90 @@ class AchievementService {
       requiredCount: template.requiredCount,
       currentCount: count,
       isUnlocked: unlocked,
+      unlockedAt: unlockedAtStr != null ? DateTime.tryParse(unlockedAtStr) : null,
     );
   }
   
-  /// 紀錄一次動作並檢查成就
-  Future<List<Achievement>> recordAction(String actionType, {int count = 1}) async {
-    final unlocked = <Achievement>[];
-    
-    // 根據動作類型增加進度
+  /// 紀錄一次翻譯動作並檢查成就
+  Future<List<Achievement>> recordTranslation() async {
+    return _incrementAchievements('translation');
+  }
+  
+  /// 通用動作記錄
+  Future<List<Achievement>> recordAction(String actionType) async {
     switch (actionType) {
       case 'translation':
-        unlocked.addAll(await _incrementAchievement('first_translation'));
-        unlocked.addAll(await _incrementAchievement('translation_10'));
-        unlocked.addAll(await _incrementAchievement('translation_50'));
-        unlocked.addAll(await _incrementAchievement('translation_100'));
+        return recordTranslation();
+      case 'pose':
+        return recordPose();
+      case 'quiz':
+        return recordQuiz();
+      case 'feedback':
+        return recordFeedback();
+      default:
+        return [];
+    }
+  }
+  
+  /// 紀錄一次姿勢分析動作
+  Future<List<Achievement>> recordPose() async {
+    return _incrementAchievements('pose');
+  }
+  
+  /// 紀錄一次問答動作
+  Future<List<Achievement>> recordQuiz() async {
+    return _incrementAchievements('quiz');
+  }
+  
+  /// 紀錄連續天數
+  Future<List<Achievement>> recordStreak(int days) async {
+    final unlocked = <Achievement>[];
+    
+    final streakIds = ['streak_3', 'streak_7', 'streak_14', 'streak_30'];
+    for (final id in streakIds) {
+      final templates = AchievementSystem.getAllAchievements();
+      final template = templates.firstWhere((a) => a.id == id, orElse: () => throw Exception('Unknown: $id'));
+      
+      if (days >= template.requiredCount) {
+        unlocked.addAll(await _incrementAchievement(id));
+      }
+    }
+    
+    return unlocked;
+  }
+  
+  /// 紀錄回饋
+  Future<List<Achievement>> recordFeedback() async {
+    return _incrementAchievements('feedback');
+  }
+  
+  /// 內部：根據類型增加進度
+  Future<List<Achievement>> _incrementAchievements(String type) async {
+    final unlocked = <Achievement>[];
+    
+    switch (type) {
+      case 'translation':
+        final ids = ['translation_1', 'translation_3', 'translation_5', 'translation_10', 
+                     'translation_20', 'translation_35', 'translation_50', 'translation_75', 
+                     'translation_100', 'translation_120'];
+        for (final id in ids) {
+          unlocked.addAll(await _incrementAchievement(id));
+        }
         break;
       case 'pose':
-        unlocked.addAll(await _incrementAchievement('pose_first'));
-        unlocked.addAll(await _incrementAchievement('pose_10'));
+        final ids = ['pose_1', 'pose_5', 'pose_10'];
+        for (final id in ids) {
+          unlocked.addAll(await _incrementAchievement(id));
+        }
         break;
       case 'quiz':
-        unlocked.addAll(await _incrementAchievement('quiz_first'));
-        unlocked.addAll(await _incrementAchievement('quiz_10'));
+        final ids = ['quiz_1', 'quiz_5', 'quiz_10'];
+        for (final id in ids) {
+          unlocked.addAll(await _incrementAchievement(id));
+        }
         break;
-      case 'daily':
-        // 這個由 StreakService 控制
+      case 'feedback':
+        unlocked.addAll(await _incrementAchievement('feedback_master'));
         break;
     }
     
@@ -69,10 +129,13 @@ class AchievementService {
     return unlocked;
   }
   
-  /// 增加成就進度
+  /// 增加單一成就進度
   Future<List<Achievement>> _incrementAchievement(String id) async {
     final templates = AchievementSystem.getAllAchievements();
-    final template = templates.firstWhere((a) => a.id == id, orElse: () => throw Exception('Unknown achievement: $id'));
+    final template = templates.firstWhere(
+      (a) => a.id == id,
+      orElse: () => throw Exception('Unknown achievement: $id'),
+    );
     
     final currentCount = (_prefs.getInt('$_prefix${id}_count') ?? 0) + 1;
     final wasUnlocked = _prefs.getBool('$_prefix${id}_unlocked') ?? false;
@@ -83,10 +146,10 @@ class AchievementService {
     await _prefs.setInt('$_prefix${id}_count', currentCount);
     if (shouldUnlock) {
       await _prefs.setBool('$_prefix${id}_unlocked', true);
+      await _prefs.setString('$_prefix${id}_unlocked_at', DateTime.now().toIso8601String());
     }
     
     if (shouldUnlock) {
-      // 返回新解鎖的成就
       return [Achievement(
         id: template.id,
         name: template.name,
@@ -103,8 +166,14 @@ class AchievementService {
   }
   
   /// 增加貓咪數量
-  Future<List<Achievement>> recordAddCat() async {
-    return _incrementAchievement('all_cats');
+  Future<List<Achievement>> recordAddCat(int catCount) async {
+    final unlocked = <Achievement>[];
+    
+    if (catCount >= 3) {
+      unlocked.addAll(await _incrementAchievement('multi_cat'));
+    }
+    
+    return unlocked;
   }
   
   /// 取得已解鎖的成就數量
@@ -115,9 +184,22 @@ class AchievementService {
   
   /// 取得總動作數
   int getTotalActions() {
-    final count = _prefs.getInt('${_prefix}translation_100_count') ?? 0;
-    final pose = _prefs.getInt('${_prefix}pose_10_count') ?? 0;
-    final quiz = _prefs.getInt('${_prefix}quiz_10_count') ?? 0;
-    return count + pose + quiz;
+    int total = 0;
+    
+    // 翻譯
+    final translationIds = ['translation_1', 'translation_3', 'translation_5', 'translation_10', 
+                           'translation_20', 'translation_35', 'translation_50', 'translation_75', 
+                           'translation_100', 'translation_120'];
+    for (final id in translationIds) {
+      total += _prefs.getInt('$_prefix${id}_count') ?? 0;
+    }
+    
+    // 姿勢
+    final poseIds = ['pose_1', 'pose_5', 'pose_10'];
+    for (final id in poseIds) {
+      total += _prefs.getInt('$_prefix${id}_count') ?? 0;
+    }
+    
+    return total;
   }
 }

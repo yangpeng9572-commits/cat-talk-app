@@ -81,7 +81,7 @@ class CatsPage extends StatelessWidget {
           const SizedBox(height: 2),
           // 年齡
           Text(
-            cat.ageStage.label,
+            cat.ageStageLabel,
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey.shade500,

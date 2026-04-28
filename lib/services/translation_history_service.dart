@@ -55,6 +55,15 @@ class TranslationHistoryService {
     final emotions = EmotionType.values.where((e) => e != EmotionType.other).toList();
     final cats = Cat.getDemoCats();
 
+    // 如果沒有 demo 貓，建立一個預設貓
+    if (cats.isEmpty) {
+      cats.add(Cat(
+        id: 'demo_cat',
+        name: '奶茶',
+        breed: '英國短毛貓',
+      ));
+    }
+
     for (int i = 0; i < 10; i++) {
       final emotion = emotions[i % emotions.length];
       final cat = cats[i % cats.length];

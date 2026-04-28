@@ -201,57 +201,78 @@ class DailyReportService {
   /// 生成一句話摘要（最多20字）
   /// 
   /// 根據 dominantEmotion + totalTranslations 生成簡短摘要
+  /// 增加情緒強度（超/有點/很）+ 2-3種隨機文案
   String generateHeadlineText(EmotionType? dominantEmotion, int totalTranslations) {
     if (dominantEmotion == null) {
       return '今天還沒有紀錄';
     }
 
-    // 根據翻譯次數決定語氣
-    final isManyTimes = totalTranslations > 5;
-    final isALot = totalTranslations > 10;
+    // 根據翻譯次數決定強度
+    String intensity;
+    if (totalTranslations > 10) {
+      intensity = '超';  // 很多次
+    } else if (totalTranslations > 5) {
+      intensity = '有點';  // 中等
+    } else {
+      intensity = ' ';  // 正常
+    }
+
+    // 根據次數決定程度
+    String degree;
+    if (totalTranslations > 10) {
+      degree = '一直';
+    } else if (totalTranslations > 5) {
+      degree = '常常';
+    } else {
+      degree = '';
+    }
+
+    // 隨機種子
+    final seed = DateTime.now().day + totalTranslations;
+    final variant = seed % 3;
 
     switch (dominantEmotion) {
       case EmotionType.hungry:
-        if (isALot) return '今天牠一直在討吃';
-        if (isManyTimes) return '今天牠有點愛吃';
-        return '今天牠想吃東西';
-
+        if (totalTranslations > 10) return '今天牠超級餓的！';
+        if (totalTranslations > 5) return '今天牠有點嘴饞 🐱';
+        final hungryMsgs = ['今天牠好像想吃东西', '今天牠對食物很感興趣', '今天牠肚子在叫'];
+        return hungryMsgs[variant];
       case EmotionType.affectionate:
-        if (isALot) return '今天牠一直要撒嬌';
-        if (isManyTimes) return '今天牠有點愛撒嬌';
-        return '今天牠想撒嬌';
-
+        if (totalTranslations > 10) return '今天牠超級撒嬌！';
+        if (totalTranslations > 5) return '今天牠很需要抱抱 💕';
+        final affMsgs = ['今天牠想靠近你', '今天牠看起來很親人', '今天牠需要一些溫暖'];
+        return affMsgs[variant];
       case EmotionType.playful:
-        if (isALot) return '今天牠精力超級旺盛';
-        if (isManyTimes) return '今天牠很想玩';
-        return '今天牠想玩耍';
-
+        if (totalTranslations > 10) return '今天牠精力超級旺盛！';
+        if (totalTranslations > 5) return '今天牠很想玩耍 🎾';
+        final playMsgs = ['今天牠想玩耍', '今天牠對玩具很有興趣', '今天牠有點活潑'];
+        return playMsgs[variant];
       case EmotionType.attention:
-        if (isALot) return '今天牠一直刷存在感';
-        if (isManyTimes) return '今天牠有點黏人';
-        return '今天牠需要關注';
-
+        if (totalTranslations > 10) return '今天牠一直刷存在感！';
+        if (totalTranslations > 5) return '今天牠有點黏人 👀';
+        final attMsgs = ['今天牠想引起注意', '今天牠在找你', '今天牠需要互動'];
+        return attMsgs[variant];
       case EmotionType.anxious:
-        if (isALot) return '今天牠有點焦躁不安';
-        if (isManyTimes) return '今天牠有點焦慮';
-        return '今天牠有點緊張';
-
+        if (totalTranslations > 10) return '今天牠很焦躁不安 😿';
+        if (totalTranslations > 5) return '今天牠有點緊張';
+        final anxMsgs = ['今天牠有點不安', '今天牠看起來謹慎', '今天牠在觀察環境'];
+        return anxMsgs[variant];
       case EmotionType.angry:
-        if (isALot) return '今天牠脾氣不太好';
-        if (isManyTimes) return '今天牠有點不高興';
-        return '今天牠不太高興';
-
+        if (totalTranslations > 10) return '今天牠脾氣不太好 😾';
+        if (totalTranslations > 5) return '今天牠有點不高興';
+        final angryMsgs = ['今天牠不太高興', '今天牠有點不爽', '今天牠需要空間'];
+        return angryMsgs[variant];
       case EmotionType.uncomfortable:
-        if (isALot) return '今天牠看起來不太舒服';
-        if (isManyTimes) return '今天牠有點不舒服';
-        return '今天牠感覺怪怪的';
-
+        if (totalTranslations > 10) return '今天牠不太舒服 😿';
+        if (totalTranslations > 5) return '今天牠有點不適';
+        final uncMsgs = ['今天牠感覺怪怪的', '今天牠不太對勁', '今天牠需要關注'];
+        return uncMsgs[variant];
       case EmotionType.greeting:
-        if (isManyTimes) return '今天牠頻頻打招呼';
-        return '今天牠跟你打招呼';
-
+        if (totalTranslations > 5) return '今天牠頻頻打招呼 👋';
+        final greetMsgs = ['今天牠跟你打招呼', '今天牠在說嗨', '今天牠態度友善'];
+        return greetMsgs[variant];
       case EmotionType.other:
-        return '今天牠很難捉摸';
+        return '今天牠很難捉摸 🤔';
     }
   }
 

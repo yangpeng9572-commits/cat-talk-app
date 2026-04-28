@@ -15,10 +15,13 @@ import '../services/daily_task_service.dart';
 import '../services/streak_service.dart';
 import '../services/audio_recorder_service.dart';
 import '../services/achievement_service.dart';
+import '../services/cat_service.dart';
 import 'pose_recognition_page.dart';
 import 'daily_report_page.dart';
+import 'add_cat_page.dart';
 import '../widgets/emotion_card.dart';
 import '../widgets/onboarding_overlay.dart';
+import '../widgets/achievement_celebration.dart';
 import '../widgets/daily_task_card.dart';
 
 class HomePage extends StatefulWidget {
@@ -35,6 +38,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _showOnboarding = false;
   bool _isAnalyzing = false;
   bool _isLoading = true;
+  bool _showCelebration = false;
+  Achievement? _pendingAchievement;
   bool _isPermissionDenied = false;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
@@ -56,6 +61,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   
   // 成就服務
   AchievementService? _achievementService;
+  
+  // 貓咪服務
+  CatService? _catService;
+  List<Cat> _cats = [];
 
   // Timer for max recording duration
   Timer? _maxDurationTimer;
@@ -63,7 +72,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    selectedCat = Cat.getDemoCats().first;
+    // 不再自動選擇示範貓咪
+    // selectedCat = Cat.getDemoCats().first;
     _initServices();
     _checkOnboarding();
     _checkPermission();
@@ -87,7 +97,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _taskService = DailyTaskService(prefs);
     _streakService = StreakService(prefs);
     _achievementService = AchievementService(prefs);
+    _catService = CatService(prefs);
+    _loadCatData();
     _loadTaskData();
+  }
+
+  void _loadCatData() {
+    _cats = _catService!.getAllCats();
+    // 自動選擇第一隻貓
+    if (_cats.isNotEmpty && selectedCat == null) {
+      selectedCat = _cats.first;
+    }
   }
 
   void _loadTaskData() {
@@ -118,41 +138,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     final newUnlocked = await _achievementService!.recordAction('translation');
     
-    // 如果有新解鎖的成就，顯示通知
+    // 如果有新解鎖的成就，顯示慶祝動畫
     for (final achievement in newUnlocked) {
       if (mounted) {
-        _showAchievementUnlockedSnackbar(achievement);
+        _pendingAchievement = achievement;
+        setState(() => _showCelebration = true);
       }
     }
   }
   
-  void _showAchievementUnlockedSnackbar(Achievement achievement) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Text(achievement.emoji, style: const TextStyle(fontSize: 24)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    '🎉 成就解鎖！',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(achievement.name),
-                ],
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.orange,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+  void _dismissCelebration() {
+    setState(() {
+      _showCelebration = false;
+      _pendingAchievement = null;
+    });
   }
 
   Future<void> _completeOnboarding() async {
@@ -538,6 +537,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
     }
 
+    // 成就慶祝動畫（覆蓋層）
+    if (_showCelebration && _pendingAchievement != null) {
+      return Material(
+        color: Colors.transparent,
+        child: AchievementCelebration(
+          emoji: _pendingAchievement!.emoji,
+          name: _pendingAchievement!.name,
+          message: '你越來越懂牠了！',
+          onComplete: _dismissCelebration,
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       body: SafeArea(
@@ -619,15 +631,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
           ),
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const PoseRecognitionPage()),
-              );
-            },
-            icon: Icon(Icons.camera_alt, color: Colors.grey.shade600),
-          ),
         ],
       ),
     );
@@ -642,117 +645,177 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           children: [
             const SizedBox(height: 20),
 
-            // 波紋效果
-            AnimatedBuilder(
-              animation: _waveController,
-              builder: (context, child) {
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (isRecording)
-                      ...List.generate(3, (index) {
-                        final delay = index * 0.3;
-                        final value = (_waveController.value - delay).clamp(0.0, 1.0);
-                        final size = 200 + (value * 80);
-                        final opacity = (1 - value) * 0.3;
-                        return Container(
-                          width: size,
-                          height: size,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.orange.withValues(alpha: opacity),
-                              width: 2,
-                            ),
-                          ),
-                        );
-                      }),
-
-                    // 主按鈕
-                    GestureDetector(
-                      onTapDown: (_) => _startRecording(),
-                      onTapUp: (_) => _stopRecording(),
-                      onTapCancel: _stopRecording,
-                      child: AnimatedBuilder(
-                        animation: _pulseAnimation,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: isRecording ? _pulseAnimation.value : 1.0,
-                            child: Container(
-                              width: 180,
-                              height: 180,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFFFF8C00), Color(0xFFFF6B00)],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.orange.withValues(alpha: 0.4),
-                                    blurRadius: isRecording ? 40 : 20,
-                                    spreadRadius: isRecording ? 10 : 0,
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    isRecording
-                                        ? Icons.hearing
-                                        : (_isAnalyzing ? Icons.psychology : Icons.pets),
-                                    size: 56,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    _isAnalyzing
-                                        ? '正在聽...'
-                                        : (isRecording ? '正在聽牠說話' : '長按翻譯'),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-
-            const SizedBox(height: 24),
-
-            // 錄音提示
-            if (isRecording)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  '🎤 放開就翻譯',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.orange,
-                    fontWeight: FontWeight.w500,
+            // 雙主按鈕設計
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  // 錄音翻譯按鈕
+                  Expanded(
+                    child: _buildRecordButton(),
                   ),
-                ),
-              )
-            else if (!_isAnalyzing)
-              Text(
-                '長按開始翻譯',
-                style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                  const SizedBox(width: 16),
+                  // 姿勢分析按鈕
+                  Expanded(
+                    child: _buildPoseButton(),
+                  ),
+                ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 錄音翻譯按鈕
+  Widget _buildRecordButton() {
+    return GestureDetector(
+      onTapDown: (_) => _startRecording(),
+      onTapUp: (_) => _stopRecording(),
+      onTapCancel: _stopRecording,
+      child: AnimatedBuilder(
+        animation: _pulseAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: isRecording ? _pulseAnimation.value : 1.0,
+            child: Container(
+              height: 160,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFF8C00), Color(0xFFFF6B00)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.orange.withValues(alpha: isRecording ? 0.5 : 0.3),
+                    blurRadius: isRecording ? 30 : 15,
+                    spreadRadius: isRecording ? 5 : 2,
+                  ),
+                ],
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // 波紋效果
+                  if (isRecording)
+                    ...List.generate(3, (index) {
+                      final delay = index * 0.3;
+                      final value = (_waveController.value - delay).clamp(0.0, 1.0);
+                      final size = 160 + (value * 60);
+                      final opacity = (1 - value) * 0.3;
+                      return Container(
+                        width: size,
+                        height: size,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: opacity),
+                            width: 2,
+                          ),
+                        ),
+                      );
+                    }),
+                  // 按鈕內容
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        isRecording
+                            ? Icons.hearing
+                            : (_isAnalyzing ? Icons.psychology : Icons.pets),
+                        size: 48,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _isAnalyzing
+                            ? '正在聽...'
+                            : (isRecording ? '正在聽' : '長按翻譯'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (isRecording)
+                        const Text(
+                          '🎤 放開就翻譯',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// 姿勢分析按鈕
+  Widget _buildPoseButton() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const PoseRecognitionPage()),
+        );
+      },
+      child: Container(
+        height: 160,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF6B5B95), Color(0xFF9B8DC7)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6B5B95).withValues(alpha: 0.3),
+              blurRadius: 15,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.camera_alt,
+                size: 40,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '分析姿勢',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const Text(
+              '一拍就懂',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 11,
+              ),
+            ),
           ],
         ),
       ),
@@ -841,6 +904,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isDismissible: false,
+      enableDrag: false,
       builder: (context) => Container(
         padding: const EdgeInsets.all(16),
         decoration: const BoxDecoration(
@@ -864,21 +929,105 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            ...Cat.getDemoCats().map((cat) => ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.orange.shade100,
-                    child: const Icon(Icons.pets, color: Colors.orange),
+            // 無貓咪提示
+            if (_cats.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.pets,
+                      size: 64,
+                      color: Colors.grey.shade300,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      '還沒有新增貓咪',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      '點擊下方新增你的第一隻貓咪',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AddCatPage(),
+                          ),
+                        ).then((_) => _loadCatData());
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text('新增貓咪'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              ..._cats.map((cat) => ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.orange.shade100,
+                      child: const Icon(Icons.pets, color: Colors.orange),
+                    ),
+                    title: Text(cat.name),
+                    subtitle: Text(cat.breed.isNotEmpty ? cat.breed : '尚未設定'),
+                    trailing: selectedCat?.id == cat.id
+                        ? const Icon(Icons.check, color: Colors.orange)
+                        : null,
+                    onTap: () {
+                      setState(() => selectedCat = cat);
+                      Navigator.pop(context);
+                    },
+                  )),
+            if (_cats.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AddCatPage(),
+                    ),
+                  ).then((_) => _loadCatData());
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('新增貓咪'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey.shade100,
+                  foregroundColor: Colors.orange,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
                   ),
-                  title: Text(cat.name),
-                  subtitle: Text(cat.breed),
-                  trailing: selectedCat?.id == cat.id
-                      ? const Icon(Icons.check, color: Colors.orange)
-                      : null,
-                  onTap: () {
-                    setState(() => selectedCat = cat);
-                    Navigator.pop(context);
-                  },
-                )),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
           ],
         ),

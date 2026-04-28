@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/cat.dart';
+import '../services/cat_service.dart';
 
 class AddCatPage extends StatefulWidget {
   const AddCatPage({super.key});
@@ -115,7 +118,7 @@ class _AddCatPageState extends State<AddCatPage> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   // 驗證名字
                   final name = _nameController.text.trim();
                   if (name.isEmpty) {
@@ -127,7 +130,25 @@ class _AddCatPageState extends State<AddCatPage> {
                     );
                     return;
                   }
-                  Navigator.pop(context);
+                  
+                  // 建立新貓咪
+                  final cat = Cat(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    name: name,
+                    breed: _breed.isNotEmpty ? _breed : '混種貓',
+                    gender: _isMale ? 'male' : 'female',
+                    age: _age,
+                    ageStage: _getAgeStage(_age),
+                  );
+                  
+                  // 儲存
+                  final prefs = await SharedPreferences.getInstance();
+                  final catService = CatService(prefs);
+                  await catService.addCat(cat);
+                  
+                  if (mounted) {
+                    Navigator.pop(context, cat);
+                  }
                 },
                 child: const Text('添加', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),

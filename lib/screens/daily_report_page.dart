@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/daily_cat_report.dart';
 import '../models/cat.dart';
 import '../models/translation_result.dart';
 import '../services/daily_report_service.dart';
+import '../services/cat_service.dart';
 
 /// 每日貓咪報告頁面
 class DailyReportPage extends StatefulWidget {
@@ -24,9 +26,19 @@ class _DailyReportPageState extends State<DailyReportPage> {
   @override
   void initState() {
     super.initState();
-    _cats = Cat.getDemoCats();
-    _selectedCatId = widget.preselectedCatId ?? _cats.first.id;
-    _loadReport();
+    _loadCats();
+  }
+
+  Future<void> _loadCats() async {
+    final prefs = await SharedPreferences.getInstance();
+    final catService = CatService(prefs);
+    _cats = catService.getAllCats();
+    if (mounted) {
+      setState(() {
+        _selectedCatId = widget.preselectedCatId ?? (_cats.isNotEmpty ? _cats.first.id : null);
+        _loadReport();
+      });
+    }
   }
 
   void _loadReport() {

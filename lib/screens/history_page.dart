@@ -302,6 +302,8 @@ class _HistoryPageState extends State<HistoryPage> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
       builder: (context) => EmotionCard(
         result: result,
         onFeedback: (feedback) {
