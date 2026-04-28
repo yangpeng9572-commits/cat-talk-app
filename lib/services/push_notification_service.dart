@@ -27,6 +27,9 @@ class PushNotificationService {
   static const String _lastNotificationDateKey = 'last_notification_date';
   static const String _notificationEnabledKey = 'notification_enabled';
   static const String _lastInteractionDateKey = 'last_interaction_date';
+  static const String _todayInteractionCountKey = 'today_interaction_count';
+  static const String _lastClickedDateKey = 'last_notification_clicked_date';
+  static const String _consecutiveMissDaysKey = 'consecutive_miss_days';
 
   /// 初始化推播服務
   Future<bool> initialize() async {
@@ -119,45 +122,74 @@ class PushNotificationService {
     await cancelAll();
   }
 
-  // ==================== 推播文案生成 ====================
+  // ==================== 推播文案生成（帶連續感） ====================
 
-  /// 1️⃣ 貓咪找你（最高點擊）
-  String _getCatCallMessage(String catName, EmotionType? emotion) {
+  /// 產生帶連續感的貓咪找你文案
+  String _getCatCallMessageWithCount(String catName, EmotionType? emotion, int todayCount) {
     final now = DateTime.now();
     final random = Random(now.millisecond);
 
-    if (emotion == EmotionType.affectionate) {
+    // 根據今日互動次數產生連續感文案
+    if (todayCount >= 3) {
       final messages = [
-        '$catName好像在找你 🐱',
-        '她今天很想黏著你 💕',
-        '$catName好像在等你回應',
-        '她今天特別想撒嬌 🐾',
+        '$catName今天已經找你 ${todayCount} 次了 🐱',
+        '她又叫了，好像有什麼想跟你說 💕',
+        '$catName好像一直在等你回應 🐾',
       ];
       return messages[random.nextInt(messages.length)];
-    } else if (emotion == EmotionType.attention) {
+    } else if (todayCount == 2) {
       final messages = [
-        '她剛剛好像叫了一聲',
-        '$catName在看你嗎？👀',
-        '她想讓你注意一下',
-        '好像有什麼想跟你說 👀',
+        '$catName剛剛又叫了一聲，好像在找你 🐱',
+        '她今天找你 2 次了，應該有什麼事 💕',
+        '$catName又叫了，你在就回應一下她吧 🐾',
       ];
       return messages[random.nextInt(messages.length)];
-    } else if (emotion == EmotionType.hungry) {
+    } else if (todayCount == 1) {
       final messages = [
-        '$catName好像在提醒你什麼 🍽️',
-        '她好像有點餓了',
-        '$catName好像在等你準備食物',
+        '她剛剛叫了一聲，好像在找你 🐱',
+        '$catName好像想跟你說什麼 💕',
+        '她剛才叫你，好像在等你回應 🐾',
       ];
       return messages[random.nextInt(messages.length)];
     } else {
-      // other / null
-      final messages = [
-        '$catName好像在找你 🐱',
-        '她好像想跟你說什麼',
-        '$catName好像在等你 🐾',
-      ];
-      return messages[random.nextInt(messages.length)];
+      // todayCount == 0
+      if (emotion == EmotionType.affectionate) {
+        final messages = [
+          '$catName好像在找你 🐱',
+          '她今天很想黏著你 💕',
+          '$catName好像在等你回應',
+          '她今天特別想撒嬌 🐾',
+        ];
+        return messages[random.nextInt(messages.length)];
+      } else if (emotion == EmotionType.attention) {
+        final messages = [
+          '她剛剛好像叫了一聲',
+          '$catName在看你嗎？👀',
+          '她想讓你注意一下',
+          '好像有什麼想跟你說 👀',
+        ];
+        return messages[random.nextInt(messages.length)];
+      } else if (emotion == EmotionType.hungry) {
+        final messages = [
+          '$catName好像在提醒你什麼 🍽️',
+          '她好像有點餓了',
+          '$catName好像在等你準備食物',
+        ];
+        return messages[random.nextInt(messages.length)];
+      } else {
+        final messages = [
+          '$catName好像在找你 🐱',
+          '她好像想跟你說什麼',
+          '$catName好像在等你 🐾',
+        ];
+        return messages[random.nextInt(messages.length)];
+      }
     }
+  }
+
+  /// 1️⃣ 貓咪找你（最高點擊）- 向下相容版
+  String _getCatCallMessage(String catName, EmotionType? emotion) {
+    return _getCatCallMessageWithCount(catName, emotion, 0);
   }
 
   /// 2️⃣ 今日小日記
@@ -249,12 +281,15 @@ class PushNotificationService {
     // 取得貓咪資料（用於默契值）
     final bond = BondService().getBond(catName);
 
+    // 取得今日互動次數
+    final todayCount = await _getTodayInteractionCount();
+
     // 如果沒有互動，優先推「貓咪找你」
     if (!hadInteraction) {
       await _scheduleNotification(
         id: _catCallId,
         title: '🐱',
-        body: _getCatCallMessage(catName, todayEmotion),
+        body: _getCatCallMessageWithCount(catName, todayEmotion, todayCount),
         scheduledTime: _nextInstanceOfTime(hour: noonHour, minute: noonMinute),
         payload: 'cat_call:home',
       );
@@ -399,6 +434,42 @@ class PushNotificationService {
     final today = DateTime.now();
     final todayStr = '${today.year}-${today.month}-${today.day}';
     return lastDate == todayStr;
+  }
+
+  /// 取得今日互動次數
+  Future<int> _getTodayInteractionCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month}-${today.day}';
+    final storedDate = prefs.getString('interaction_count_date');
+    
+    // 如果不是今天，重置計數
+    if (storedDate != todayStr) {
+      await prefs.setInt(_todayInteractionCountKey, 0);
+      await prefs.setString('interaction_count_date', todayStr);
+      return 0;
+    }
+    
+    return prefs.getInt(_todayInteractionCountKey) ?? 0;
+  }
+
+  /// 增加今日互動次數
+  Future<void> incrementInteractionCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month}-${today.day}';
+    final storedDate = prefs.getString('interaction_count_date');
+    
+    int currentCount = 0;
+    if (storedDate == todayStr) {
+      currentCount = prefs.getInt(_todayInteractionCountKey) ?? 0;
+    } else {
+      // 新的一天，重置
+      await prefs.setString('interaction_count_date', todayStr);
+    }
+    
+    await prefs.setInt(_todayInteractionCountKey, currentCount + 1);
+    await recordInteraction(); // 同時更新最後互動時間
   }
 
   /// 計算下一個指定時間的 DateTime
