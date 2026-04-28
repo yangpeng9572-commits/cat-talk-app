@@ -7,15 +7,18 @@ import '../models/cat.dart';
 import '../models/translation.dart';
 import '../models/translation_result.dart';
 import '../models/daily_task.dart';
+import '../models/daily_cat_report.dart';
 import '../models/achievement.dart';
 import '../services/meow_translation_service.dart';
 import '../services/translation_history_service.dart';
 import '../services/cat_learning_service.dart';
 import '../services/daily_task_service.dart';
+import '../services/daily_report_service.dart';
 import '../services/streak_service.dart';
 import '../services/audio_recorder_service.dart';
 import '../services/achievement_service.dart';
 import '../services/cat_service.dart';
+import '../services/emotional_headline_service.dart';
 import 'pose_recognition_page.dart';
 import 'daily_report_page.dart';
 import 'add_cat_page.dart';
@@ -50,6 +53,22 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final MeowTranslationService _translationService = MeowTranslationService();
   final TranslationHistoryService _historyService = TranslationHistoryService();
   final CatLearningService _learningService = CatLearningService();
+  
+  // 每日報告服務
+  final DailyReportService _reportService = DailyReportService();
+  DailyCatReport? _todayReport;
+  
+  // 情感文案服務
+  final EmotionalHeadlineService _headlineService = EmotionalHeadlineService();
+  final FeedbackMessageService _feedbackMessageService = FeedbackMessageService();
+  
+  // 今日文案
+  String _todayHeadline = '';
+  String _todaySubtitle = '';
+  int _todayInteractionCount = 0;
+  
+  // 貓咪默契值（mock）
+  int _chemistryValue = 0;
 
   // 任務服務
   late DailyTaskService _taskService;
@@ -101,6 +120,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _catService = CatService(prefs);
     _loadCatData();
     _loadTaskData();
+    _refreshEmotionalData();
   }
 
   void _loadCatData() {
@@ -117,6 +137,51 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       _currentStreak = _streakService.getCurrentStreak();
       _isLoading = false;
     });
+  }
+  
+  /// 更新今日情感資料
+  void _refreshEmotionalData() {
+    if (selectedCat == null) {
+      setState(() {
+        _todayHeadline = '';
+        _todaySubtitle = '';
+        _todayInteractionCount = 0;
+        _chemistryValue = 0;
+        _todayReport = null;
+      });
+      return;
+    }
+    
+    // 取得今日報告
+    _todayReport = _reportService.getTodayReport(selectedCat!.id);
+    
+    // 取得今日互動次數（從翻譯歷史）
+    final todayTranslations = _historyService.getByCatId(selectedCat!.id).where((t) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      return t.createdAt.isAfter(today);
+    }).toList();
+    _todayInteractionCount = todayTranslations.length;
+    
+    // 取得 dominant emotion
+    final dominantEmotion = _todayReport?.dominantEmotion;
+    
+    // 生成 headline 和 subtitle
+    _todayHeadline = _headlineService.getHeadline(
+      selectedCat!.name,
+      dominantEmotion,
+    );
+    _todaySubtitle = _headlineService.getSubtitle(
+      selectedCat!.name,
+      dominantEmotion,
+    );
+    
+    // 計算默契值（根據翻譯次數和歷史）
+    // 簡單 mock：翻譯次數越多，默契值越高
+    final totalTranslations = _historyService.getByCatId(selectedCat!.id).length;
+    _chemistryValue = ((totalTranslations * 2) % 100).clamp(20, 95);
+    
+    setState(() {});
   }
 
   Future<void> _checkOnboarding() async {
@@ -452,8 +517,36 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Navigator.pop(context);
           _handleFeedback(result, feedback);
         },
-        onClose: () => Navigator.pop(context),
+        onClose: () {
+          Navigator.pop(context);
+          // 刷新情感資料
+          _refreshEmotionalData();
+          // 顯示完成提示
+          _showBriefToast(_feedbackMessageService.getTranslationCompletedMessage());
+        },
         catName: selectedCat?.name ?? '你的貓',
+      ),
+    );
+  }
+  
+  /// 顯示短暫提示（約 1.5 秒）
+  void _showBriefToast(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.favorite, color: KawaiiTheme.primaryPink),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: Colors.white,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
+        ),
+        duration: const Duration(milliseconds: 1500),
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
@@ -522,6 +615,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void _onDailyReportViewed() {
     _updateTaskProgress(TaskType.view_daily_report);
+    // 刷新情感資料
+    _refreshEmotionalData();
+    // 顯示了解提示
+    _showBriefToast(_feedbackMessageService.getReportViewedMessage());
   }
 
   @override
@@ -551,12 +648,83 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
     }
 
+    // 沒有貓咪的引導頁面
+    if (_cats.isEmpty || selectedCat == null) {
+      return Scaffold(
+        backgroundColor: KawaiiTheme.background,
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: KawaiiTheme.softPink.withValues(alpha: 0.3),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.pets,
+                      size: 64,
+                      color: KawaiiTheme.primaryPink,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    '先讓我認識你的貓咪吧 🐱',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: KawaiiTheme.textPrimary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '新增貓咪後，我會幫你記錄牠的叫聲、情緒和每日狀態。',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: KawaiiTheme.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const AddCatPage()),
+                      );
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('新增我的貓咪'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: KawaiiTheme.primaryPink,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: KawaiiTheme.background,
       body: SafeArea(
         child: Column(
           children: [
             _buildCatSelector(),
+            // 今日情感狀態區塊（新增）
+            _buildEmotionalStatusBlock(),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -631,6 +799,156 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 今日情感狀態區塊
+  Widget _buildEmotionalStatusBlock() {
+    final emotion = _todayReport?.dominantEmotion;
+    final emotionTag = _headlineService.getEmotionTag(emotion);
+    final emotionEmoji = _headlineService.getEmotionEmoji(emotion);
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            KawaiiTheme.softPink.withValues(alpha: 0.6),
+            KawaiiTheme.peach.withValues(alpha: 0.4),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
+        boxShadow: [
+          BoxShadow(
+            color: KawaiiTheme.primaryPink.withValues(alpha: 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Headline
+          Text(
+            _todayHeadline.isNotEmpty ? _todayHeadline : '今天也來聽聽她的聲音吧 🐾',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: KawaiiTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Subtitle
+          Text(
+            _todaySubtitle.isNotEmpty ? _todaySubtitle : '長按錄音，記錄今天第一聲喵',
+            style: TextStyle(
+              fontSize: 14,
+              color: KawaiiTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Tags row
+          Row(
+            children: [
+              // 情緒 tag
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(emotionEmoji, style: const TextStyle(fontSize: 14)),
+                    const SizedBox(width: 6),
+                    Text(
+                      '今日心情：$emotionTag',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: KawaiiTheme.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // 互動次數
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.chat_bubble_outline, size: 14, color: KawaiiTheme.primaryPink),
+                    const SizedBox(width: 6),
+                    Text(
+                      '今日互動：$_todayInteractionCount 次',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: KawaiiTheme.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // 默契值 progress bar
+          Row(
+            children: [
+              const Icon(Icons.favorite, size: 16, color: KawaiiTheme.coral),
+              const SizedBox(width: 8),
+              const Text(
+                '默契值',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: KawaiiTheme.textSecondary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: _chemistryValue / 100,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: KawaiiTheme.coral,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '$_chemistryValue%',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: KawaiiTheme.coral,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -730,7 +1048,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       Text(
                         _isAnalyzing
                             ? '正在聽...'
-                            : (isRecording ? '正在聽' : '長按翻譯'),
+                            : (isRecording ? '正在聽' : '聽聽她想說什麼'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -739,7 +1057,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                       if (isRecording)
                         const Text(
-                          '🎤 放開就翻譯',
+                          '🎤 放開後推測她的心情',
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 11,
@@ -799,7 +1117,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 8),
             const Text(
-              '分析姿勢',
+              '看看她現在的樣子',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -807,7 +1125,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
             const Text(
-              '一拍就懂',
+              '從姿勢讀懂她的小心情',
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 11,
@@ -839,14 +1157,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.orange.shade400, Colors.orange.shade600],
+            colors: [
+              KawaiiTheme.primaryPink.withValues(alpha: 0.9),
+              KawaiiTheme.coral,
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
           boxShadow: [
             BoxShadow(
-              color: Colors.orange.withValues(alpha: 0.3),
+              color: KawaiiTheme.primaryPink.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -860,7 +1181,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Text('📊', style: TextStyle(fontSize: 28)),
+              child: const Text('💕', style: TextStyle(fontSize: 28)),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -868,7 +1189,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    '今日貓咪報告',
+                    '今日報告',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -877,7 +1198,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '看看${selectedCat?.name ?? "你的貓"}今天的情緒',
+                    '看看${selectedCat?.name ?? "你的貓"}今天過得怎麼樣',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.white.withValues(alpha: 0.9),
