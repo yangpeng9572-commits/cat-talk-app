@@ -30,6 +30,10 @@ class PushNotificationService {
   static const String _todayInteractionCountKey = 'today_interaction_count';
   static const String _lastClickedDateKey = 'last_notification_clicked_date';
   static const String _consecutiveMissDaysKey = 'consecutive_miss_days';
+  static const String _appOpenTimesKey = 'app_open_times';
+  static const String _abVariantKey = 'ab_variant_';
+  static const String _abSentKey = 'ab_sent_';
+  static const String _abClickedKey = 'ab_clicked_';
 
   /// 初始化推播服務
   Future<bool> initialize() async {
@@ -71,9 +75,10 @@ class PushNotificationService {
     final payload = response.payload;
     if (payload == null) return;
 
-    // 解析 payload（例如: "cat_call:home"）
+    // 解析 payload（例如: "cat_call:home|A"）
     final parts = payload.split(':');
     final type = parts.isNotEmpty ? parts[0] : '';
+    final variant = parts.length > 1 ? parts[1].split('|').last : null;
     
     // 記錄點擊狀態（供首頁讀取顯示提示）
     final prefs = await SharedPreferences.getInstance();
@@ -82,6 +87,87 @@ class PushNotificationService {
     
     // 更新連續點擊天數（重置冷卻）
     await recordNotificationClicked();
+    
+    // 記錄 A/B 點擊
+    if (variant != null) {
+      await _recordAbClick(type, variant);
+    }
+  }
+
+  /// 記錄 A/B 點擊（區分 variant）
+  Future<void> _recordAbClick(String type, String variant) async {
+    final prefs = await SharedPreferences.getInstance();
+    final clickedKey = '${_abClickedKey}${type}_$variant';
+    final count = prefs.getInt(clickedKey) ?? 0;
+    await prefs.setInt(clickedKey, count + 1);
+  }
+
+  /// 記錄 App 開啟時間（用於個人化推播時間）
+  Future<void> recordAppOpenTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final today = '${now.year}-${now.month}-${now.day}';
+    
+    // 取得最近 3 天的記錄
+    final appOpenTimesJson = prefs.getString(_appOpenTimesKey);
+    List<String> appOpenTimes = [];
+    if (appOpenTimesJson != null) {
+      appOpenTimes = appOpenTimesJson.split(',');
+    }
+    
+    // 加入今天的時間（只取小時，如 "10:30"）
+    final todayTime = '${now.hour}:${now.minute}';
+    
+    // 如果今天還沒記錄過，才加入
+    final todayExists = appOpenTimes.any((t) => t.startsWith(today));
+    if (!todayExists) {
+      appOpenTimes.add('$today|$todayTime');
+    }
+    
+    // 只保留最近 3 天的記錄
+    final threeDaysAgo = now.subtract(const Duration(days: 3));
+    appOpenTimes = appOpenTimes.where((t) {
+      final parts = t.split('|');
+      if (parts.length != 2) return false;
+      final date = DateTime.tryParse(parts[0]);
+      return date != null && date.isAfter(threeDaysAgo);
+    }).toList();
+    
+    await prefs.setString(_appOpenTimesKey, appOpenTimes.join(','));
+  }
+
+  /// 取得個人化推播時間（最近 3 天 App 開啟時間 ±15 分鐘）
+  Future<({int hour, int minute})?> _getPersonalizedTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final appOpenTimesJson = prefs.getString(_appOpenTimesKey);
+    if (appOpenTimesJson == null || appOpenTimesJson.isEmpty) return null;
+    
+    final appOpenTimes = appOpenTimesJson.split(',');
+    if (appOpenTimes.isEmpty) return null;
+    
+    // 取最近一次記錄的時間
+    final lastRecord = appOpenTimes.last;
+    final parts = lastRecord.split('|');
+    if (parts.length != 2) return null;
+    
+    final timeParts = parts[1].split(':');
+    if (timeParts.length != 2) return null;
+    
+    final hour = int.tryParse(timeParts[0]);
+    final minute = int.tryParse(timeParts[1]);
+    if (hour == null || minute == null) return null;
+    
+    // 加入 ±15 分鐘隨機偏移
+    final random = Random();
+    final offset = random.nextInt(31) - 15; // -15 ~ +15
+    final newMinute = (minute + offset).clamp(0, 59);
+    
+    return (hour: hour, minute: newMinute);
+  }
+
+  /// 記錄 App 開啟時間（公開方法，供外部呼叫）
+  Future<void> recordUserActive() async {
+    await recordAppOpenTime();
   }
 
   /// 請求通知權限
@@ -295,19 +381,38 @@ class PushNotificationService {
     // 取消舊的推播
     await cancelAll();
 
-    // 加入隨機 ±15 分鐘
     final random = Random();
 
-    // 中午 12:30 ± 15min
-    final noonHour = 12;
-    final noonMinute = 30 + random.nextInt(31) - 15; // -15 ~ +15
+    // 取得個人化時間（根據最近 App 開啟時間，預設 12:30）
+    final personalizedTime = await _getPersonalizedTime();
+    late int noonHour;
+    late int noonMinute;
+    if (personalizedTime != null) {
+      noonHour = personalizedTime.hour;
+      noonMinute = personalizedTime.minute;
+    } else {
+      noonHour = 12;
+      noonMinute = 30 + random.nextInt(31) - 15;
+    }
+    // 晚上：個人化時間往後挪 8 小時
+    late int eveningHour;
+    late int eveningMinute;
+    if (personalizedTime != null) {
+      eveningHour = (personalizedTime.hour + 8) % 24;
+      eveningMinute = personalizedTime.minute;
+    } else {
+      eveningHour = 20;
+      eveningMinute = 30 + random.nextInt(31) - 15;
+    }
 
-    // 晚上 20:30 ± 15min
-    final eveningHour = 20;
-    final eveningMinute = 30 + random.nextInt(31) - 15;
+    // A/B 測試 variants
+    final catCallVariant = random.nextBool() ? 'A' : 'B';
+    final affectionateVariant = random.nextBool() ? 'A' : 'B';
+
 
     // 取得貓咪資料（用於默契值）
     final bond = BondService().getBond(catName);
+
 
     // 取得今日互動次數
     final todayCount = await _getTodayInteractionCount();
@@ -317,11 +422,12 @@ class PushNotificationService {
       await _scheduleNotification(
         id: _catCallId,
         title: '🐱',
-        body: _getCatCallMessageWithCount(catName, todayEmotion, todayCount),
+        body: _getCatCallMessageAb(catName, todayEmotion, todayCount, catCallVariant),
         scheduledTime: _nextInstanceOfTime(hour: noonHour, minute: noonMinute),
-        payload: 'cat_call:home',
+        payload: 'cat_call:home|$catCallVariant',
       );
       await _markLastNotificationType('cat_call');
+      await _recordAbSent('cat_call', catCallVariant);
     } else if (hasDiary && yesterdayType != 'daily_diary') {
       // 如果有日記，推「今日小日記」（避免和昨天重複）
       await _scheduleNotification(
@@ -337,15 +443,16 @@ class PushNotificationService {
     // 晚上的推播：撒嬌或陪伴或輕提醒（避免和昨天重複）
     final eveningType = random.nextInt(10);
     if (eveningType < 4 && yesterdayType != 'affectionate') {
-      // 40%: 撒嬌提醒
+      // 40%: 撒嬌提醒（帶 A/B）
       await _scheduleNotification(
         id: _affectionateId,
         title: '💕',
-        body: _getAffectionateMessage(catName),
+        body: _getAffectionateMessageAb(catName, affectionateVariant),
         scheduledTime: _nextInstanceOfTime(hour: eveningHour, minute: eveningMinute),
-        payload: 'affectionate:home',
+        payload: 'affectionate:home|$affectionateVariant',
       );
       await _markLastNotificationType('affectionate');
+      await _recordAbSent('affectionate', affectionateVariant);
     } else if (eveningType < 7 && !hadAnyInteraction && yesterdayType != 'companion') {
       // 30%: 陪伴提醒（如果沒有互動，避免和昨天重複）
       await _scheduleNotification(
@@ -750,6 +857,61 @@ class PushNotificationService {
   Future<void> markFirstTimeDone() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('first_notification_shown', true);
+  }
+
+  /// A/B 文案：貓咪找你
+  String _getCatCallMessageAb(String catName, EmotionType? emotion, int todayCount, String variant) {
+    if (variant == 'A') {
+      return _getCatCallMessageWithCount(catName, emotion, todayCount);
+    }
+    // Variant B: 另一組文案風格
+    if (todayCount >= 3) {
+      return '$catName 今天好活跃，好像一直在找你 🐱';
+    } else if (todayCount == 2) {
+      return '她又叫了～ $catName 在呼喚你喔 💕';
+    } else if (todayCount == 1) {
+      return '$catName 剛才叫了一聲，好像需要你 🐾';
+    }
+    return '$catName 好像有什麼想跟你说 🐱';
+  }
+  /// A/B 文案：撒嬌提醒
+  String _getAffectionateMessageAb(String catName, String variant) {
+    if (variant == 'A') {
+      return _getAffectionateMessage(catName);
+    }
+    final messages = [
+      '現在是個好時機，給她一個抱抱 🐱',
+      '$catName 看起來有點寂寞，陪她一下吧',
+      '她今天特別需要你 💕 不限時的摸摸最適合',
+      '$catName 想被關注的訊號出現了 🐾',
+    ];
+    return messages[Random().nextInt(messages.length)];
+  }
+  /// 記錄 A/B 發送
+  Future<void> _recordAbSent(String type, String variant) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('${_abVariantKey}${type}', variant);
+    final sentKey = '${_abSentKey}${type}_$variant';
+    final count = prefs.getInt(sentKey) ?? 0;
+    await prefs.setInt(sentKey, count + 1);
+  }
+  /// 取得 A/B 測試統計（除錯用）
+  Future<Map<String, dynamic>> getAbStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      'cat_call': {
+        'sent_A': prefs.getInt('${_abSentKey}cat_call_A') ?? 0,
+        'sent_B': prefs.getInt('${_abSentKey}cat_call_B') ?? 0,
+        'clicked_A': prefs.getInt('${_abClickedKey}cat_call_A') ?? 0,
+        'clicked_B': prefs.getInt('${_abClickedKey}cat_call_B') ?? 0,
+      },
+      'affectionate': {
+        'sent_A': prefs.getInt('${_abSentKey}affectionate_A') ?? 0,
+        'sent_B': prefs.getInt('${_abSentKey}affectionate_B') ?? 0,
+        'clicked_A': prefs.getInt('${_abClickedKey}affectionate_A') ?? 0,
+        'clicked_B': prefs.getInt('${_abClickedKey}affectionate_B') ?? 0,
+      },
+    };
   }
 }
 
