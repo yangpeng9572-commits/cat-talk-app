@@ -79,6 +79,9 @@ class PushNotificationService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notification_clicked', true);
     await prefs.setString('last_notification_type', type);
+    
+    // 更新連續點擊天數（重置冷卻）
+    await recordNotificationClicked();
   }
 
   /// 請求通知權限
@@ -268,6 +271,22 @@ class PushNotificationService {
 
     // 檢查今天是否已有互動（若是，則跳過陪伴提醒）
     final hadInteraction = await _hadInteractionToday();
+    
+    // 檢查冷卻機制：當天是否已開 App（透過記錄推播發送時間）
+    final alreadySentToday = await _wasNotificationSentToday();
+    if (alreadySentToday) return; // 當天已發過，不重複推播
+    
+    // 更新連續未點擊天數
+    await _updateConsecutiveMissDays();
+    
+    // 取得連續未互動天數
+    final consecutiveMissDays = await _getConsecutiveMissDays();
+    
+    // 冷卻機制：連續 2 天未點擊 → 第 3 天只發輕提醒
+    if (consecutiveMissDays >= 2) {
+      await _scheduleLightOnly(catName);
+      return;
+    }
 
     // 取消舊的推播
     await cancelAll();
@@ -339,6 +358,9 @@ class PushNotificationService {
         payload: 'light:home',
       );
     }
+    
+    // 記錄今日已發送（避免當天重複推播）
+    await _markNotificationSentToday();
   }
 
   /// 立即發送測試推播
@@ -475,6 +497,74 @@ class PushNotificationService {
     
     await prefs.setInt(_todayInteractionCountKey, currentCount + 1);
     await recordInteraction(); // 同時更新最後互動時間
+  }
+
+  /// 檢查今天是否已發送過推播（當天不重複）
+  Future<bool> _wasNotificationSentToday() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastSentDate = prefs.getString('last_notification_sent_date');
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month}-${today.day}';
+    return lastSentDate == todayStr;
+  }
+
+  /// 記錄今日已發送推播（避免重複）
+  Future<void> _markNotificationSentToday() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month}-${today.day}';
+    await prefs.setString('last_notification_sent_date', todayStr);
+  }
+
+  /// 記錄推播點擊（更新連續未點擊天數）
+  Future<void> _updateConsecutiveMissDays() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month}-${today.day}';
+    final lastClicked = prefs.getString(_lastClickedDateKey);
+    
+    // 如果昨天點擊過，重置計數
+    if (lastClicked != null) {
+      final yesterday = today.subtract(const Duration(days: 1));
+      final yesterdayStr = '${yesterday.year}-${yesterday.month}-${yesterday.day}';
+      if (lastClicked == yesterdayStr) {
+        await prefs.setInt(_consecutiveMissDaysKey, 0);
+      }
+    }
+  }
+
+  /// 取得連續未點擊推播天數
+  Future<int> _getConsecutiveMissDays() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_consecutiveMissDaysKey) ?? 0;
+  }
+
+  /// 更新推播點擊天數（當用戶點擊推播時呼叫）
+  Future<void> recordNotificationClicked() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month}-${today.day}';
+    await prefs.setString(_lastClickedDateKey, todayStr);
+    // 重置連續未點擊天數
+    await prefs.setInt(_consecutiveMissDaysKey, 0);
+  }
+
+  /// 排程只發輕提醒（冷卻模式）
+  Future<void> _scheduleLightOnly(String catName) async {
+    final random = Random();
+    final hour = 20; // 只在晚上發
+    final minute = 30 + random.nextInt(31) - 15;
+    
+    await _scheduleNotification(
+      id: _lightId,
+      title: '🐱',
+      body: _getLightMessage(catName),
+      scheduledTime: _nextInstanceOfTime(hour: hour, minute: minute),
+      payload: 'light:home',
+    );
+    
+    // 記錄已發送
+    await _markNotificationSentToday();
   }
 
   /// 計算下一個指定時間的 DateTime
