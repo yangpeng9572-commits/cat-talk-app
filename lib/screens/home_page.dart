@@ -573,10 +573,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final updatedTask = await _taskService.updateTaskProgress(type, delta: delta);
     
     if (updatedTask != null && updatedTask.isCompleted) {
-      // 任務完成，獎勵 exp 並記錄連續
+      // 任務完成，記錄連續（使用默契值，不再用 exp）
       await _streakService.recordActivity(expReward: updatedTask.rewardExp);
       // 更新默契值 +5
       await _addBondScore(BondService.eventTaskComplete);
+      // 顯示陪伴型完成提示
+      _showBriefToast(_taskService.getTaskCompletionMessage(type));
     }
 
     _loadTaskData();

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/daily_task.dart';
+import 'task_companion_service.dart';
 
 /// 每日任務服務
 class DailyTaskService {
@@ -8,6 +9,7 @@ class DailyTaskService {
   static const String _lastResetKey = 'last_task_reset';
 
   final SharedPreferences _prefs;
+  final TaskCompanionService _companion = TaskCompanionService();
 
   DailyTaskService(this._prefs);
 
@@ -30,25 +32,27 @@ class DailyTaskService {
     return tasksList.map((json) => DailyTask.fromJson(json)).toList();
   }
 
-  /// 生成今日任務
+  /// 生成今日任務（使用陪伴型文案）
   List<DailyTask> _generateTodayTasks() {
     final today = DateTime.now();
     final todayStr = _getTodayStr();
 
+    // 只生成翻譯、報告、回饋三個核心任務
+    // play_with_cat 和 add_cat_note 在應用層單獨觸發
     final tasks = [
       DailyTask(
         id: '${todayStr}_translate',
-        title: '錄下貓叫聲',
-        description: '錄下 1 次貓叫聲，翻譯看看牠想說什麼',
+        title: _companion.getTitle(TaskType.translate_meow),
+        description: _companion.getDescription(TaskType.translate_meow),
         type: TaskType.translate_meow,
         targetCount: 1,
-        rewardExp: 10,
+        rewardExp: 5, // 默契值用，不是 exp
         date: today,
       ),
       DailyTask(
         id: '${todayStr}_report',
-        title: '查看每日報告',
-        description: '看看你家貓咪今天的情緒怎麼樣',
+        title: _companion.getTitle(TaskType.view_daily_report),
+        description: _companion.getDescription(TaskType.view_daily_report),
         type: TaskType.view_daily_report,
         targetCount: 1,
         rewardExp: 5,
@@ -56,8 +60,8 @@ class DailyTaskService {
       ),
       DailyTask(
         id: '${todayStr}_feedback',
-        title: '給予回饋',
-        description: '幫翻譯結果回饋，讓我更懂你家貓',
+        title: _companion.getTitle(TaskType.give_feedback),
+        description: _companion.getDescription(TaskType.give_feedback),
         type: TaskType.give_feedback,
         targetCount: 1,
         rewardExp: 5,
@@ -118,12 +122,28 @@ class DailyTaskService {
     return tasks.where((t) => t.isCompleted).length;
   }
 
-  /// 取得今日總獎勵 exp
-  int getTodayTotalExp() {
+  /// 檢查是否所有任務都完成
+  bool isAllCompleted() {
+    final tasks = getTodayTasks();
+    return tasks.isNotEmpty && tasks.every((t) => t.isCompleted);
+  }
+
+  /// 取得今日總默契值（不是 exp）
+  int getTodayTotalBond() {
     final tasks = getTodayTasks();
     return tasks
         .where((t) => t.isCompleted)
         .fold(0, (sum, t) => sum + t.rewardExp);
+  }
+
+  /// 取得任務完成後的回饋訊息
+  String getTaskCompletionMessage(TaskType type) {
+    return _companion.getCompletionMessage(type);
+  }
+
+  /// 取得全部完成時的回饋訊息
+  String getAllTasksCompletedMessage() {
+    return _companion.getAllCompletedMessage();
   }
 
   /// 重置每日任務（如果需要）
