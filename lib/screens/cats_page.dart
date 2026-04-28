@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/cat.dart';
+import '../theme/kawaii_theme.dart';
 import 'add_cat_page.dart';
 
 class CatsPage extends StatelessWidget {
@@ -10,23 +11,12 @@ class CatsPage extends StatelessWidget {
     final cats = Cat.getDemoCats();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: KawaiiTheme.background,
       appBar: AppBar(
-        title: const Text('貓咪'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        title: const Text('我的貓咪'),
+        backgroundColor: Colors.transparent,
+        foregroundColor: KawaiiTheme.textPrimary,
         elevation: 0,
-        actions: [
-          TextButton(
-            onPressed: () {
-              // 自定義語言
-            },
-            child: const Text(
-              '自定義語言',
-              style: TextStyle(color: Colors.orange),
-            ),
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -48,8 +38,9 @@ class CatsPage extends StatelessWidget {
   Widget _buildCatCard(Cat cat) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
+        boxShadow: KawaiiTheme.cardShadow,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -57,7 +48,7 @@ class CatsPage extends StatelessWidget {
           // 頭像
           CircleAvatar(
             radius: 40,
-            backgroundColor: Colors.orange.shade100,
+            backgroundColor: KawaiiTheme.softPink,
             child: const Icon(Icons.pets, size: 40, color: Colors.orange),
           ),
           const SizedBox(height: 12),
