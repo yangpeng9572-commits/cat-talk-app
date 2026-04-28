@@ -3,6 +3,7 @@ import '../models/translation_result.dart';
 import '../models/cat.dart';
 import '../services/translation_history_service.dart';
 import '../widgets/emotion_card.dart';
+import '../theme/kawaii_theme.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -26,11 +27,11 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: KawaiiTheme.background,
       appBar: AppBar(
-        title: const Text('記錄'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        title: const Text('翻譯記錄'),
+        backgroundColor: Colors.transparent,
+        foregroundColor: KawaiiTheme.textPrimary,
         elevation: 0,
         actions: [
           if (_historyService.count > 0)
@@ -55,7 +56,7 @@ class _HistoryPageState extends State<HistoryPage> {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: KawaiiTheme.softPink,
               shape: BoxShape.circle,
             ),
             child: const Text(
@@ -109,11 +110,11 @@ class _HistoryPageState extends State<HistoryPage> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
           border: Border.all(
             color: hasCorrection
-                ? Colors.orange.withValues(alpha: 0.5)
-                : Colors.grey.shade200,
+                ? KawaiiTheme.primaryPink.withValues(alpha: 0.5)
+                : KawaiiTheme.divider,
             width: hasCorrection ? 2 : 1,
           ),
           boxShadow: [
@@ -135,10 +136,10 @@ class _HistoryPageState extends State<HistoryPage> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade100,
+                    color: KawaiiTheme.softPink,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.pets, color: Colors.orange, size: 20),
+                  child: const Icon(Icons.pets, color: KawaiiTheme.primaryPink, size: 20),
                 ),
                 const SizedBox(width: 12),
                 // 貓咪名稱
@@ -155,7 +156,7 @@ class _HistoryPageState extends State<HistoryPage> {
                   _formatTime(result.createdAt),
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: KawaiiTheme.textSecondary,
                   ),
                 ),
               ],
@@ -195,7 +196,7 @@ class _HistoryPageState extends State<HistoryPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.orange,
+                      color: KawaiiTheme.coral,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -253,7 +254,7 @@ class _HistoryPageState extends State<HistoryPage> {
                   '信心度',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: KawaiiTheme.textSecondary,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -263,7 +264,7 @@ class _HistoryPageState extends State<HistoryPage> {
                       Container(
                         height: 6,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
+                          color: KawaiiTheme.divider,
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
@@ -367,7 +368,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
   Color _getConfidenceColor(double confidence) {
     if (confidence >= 0.8) return Colors.green;
-    if (confidence >= 0.6) return Colors.orange;
+    if (confidence >= 0.6) return KawaiiTheme.coral;
     return Colors.red;
   }
 }
