@@ -1,55 +1,168 @@
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/translation_result.dart';
 import '../models/cat.dart';
 
 /// 翻譯歷史資料服務
-/// 目前用於存放翻譯記錄
-/// 未來會改為 SQLite 或 Firebase 持久化
+/// 
+/// 使用 SharedPreferences 持久化儲存
+/// 依 catId 分開儲存，保留最近 30 天資料
 class TranslationHistoryService {
   // 單例模式
   static final TranslationHistoryService _instance = TranslationHistoryService._internal();
   factory TranslationHistoryService() => _instance;
   TranslationHistoryService._internal();
 
-  // 記憶體中的翻譯歷史
-  final List<TranslationResult> _history = [];
+  SharedPreferences? _prefs;
+  
+  // 記憶體緩存（減少磁碟讀取）
+  final Map<String, List<TranslationResult>> _memoryCache = {};
+  
+  // Storage key prefix
+  static const String _storageKeyPrefix = 'translation_history_';
+  static const int _maxDaysToKeep = 30; // 保留最近 30 天
+
+  /// 初始化
+  Future<void> init(SharedPreferences prefs) async {
+    _prefs = prefs;
+    // 載入所有貓的歷史到記憶體
+    await _loadAllToMemory();
+  }
+
+  /// 將所有貓的歷史載入記憶體
+  Future<void> _loadAllToMemory() async {
+    if (_prefs == null) return;
+    
+    final allKeys = _prefs!.getKeys();
+    final historyKeys = allKeys.where((k) => k.startsWith(_storageKeyPrefix));
+    
+    for (final key in historyKeys) {
+      final catId = key.substring(_storageKeyPrefix.length);
+      final jsonStr = _prefs!.getString(key);
+      if (jsonStr != null) {
+        try {
+          final List<dynamic> jsonList = jsonDecode(jsonStr);
+          _memoryCache[catId] = jsonList
+              .map((j) => TranslationResult.fromJson(j as Map<String, dynamic>))
+              .toList();
+          // 清理過期資料
+          _memoryCache[catId] = _filterRecentDays(_memoryCache[catId]!);
+        } catch (e) {
+          _memoryCache[catId] = [];
+        }
+      }
+    }
+  }
+
+  /// 過濾出最近 N 天的資料
+  List<TranslationResult> _filterRecentDays(List<TranslationResult> history, {int? days}) {
+    final cutoff = DateTime.now().subtract(Duration(days: days ?? _maxDaysToKeep));
+    return history.where((r) => r.createdAt.isAfter(cutoff)).toList();
+  }
 
   /// 取得所有歷史記錄（由新到舊）
   List<TranslationResult> getAll() {
-    return List.from(_history.reversed);
+    final all = <TranslationResult>[];
+    for (final list in _memoryCache.values) {
+      all.addAll(list);
+    }
+    all.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return all;
   }
 
   /// 依照貓咪 ID 取得歷史記錄
   List<TranslationResult> getByCatId(String catId) {
-    return _history.where((r) => r.catId == catId).toList().reversed.toList();
+    return List<TranslationResult>.from(_memoryCache[catId] ?? []).reversed.toList();
+  }
+
+  /// 依照貓咪 ID 取得最近 N 天的歷史記錄
+  List<TranslationResult> getByCatIdWithinDays(String catId, int days) {
+    final cutoff = DateTime.now().subtract(Duration(days: days));
+    final all = _memoryCache[catId] ?? [];
+    return all.where((r) => r.createdAt.isAfter(cutoff)).toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
   /// 新增翻譯記錄
-  void add(TranslationResult result) {
-    _history.add(result);
+  Future<void> add(TranslationResult result) async {
+    if (!_memoryCache.containsKey(result.catId)) {
+      _memoryCache[result.catId] = [];
+    }
+    _memoryCache[result.catId]!.add(result);
+    
+    // 清理過期資料
+    _memoryCache[result.catId] = _filterRecentDays(_memoryCache[result.catId]!);
+    
+    // 保存到磁碟
+    await _saveToDisk(result.catId);
   }
 
   /// 更新翻譯記錄（帶入回饋）
-  void updateWithFeedback(TranslationResult result, UserFeedback feedback) {
-    final index = _history.indexWhere((r) => r.id == result.id);
+  Future<void> updateWithFeedback(TranslationResult result, UserFeedback feedback) async {
+    final list = _memoryCache[result.catId];
+    if (list == null) return;
+    
+    final index = list.indexWhere((r) => r.id == result.id);
     if (index != -1) {
-      _history[index] = result.copyWith(userFeedback: feedback);
+      _memoryCache[result.catId]![index] = result.copyWith(userFeedback: feedback);
+      await _saveToDisk(result.catId);
     }
   }
 
   /// 刪除單筆記錄
-  void delete(String id) {
-    _history.removeWhere((r) => r.id == id);
+  Future<void> delete(String id) async {
+    for (final catId in _memoryCache.keys) {
+      final list = _memoryCache[catId]!;
+      final index = list.indexWhere((r) => r.id == id);
+      if (index != -1) {
+        list.removeAt(index);
+        await _saveToDisk(catId);
+        break;
+      }
+    }
+  }
+
+  /// 刪除特定貓咪的所有歷史
+  Future<void> deleteByCatId(String catId) async {
+    _memoryCache.remove(catId);
+    await _prefs?.remove('$_storageKeyPrefix$catId');
   }
 
   /// 清除所有記錄
-  void clearAll() {
-    _history.clear();
+  Future<void> clearAll() async {
+    _memoryCache.clear();
+    if (_prefs == null) return;
+    
+    final allKeys = _prefs!.getKeys().where((k) => k.startsWith(_storageKeyPrefix));
+    for (final key in allKeys) {
+      await _prefs!.remove(key);
+    }
   }
 
   /// 取得總記錄數
-  int get count => _history.length;
+  int get count {
+    int total = 0;
+    for (final list in _memoryCache.values) {
+      total += list.length;
+    }
+    return total;
+  }
 
-  /// 測試用：新增一筆模擬資料
+  /// 儲存到磁碟
+  Future<void> _saveToDisk(String catId) async {
+    if (_prefs == null) return;
+    
+    final list = _memoryCache[catId] ?? [];
+    final jsonList = list.map((r) => r.toJson()).toList();
+    await _prefs!.setString('$_storageKeyPrefix$catId', jsonEncode(jsonList));
+  }
+
+  /// 取得某隻貓的記錄數量
+  int getCountByCatId(String catId) {
+    return _memoryCache[catId]?.length ?? 0;
+  }
+
+  /// 測試用：新增一筆模擬資料（使用記憶體，不持久化）
   void addMockData() {
     final now = DateTime.now();
     final emotions = EmotionType.values.where((e) => e != EmotionType.other).toList();
@@ -68,7 +181,7 @@ class TranslationHistoryService {
       final emotion = emotions[i % emotions.length];
       final cat = cats[i % cats.length];
 
-      _history.add(TranslationResult(
+      final result = TranslationResult(
         id: 'mock_${now.millisecondsSinceEpoch}_$i',
         catId: cat.id,
         emotionType: emotion,
@@ -95,7 +208,10 @@ class TranslationHistoryService {
             : i % 4 == 0
                 ? UserFeedback.correct()
                 : null,
-      ));
+      );
+      
+      // 加入記憶體（但不放磁碟，因為這是 mock 資料）
+      _memoryCache.putIfAbsent(cat.id, () => []).add(result);
     }
   }
 

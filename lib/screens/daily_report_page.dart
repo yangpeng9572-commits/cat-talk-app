@@ -10,8 +10,11 @@ import '../services/cat_service.dart';
 import '../services/cat_diary_service.dart';
 import '../services/bond_service.dart';
 import '../services/share_card_service.dart';
+import '../services/translation_history_service.dart';
+import '../services/personality_analysis_service.dart';
 import '../widgets/share_card_widget.dart';
 import '../theme/kawaii_theme.dart';
+import 'personality_card_page.dart';
 
 /// 每日貓咪報告頁面
 class DailyReportPage extends StatefulWidget {
@@ -303,6 +306,10 @@ class _DailyReportPageState extends State<DailyReportPage> {
           // ===== 安全提醒（如果需要）=====
           if (report.warningLevel != WarningLevel.normal)
             _buildWarningCard(report),
+          const SizedBox(height: 16),
+
+          // ===== 7天個性分析卡入口 =====
+          _buildPersonalityCardEntry(),
           const SizedBox(height: 16),
 
           // ===== 歷史按鈕 =====
@@ -942,6 +949,121 @@ class _DailyReportPageState extends State<DailyReportPage> {
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
+        ),
+      ),
+    );
+  }
+
+  /// 7天個性分析卡入口
+  Widget _buildPersonalityCardEntry() {
+    return FutureBuilder<bool>(
+      future: _hasEnoughDataForPersonality(),
+      builder: (context, snapshot) {
+        final hasData = snapshot.data ?? false;
+        if (!hasData) {
+          // 資料不足，顯示空狀態提示
+          return Container(
+            margin: const EdgeInsets.only(top: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: KawaiiTheme.softPink.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: KawaiiTheme.primaryPink.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome,
+                    color: KawaiiTheme.primaryPink,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '再記錄幾天',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: KawaiiTheme.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        '我就能更了解她 🐾',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: KawaiiTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // 有足夠資料，顯示入口按鈕
+        return Container(
+          margin: const EdgeInsets.only(top: 16),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: KawaiiTheme.primaryPink,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              onPressed: () => _openPersonalityCard(),
+              icon: const Icon(Icons.auto_awesome, size: 20),
+              label: const Text(
+                '查看她的 7 天小檔案',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<bool> _hasEnoughDataForPersonality() async {
+    if (_selectedCatId == null) return false;
+    final prefs = await SharedPreferences.getInstance();
+    final historyService = TranslationHistoryService();
+    await historyService.init(prefs);
+    final translations = historyService.getByCatIdWithinDays(_selectedCatId!, 7);
+    return translations.length >= 3;
+  }
+
+  void _openPersonalityCard() {
+    if (_selectedCatId == null) return;
+    final cat = _cats.firstWhere(
+      (c) => c.id == _selectedCatId,
+      orElse: () => _cats.first,
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PersonalityCardPage(
+          catId: _selectedCatId!,
+          cat: cat,
         ),
       ),
     );

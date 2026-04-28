@@ -268,4 +268,207 @@ Bond: $bondScore%
 
 $tags''';
   }
-}
+
+  /// Generate personality card image
+  Future<String?> generatePersonalityCard({
+    required String catName,
+    required String personalityType,
+    required String personalityDescription,
+    required EmotionType topEmotion,
+    required int bondScore,
+  }) async {
+    try {
+      // 建立一個 1080x1080 的影像
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      const size = Size(1080, 1080);
+
+      // 背景：奶茶色漸層
+      final bgPaint = Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFFF0F5), Color(0xFFFFE4E1)],
+        ).createShader(const Rect.fromLTWH(0, 0, 1080, 1080));
+      canvas.drawRect(Rect.fromLTWH(0, 0, 1080, 1080), bgPaint);
+
+      // 頂部裝飾愛心
+      _drawHeart(canvas, 100, 80, 40, const Color(0xFFFF8FAB).withOpacity(0.3));
+      _drawHeart(canvas, 980, 120, 30, const Color(0xFFFF8FAB).withOpacity(0.2));
+
+      // 主卡片背景（白色圓角）
+      final cardPaint = Paint()..color = Colors.white;
+      final cardRRect = RRect.fromRectAndRadius(
+        const Rect.fromLTWH(60, 160, 960, 760),
+        const Radius.circular(48),
+      );
+      canvas.drawRRect(cardRRect, cardPaint);
+
+      // 卡片陰影
+      final shadowPaint = Paint()
+        ..color = Colors.black.withOpacity(0.1)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);
+      canvas.drawRRect(cardRRect, shadowPaint);
+      canvas.drawRRect(cardRRect, cardPaint);
+
+      // 頂部粉紅色區塊
+      final headerPaint = Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFFF8FAB), Color(0xFFFFB6C1)],
+        ).createShader(const Rect.fromLTWH(60, 160, 960, 200));
+      final headerRRect = RRect.fromRectAndRadius(
+        const Rect.fromLTWH(60, 160, 960, 200),
+        const Radius.circular(48),
+      );
+      // 只畫上半部
+      canvas.save();
+      canvas.clipRRect(RRect.fromRectAndRadius(
+        const Rect.fromLTWH(60, 160, 960, 120),
+        const Radius.circular(48),
+      ));
+      canvas.drawRRect(headerRRect, headerPaint);
+      canvas.restore();
+
+      // 貓咪名字
+      _drawText(
+        canvas,
+        catName,
+        const Rect.fromLTWH(60, 180, 960, 80),
+        const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
+        textAlign: TextAlign.center,
+      );
+
+      // 個性類型標籤
+      final labelBgPaint = Paint()..color = Colors.white.withOpacity(0.25);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          const Rect.fromLTWH(340, 270, 400, 60),
+          const Radius.circular(30),
+        ),
+        labelBgPaint,
+      );
+      _drawText(
+        canvas,
+        personalityType,
+        const Rect.fromLTWH(340, 270, 400, 60),
+        const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+        textAlign: TextAlign.center,
+      );
+
+      // 描述文字
+      _drawText(
+        canvas,
+        personalityDescription,
+        const Rect.fromLTWH(120, 420, 840, 100),
+        const TextStyle(fontSize: 24, color: Color(0xFF6B5B5B), height: 1.5),
+        textAlign: TextAlign.center,
+      );
+
+      // 分隔線
+      final linePaint = Paint()
+        ..color = const Color(0xFFFFE4E1)
+        ..strokeWidth = 2;
+      canvas.drawLine(const Offset(180, 540), const Offset(900, 540), linePaint);
+
+      // 情緒 emoji + TOP 1
+      final emoji = _getEmotionEmoji(topEmotion);
+      _drawText(
+        canvas,
+        '最常見情緒',
+        const Rect.fromLTWH(120, 570, 400, 50),
+        const TextStyle(fontSize: 20, color: Color(0xFF9B8B8B)),
+      );
+      _drawText(
+        canvas,
+        emoji,
+        const Rect.fromLTWH(120, 620, 400, 80),
+        const TextStyle(fontSize: 48),
+      );
+
+      // 默契值
+      _drawText(
+        canvas,
+        '默契值',
+        const Rect.fromLTWH(560, 570, 400, 50),
+        const TextStyle(fontSize: 20, color: Color(0xFF9B8B8B)),
+      );
+      _drawText(
+        canvas,
+        '$bondScore%',
+        const Rect.fromLTWH(560, 610, 400, 100),
+        const TextStyle(fontSize: 56, fontWeight: FontWeight.bold, color: Color(0xFFFF8FAB)),
+        textAlign: TextAlign.center,
+      );
+
+      // 底部品牌
+      _drawText(
+        canvas,
+        '來自 貓語通 Cat Talk',
+        const Rect.fromLTWH(0, 980, 1080, 60),
+        const TextStyle(fontSize: 18, color: Color(0xFFB0A0A0)),
+        textAlign: TextAlign.center,
+      );
+
+      // 轉成圖片
+      final picture = recorder.endRecording();
+      final img = await picture.toImage(1080, 1080);
+      final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return null;
+
+      final imageBytes = byteData.buffer.asUint8List();
+      final directory = await getTemporaryDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final filePath = '${directory.path}/cat_talk_personality_$timestamp.png';
+      final file = File(filePath);
+      await file.writeAsBytes(imageBytes);
+      return filePath;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  void _drawHeart(Canvas canvas, double x, double y, double size, Color color) {
+    final paint = Paint()..color = color;
+    final path = Path();
+    path.moveTo(x, y + size * 0.3);
+    path.cubicTo(x, y, x - size * 0.5, y, x - size * 0.5, y + size * 0.3);
+    path.cubicTo(x - size * 0.5, y + size * 0.6, x, y + size * 0.9, x, y + size);
+    path.cubicTo(x, y + size * 0.9, x + size * 0.5, y + size * 0.6, x + size * 0.5, y + size * 0.3);
+    path.cubicTo(x + size * 0.5, y, x, y, x, y + size * 0.3);
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawText(Canvas canvas, String text, Rect rect, TextStyle style, {TextAlign textAlign = TextAlign.left}) {
+    final textPainter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textAlign: textAlign,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout(maxWidth: rect.width);
+    textPainter.paint(canvas, rect.topLeft);
+  }
+
+  String _getEmotionEmoji(EmotionType emotion) {
+    switch (emotion) {
+      case EmotionType.affectionate:
+        return '🥰';
+      case EmotionType.hungry:
+        return '🍽️';
+      case EmotionType.playful:
+        return '🎾';
+      case EmotionType.attention:
+        return '👀';
+      case EmotionType.anxious:
+        return '😰';
+      case EmotionType.angry:
+        return '😾';
+      case EmotionType.greeting:
+        return '🐱';
+      case EmotionType.uncomfortable:
+        return '🤒';
+      case EmotionType.other:
+        return '🐾';
+    }
+  }}

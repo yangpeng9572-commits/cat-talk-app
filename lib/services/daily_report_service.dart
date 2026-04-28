@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/daily_cat_report.dart';
 import '../models/translation_result.dart';
 import 'translation_history_service.dart';
@@ -5,16 +7,68 @@ import 'cat_learning_service.dart';
 
 /// 每日報告服務
 /// 
+/// 使用 SharedPreferences 持久化儲存每日報告
 /// 負責生成每隻貓每天的「情緒與互動報告」
 class DailyReportService {
+  static const String _storageKeyPrefix = 'daily_report_';
+  static const int _maxDaysToKeep = 30; // 保留最近 30 天
+
   final TranslationHistoryService _historyService;
   final CatLearningService _learningService;
+  SharedPreferences? _prefs;
+  
+  // 記憶體緩存
+  final Map<String, DailyCatReport> _memoryCache = {};
 
   DailyReportService({
     TranslationHistoryService? historyService,
     CatLearningService? learningService,
   })  : _historyService = historyService ?? TranslationHistoryService(),
         _learningService = learningService ?? CatLearningService();
+
+  /// 初始化
+  Future<void> init(SharedPreferences prefs) async {
+    _prefs = prefs;
+    await _loadRecentToMemory();
+  }
+
+  /// 將最近 7 天的報告載入記憶體
+  Future<void> _loadRecentToMemory() async {
+    if (_prefs == null) return;
+    
+    final now = DateTime.now();
+    for (int i = 0; i <= 7; i++) {
+      final date = now.subtract(Duration(days: i));
+      final allKeys = _prefs!.getKeys().where((k) => k.startsWith(_storageKeyPrefix));
+      
+      for (final key in allKeys) {
+        final jsonStr = _prefs!.getString(key);
+        if (jsonStr != null) {
+          try {
+            final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+            if (json['date'] != null) {
+              final reportDate = DateTime.parse(json['date'] as String);
+              if (_isSameDay(reportDate, date)) {
+                _memoryCache[key] = DailyCatReport.fromJson(json);
+              }
+            }
+          } catch (e) {
+            // 忽略
+          }
+        }
+      }
+    }
+  }
+
+  /// 檢查兩個日期是否同一天
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  /// 將日期轉換成儲存 key 的一部分（用於識別哪個 catId 和日期）
+  String _dateToKey(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
 
   /// 取得今天的報告
   DailyCatReport getTodayReport(String catId) {
@@ -23,6 +77,12 @@ class DailyReportService {
 
   /// 取得指定日期的報告
   DailyCatReport generateDailyReport(String catId, DateTime date) {
+    // 檢查記憶體緩存
+    final cacheKey = '${catId}_${_dateToKey(date)}';
+    if (_memoryCache.containsKey(cacheKey) && _isSameDay(date, DateTime.now())) {
+      return _memoryCache[cacheKey]!;
+    }
+
     // 取得該貓、該日期的所有翻譯記錄
     final allHistory = _historyService.getByCatId(catId);
     
@@ -37,7 +97,13 @@ class DailyReportService {
 
     // 如果沒有記錄，回傳空狀態報告
     if (dayHistory.isEmpty) {
-      return DailyCatReport.empty(catId: catId, date: date);
+      final emptyReport = DailyCatReport.empty(catId: catId, date: date);
+      // 仍然保存（如果日期是今天）
+      if (_isSameDay(date, DateTime.now())) {
+        _memoryCache[cacheKey] = emptyReport;
+        _saveReportToDisk(catId, emptyReport);
+      }
+      return emptyReport;
     }
 
     // 計算各項數據
@@ -59,8 +125,8 @@ class DailyReportService {
     );
     final warningLevel = calculateWarningLevel(emotionCounts);
 
-    return DailyCatReport(
-      id: '${catId}_${date.toIso8601String().split('T')[0]}',
+    final report = DailyCatReport(
+      id: '${catId}_${_dateToKey(date)}',
       catId: catId,
       date: date,
       totalTranslations: dayHistory.length,
@@ -73,6 +139,75 @@ class DailyReportService {
       createdAt: DateTime.now(),
       headlineText: headlineText,
     );
+
+    // 保存報告
+    _memoryCache[cacheKey] = report;
+    _saveReportToDisk(catId, report);
+
+    return report;
+  }
+
+  /// 儲存報告到磁碟
+  Future<void> _saveReportToDisk(String catId, DailyCatReport report) async {
+    if (_prefs == null) return;
+    
+    final key = '$_storageKeyPrefix${catId}_${_dateToKey(report.date)}';
+    await _prefs!.setString(key, jsonEncode(report.toJson()));
+    
+    // 清理過期報告
+    await _cleanupOldReports(catId);
+  }
+
+  /// 清理過期報告（超過 30 天）
+  Future<void> _cleanupOldReports(String catId) async {
+    if (_prefs == null) return;
+    
+    final cutoff = DateTime.now().subtract(const Duration(days: _maxDaysToKeep));
+    final allKeys = _prefs!.getKeys().where((k) => k.startsWith('$_storageKeyPrefix${catId}_'));
+    
+    for (final key in allKeys) {
+      final jsonStr = _prefs!.getString(key);
+      if (jsonStr != null) {
+        try {
+          final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+          final reportDate = DateTime.parse(json['date'] as String);
+          if (reportDate.isBefore(cutoff)) {
+            await _prefs!.remove(key);
+            _memoryCache.remove(key);
+          }
+        } catch (e) {
+          // 忽略
+        }
+      }
+    }
+  }
+
+  /// 取得最近 N 天的報告
+  List<DailyCatReport> getReportsByCatIdWithinDays(String catId, int days) {
+    if (_prefs == null) return [];
+    
+    final cutoff = DateTime.now().subtract(Duration(days: days));
+    final reports = <DailyCatReport>[];
+    final allKeys = _prefs!.getKeys().where((k) => k.startsWith('$_storageKeyPrefix${catId}_'));
+    
+    for (final key in allKeys) {
+      final jsonStr = _prefs!.getString(key);
+      if (jsonStr != null) {
+        try {
+          final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+          final reportDate = DateTime.parse(json['date'] as String);
+          if (reportDate.isAfter(cutoff)) {
+            reports.add(DailyCatReport.fromJson(json));
+          }
+        } catch (e) {
+          // 忽略解析錯誤，回傳空列表
+        }
+      }
+    }
+    
+    // 按日期排序（由新到舊）
+    reports.sort((a, b) => b.date.compareTo(a.date));
+    return reports;
   }
 
   /// 計算情緒次數統計
@@ -199,35 +334,12 @@ class DailyReportService {
   }
 
   /// 生成一句話摘要（最多20字）
-  /// 
-  /// 根據 dominantEmotion + totalTranslations 生成簡短摘要
-  /// 增加情緒強度（超/有點/很）+ 2-3種隨機文案
   String generateHeadlineText(EmotionType? dominantEmotion, int totalTranslations) {
     if (dominantEmotion == null) {
       return '今天還沒有紀錄';
     }
 
-    // 根據翻譯次數決定強度
-    String intensity;
-    if (totalTranslations > 10) {
-      intensity = '超';  // 很多次
-    } else if (totalTranslations > 5) {
-      intensity = '有點';  // 中等
-    } else {
-      intensity = ' ';  // 正常
-    }
-
-    // 根據次數決定程度
-    String degree;
-    if (totalTranslations > 10) {
-      degree = '一直';
-    } else if (totalTranslations > 5) {
-      degree = '常常';
-    } else {
-      degree = '';
-    }
-
-    // 隨機種子
+    // 隨機種子（用於在同一 dominantEmotion 下選擇不同文案）
     final seed = DateTime.now().day + totalTranslations;
     final variant = seed % 3;
 
