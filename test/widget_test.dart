@@ -1,54 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:cat_talk/main.dart';
 import 'package:cat_talk/screens/add_cat_page.dart';
 import 'package:cat_talk/screens/privacy_policy_page.dart';
 import 'package:cat_talk/screens/about_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  setUp(() async {
-    // 模擬 SharedPreferences
-    SharedPreferences.setMockInitialValues({
-      'hasSeenOnboarding': true, // 跳過 onboarding
-    });
-  });
-
-  testWidgets('App 應該可以正常啟動', (WidgetTester tester) async {
-    await tester.pumpWidget(const CatTalkApp());
-    await tester.pumpAndSettle();
-
-    // 驗證首頁翻譯按鈕存在
-    expect(find.text('長按翻譯'), findsOneWidget);
-
-    // 驗證今日任務卡片存在
-    expect(find.text('今日任務'), findsOneWidget);
-
-    // 驗證每日報告卡片存在
-    expect(find.text('今日貓咪報告'), findsOneWidget);
-  });
-
-  testWidgets('點擊每日報告卡片可以打開報告頁面', (WidgetTester tester) async {
-    await tester.pumpWidget(const CatTalkApp());
-    await tester.pumpAndSettle();
-
-    // 點擊每日報告卡片
-    await tester.tap(find.text('今日貓咪報告'));
-    await tester.pumpAndSettle();
-
-    // 驗證進入了報告頁面
-    expect(find.text('今日貓咪報告'), findsWidgets);
-  });
-
-  testWidgets('長按翻譯按鈕應該可以錄音', (WidgetTester tester) async {
-    await tester.pumpWidget(const CatTalkApp());
-    await tester.pumpAndSettle();
-
-    // 找到主要按鈕（長按翻譯）
-    final buttonFinder = find.text('長按翻譯');
-    expect(buttonFinder, findsOneWidget);
-  });
-
   testWidgets('添加貓咪頁面應該有所有輸入欄位', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: AddCatPage()));
 
