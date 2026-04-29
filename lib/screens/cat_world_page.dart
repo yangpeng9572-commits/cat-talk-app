@@ -7,6 +7,7 @@ import '../services/cat_service.dart';
 import '../services/bond_service.dart';
 import '../services/streak_service.dart';
 import '../services/memory_card_service.dart';
+import '../services/seasonal_event_service.dart';
 import '../theme/kawaii_theme.dart';
 import 'memory_cards_page.dart';
 
@@ -367,6 +368,8 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
       children: [
         // 房間展示區
         _buildRoomSection(),
+        // 活動卡片
+        _buildEventCard(),
         // 分類 Tabs
         Expanded(
           child: TabBarView(
@@ -375,6 +378,78 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
           ),
         ),
       ],
+    );
+  }
+
+  // ===== 季節活動卡片 =====
+  Widget _buildEventCard() {
+    final eventService = SeasonalEventService();
+    final event = eventService.getCurrentEvent();
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: event != null
+            ? Color(event.themeColor).withValues(alpha: 0.15)
+            : const Color(0xFFFFF8F5),
+        borderRadius: BorderRadius.circular(16),
+        border: event != null
+            ? Border.all(
+                color: Color(event.themeColor).withValues(alpha: 0.3),
+                width: 1,
+              )
+            : null,
+      ),
+      child: Row(
+        children: [
+          Text(event?.icon ?? '🐾', style: const TextStyle(fontSize: 22)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  event?.name ?? '今天也是陪她的小日子 🐾',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: event != null
+                        ? Color(event.themeColor)
+                        : const Color(0xFF9B8B8B),
+                  ),
+                ),
+                if (event != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    event.remainingText,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF9B8B8B),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (event != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Color(event.themeColor).withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                '活動中',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF6B4B4B),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
