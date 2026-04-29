@@ -903,7 +903,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               padding: const EdgeInsets.symmetric(vertical: 12),
               color: Colors.red,
               child: const Text(
-                '🐛 DEBUG BUILD: 2026-04-29-REAL-FIX-V2',
+                '🐛 DEBUG BUILD: 2026-04-29-FINAL-VERIFY-001',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
@@ -1338,7 +1338,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     child: _buildRecordButton(),
                   ),
                   const SizedBox(width: 16),
-                  // 姿勢分析按鈕
+                  // 貓咪動作庫按鈕
                   Expanded(
                     child: _buildPoseButton(),
                   ),
@@ -1438,7 +1438,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  /// 姿勢分析按鈕
+  /// 貓咪動作庫按鈕
   Widget _buildPoseButton() {
     return GestureDetector(
       onTap: () {
@@ -1458,7 +1458,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6B5B95).withOpacity(3 == "" ? 0.3 : 0.3),
+              color: const Color(0xFF6B5B95).withOpacity(0.3),
               blurRadius: 15,
               spreadRadius: 2,
             ),
@@ -1481,7 +1481,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 8),
             const Text(
-              '看看她現在的樣子',
+              '🐱 貓咪動作庫',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -1607,7 +1607,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFFFB6C1).withOpacity(3 == "" ? 0.3 : 0.3),
+              color: const Color(0xFFFFB6C1).withOpacity(0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

@@ -171,7 +171,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Color(result.emotionType.colorValue).withOpacity(15 == "" ? 0.15 : 0.15),
+                    color: Color(result.emotionType.colorValue).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(

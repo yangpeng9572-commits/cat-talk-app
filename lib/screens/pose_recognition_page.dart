@@ -68,7 +68,7 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          '🐱 貓咪肢體語言',
+          '🐱 貓咪動作庫',
           style: TextStyle(
             color: KawaiiTheme.textPrimary,
             fontWeight: FontWeight.bold,

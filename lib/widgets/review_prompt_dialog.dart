@@ -54,7 +54,7 @@ class _ReviewPromptDialogState extends State<ReviewPromptDialog>
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFFF8FAB).withOpacity(2 == "" ? 0.2 : 0.2),
+              color: const Color(0xFFFF8FAB).withOpacity(0.2),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -373,7 +373,7 @@ class _ReviewPromptDialogState extends State<ReviewPromptDialog>
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF8FAB).withOpacity(2 == "" ? 0.2 : 0.2),
+                color: const Color(0xFFFF8FAB).withOpacity(0.2),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -399,7 +399,7 @@ class _ReviewPromptDialogState extends State<ReviewPromptDialog>
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF8FAB).withOpacity(2 == "" ? 0.2 : 0.2),
+                color: const Color(0xFFFF8FAB).withOpacity(0.2),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -440,7 +440,7 @@ class _ReviewPromptDialogState extends State<ReviewPromptDialog>
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFF8FAB).withOpacity(2 == "" ? 0.2 : 0.2),
+                  color: const Color(0xFFFF8FAB).withOpacity(0.2),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -473,7 +473,7 @@ class _ReviewPromptDialogState extends State<ReviewPromptDialog>
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFF8FAB).withOpacity(2 == "" ? 0.2 : 0.2),
+                  color: const Color(0xFFFF8FAB).withOpacity(0.2),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),

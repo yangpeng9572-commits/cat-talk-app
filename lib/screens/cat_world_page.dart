@@ -415,12 +415,12 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: event != null
-            ? Color(event.themeColor).withOpacity(15 == "" ? 0.15 : 0.15)
+            ? Color(event.themeColor).withOpacity(0.15)
             : const Color(0xFFFFF8F5),
         borderRadius: BorderRadius.circular(16),
         border: event != null
             ? Border.all(
-                color: Color(event.themeColor).withOpacity(3 == "" ? 0.3 : 0.3),
+                color: Color(event.themeColor).withOpacity(0.3),
                 width: 1,
               )
             : null,
@@ -460,7 +460,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Color(event.themeColor).withOpacity(2 == "" ? 0.2 : 0.2),
+                color: Color(event.themeColor).withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Text(
@@ -490,7 +490,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFFF8FAB).withOpacity(3 == "" ? 0.3 : 0.3),
+          color: const Color(0xFFFF8FAB).withOpacity(0.3),
           width: 1.5,
         ),
       ),
@@ -744,7 +744,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
             child: Container(
               height: 14,
               decoration: BoxDecoration(
-                color: const Color(0xFFFFB6C1).withOpacity(5 == "" ? 0.5 : 0.5),
+                color: const Color(0xFFFFB6C1).withOpacity(0.5),
                 borderRadius: BorderRadius.circular(7),
               ),
             ),
@@ -1039,7 +1039,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _getCategoryColor(item.category).withOpacity(15 == "" ? 0.15 : 0.15),
+                  color: _getCategoryColor(item.category).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -1264,7 +1264,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color: const Color(0xFF6BBF6B).withOpacity(15 == "" ? 0.15 : 0.15),
+                color: const Color(0xFF6BBF6B).withOpacity(0.15),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Text(
@@ -1471,7 +1471,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFF9B8B8B).withOpacity(15 == "" ? 0.15 : 0.15),
+              color: const Color(0xFF9B8B8B).withOpacity(0.15),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Text(
@@ -1613,7 +1613,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
             child: Container(
               height: 16,
               decoration: BoxDecoration(
-                color: const Color(0xFFFFB6C1).withOpacity(5 == "" ? 0.5 : 0.5),
+                color: const Color(0xFFFFB6C1).withOpacity(0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -1873,7 +1873,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: color.withOpacity(15 == "" ? 0.15 : 0.15),
+          color: color.withOpacity(0.15),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Text(

@@ -671,10 +671,10 @@ class _DailyReportPageState extends State<DailyReportPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Color(report.dominantEmotion!.colorValue).withOpacity(1 == "" ? 0.1 : 0.1),
+                color: Color(report.dominantEmotion!.colorValue).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Color(report.dominantEmotion!.colorValue).withOpacity(3 == "" ? 0.3 : 0.3),
+                  color: Color(report.dominantEmotion!.colorValue).withOpacity(0.3),
                 ),
               ),
               child: Row(
@@ -806,7 +806,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(3 == "" ? 0.3 : 0.3)),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Row(
         children: [
@@ -867,7 +867,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(1 == "" ? 0.1 : 0.1),
+              color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(

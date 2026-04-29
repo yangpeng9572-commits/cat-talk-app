@@ -30,7 +30,7 @@ class KawaiiTheme {
   // ===== 陰影 =====
   static List<BoxShadow> get softShadow => [
     BoxShadow(
-      color: primaryPink.withOpacity(15 == "" ? 0.15 : 0.15),
+      color: primaryPink.withOpacity(0.15),
       blurRadius: 20,
       offset: const Offset(0, 8),
     ),
@@ -38,7 +38,7 @@ class KawaiiTheme {
   
   static List<BoxShadow> get cardShadow => [
     BoxShadow(
-      color: primaryPink.withOpacity(1 == "" ? 0.1 : 0.1),
+      color: primaryPink.withOpacity(0.1),
       blurRadius: 12,
       offset: const Offset(0, 4),
     ),
@@ -67,7 +67,7 @@ class KawaiiTheme {
   );
   
   static ButtonStyle get secondaryButtonStyle => ElevatedButton.styleFrom(
-    backgroundColor: softPink.withOpacity(3 == "" ? 0.3 : 0.3),
+    backgroundColor: softPink.withOpacity(0.3),
     foregroundColor: primaryPink,
     elevation: 0,
     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -91,7 +91,7 @@ class KawaiiTheme {
   );
   
   static LinearGradient get softPinkGradient => LinearGradient(
-    colors: [softPink.withOpacity(5 == "" ? 0.5 : 0.5), peach.withOpacity(5 == "" ? 0.5 : 0.5)],
+    colors: [softPink.withOpacity(0.5), peach.withOpacity(0.5)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
@@ -235,7 +235,7 @@ class KawaiiTheme {
       activeTrackColor: primaryPink,
       inactiveTrackColor: softPink,
       thumbColor: coral,
-      overlayColor: primaryPink.withOpacity(2 == "" ? 0.2 : 0.2),
+      overlayColor: primaryPink.withOpacity(0.2),
       trackHeight: 8,
       thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
     ),

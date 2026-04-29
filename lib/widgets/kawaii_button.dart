@@ -170,7 +170,7 @@ class KawaiiAvatar extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: backgroundColor.withOpacity(4 == "" ? 0.4 : 0.4),
+            color: backgroundColor.withOpacity(0.4),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
