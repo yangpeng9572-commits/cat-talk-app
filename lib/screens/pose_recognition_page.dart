@@ -1,11 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+import '../models/cat_pose.dart';
+import '../theme/kawaii_theme.dart';
 
-/// 姿勢辨識頁面
-/// 使用 Google ML Kit 偵測人體姿勢，推斷與貓咪的互動類型
+/// 姿勢辨識 / 貓咪動作庫頁面
+/// 提供完整的貓咪姿勢庫，讓用戶瀏覽、搜尋、選擇姿勢
+/// 並根據選擇提供情緒解讀和互動建議
 class PoseRecognitionPage extends StatefulWidget {
   const PoseRecognitionPage({super.key});
 
@@ -15,845 +14,264 @@ class PoseRecognitionPage extends StatefulWidget {
 
 class _PoseRecognitionPageState extends State<PoseRecognitionPage>
     with SingleTickerProviderStateMixin {
-  bool _isAnalyzing = false;
-  bool _isCameraInitialized = false;
-  bool _hasPermission = false;
-  bool _isCameraError = false;
-  
-  CameraController? _cameraController;
-  late AnimationController _pulseController;
-  
-  // ML Kit Pose Detector
-  late PoseDetector _poseDetector;
+  late TabController _tabController;
+  final TextEditingController _searchController = TextEditingController();
+  List<CatPose> _searchResults = [];
+  bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+    _tabController = TabController(
+      length: CatPoseLibrary.categories.length,
       vsync: this,
     );
-    _initializeCamera();
-    _initializePoseDetector();
-  }
-
-  void _initializePoseDetector() {
-    final options = PoseDetectorOptions(
-      mode: PoseDetectionMode.stream,
-      model: PoseDetectionModel.base,
-    );
-    _poseDetector = PoseDetector(options: options);
-  }
-
-  Future<void> _initializeCamera() async {
-    // 檢查相機權限
-    final status = await Permission.camera.status;
-    
-    if (status.isDenied) {
-      final result = await Permission.camera.request();
-      if (!result.isGranted) {
-        setState(() => _hasPermission = false);
-        return;
-      }
-    }
-    
-    if (status.isPermanentlyDenied) {
-      setState(() => _hasPermission = false);
-      return;
-    }
-
-    setState(() => _hasPermission = true);
-
-    try {
-      final cameras = await availableCameras();
-      if (cameras.isEmpty) {
-        setState(() => _isCameraError = true);
-        return;
-      }
-
-      _cameraController = CameraController(
-        cameras.first,
-        ResolutionPreset.medium,
-        enableAudio: false,
-      );
-
-      await _cameraController!.initialize();
-      
-      if (mounted) {
-        setState(() => _isCameraInitialized = true);
-      }
-    } catch (e) {
-      debugPrint('相機初始化失敗: $e');
-      setState(() => _isCameraError = true);
-    }
   }
 
   @override
   void dispose() {
-    _pulseController.dispose();
-    _cameraController?.dispose();
-    _poseDetector.close();
+    _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
-  Future<void> _takePhotoAndAnalyze() async {
-    // 防止重複點擊
-    if (_isAnalyzing) return;
-    
-    if (_cameraController == null || !_cameraController!.value.isInitialized) {
-      _showErrorDialog('相機無法使用，請稍後再試');
-      return;
-    }
-
+  void _onSearch(String keyword) {
     setState(() {
-      _isAnalyzing = true;
-      _isCameraInitialized = false;
-    });
-    _pulseController.repeat();
-
-    try {
-      // 拍照
-      final XFile photo = await _cameraController!.takePicture();
-      
-      // 使用 ML Kit 分析姿勢
-      await _analyzePose(photo.path);
-    } catch (e) {
-      debugPrint('拍照失敗: $e');
-      setState(() => _isAnalyzing = false);
-      _showErrorDialog('姿勢分析失敗，請稍後再試');
-    }
-  }
-
-  Future<void> _analyzePose(String photoPath) async {
-    try {
-      final inputImage = InputImage.fromFilePath(photoPath);
-      final poses = await _poseDetector.processImage(inputImage);
-      
-      if (!mounted) return;
-
-      if (poses.isEmpty) {
-        _showNoPersonDialog(photoPath);
-        return;
-      }
-
-      // 分析姿勢並產生結果
-      final result = _analyzePoseResult(poses.first);
-      _showResultDialog(result.pose, result.advice, result.interactionType, photoPath);
-      
-    } catch (e) {
-      debugPrint('姿勢分析失敗: $e');
-      _showNoPersonDialog(photoPath);
-    }
-  }
-
-  /// 分析姿勢結果
-  _PoseAnalysisResult _analyzePoseResult(Pose pose) {
-    // 取得關鍵點
-    final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
-    final rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
-    final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
-    final rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
-    final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
-    final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
-    final leftHip = pose.landmarks[PoseLandmarkType.leftHip];
-    final rightHip = pose.landmarks[PoseLandmarkType.rightHip];
-    final leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
-    final rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
-    final nose = pose.landmarks[PoseLandmarkType.nose];
-
-    // 預設結果
-    String poseName = '放鬆站立';
-    String advice = '你的貓咪正在觀察你，保持溫柔的姿態吧 💕';
-    String interactionType = 'observe';
-
-    // 計算肩膀高度（判断是否蹲下）
-    final bool isCrouching = _isCrouching(leftShoulder, rightShoulder, leftHip, rightHip);
-    
-    // 計算手臂姿勢
-    final armPose = _analyzeArmPose(
-      leftShoulder, rightShoulder,
-      leftElbow, rightElbow,
-      leftWrist, rightWrist,
-    );
-
-    // 根據姿勢組合判斷互動類型
-    if (isCrouching) {
-      if (armPose == 'extended') {
-        poseName = '蹲下伸手';
-        advice = '🐱 你的貓咪感到好奇！這個姿勢很像在邀請玩耍';
-        interactionType = 'play';
-      } else if (armPose == 'bent') {
-        poseName = '蹲下靠近';
-        advice = '💕 你正在溫柔地靠近，貓咪感受到你的善意';
-        interactionType = 'pet';
+      if (keyword.isEmpty) {
+        _isSearching = false;
+        _searchResults = [];
       } else {
-        poseName = '蹲下觀察';
-        advice = '🐾 貓咪正在觀察你，保持耐心很重要';
-        interactionType = 'observe';
+        _isSearching = true;
+        _searchResults = CatPoseLibrary.search(keyword);
       }
-    } else if (armPose == 'extended') {
-      poseName = '伸手互動';
-      advice = '🤲 伸手是友善的姿態，貓咪可能在回應你';
-      interactionType = 'feed';
-    } else if (armPose == 'raised') {
-      poseName = '高舉雙手';
-      advice = '🙀 高舉雙手可能讓貓咪感到威脅，建議降低姿勢';
-      interactionType = 'scare';
-    } else {
-      // 檢查是否有面對貓咪（鼻子指向）
-      if (nose != null) {
-        poseName = '溫柔注視';
-        advice = '👀 貓咪感受到你的關注，這是建立信任的好時機';
-        interactionType = 'bond';
-      }
-    }
-
-    return _PoseAnalysisResult(
-      pose: poseName,
-      advice: advice,
-      interactionType: interactionType,
-    );
-  }
-
-  /// 判斷是否蹲下
-  bool _isCrouching(PoseLandmark? leftShoulder, PoseLandmark? rightShoulder,
-      PoseLandmark? leftHip, PoseLandmark? rightHip) {
-    if (leftShoulder == null || rightShoulder == null ||
-        leftHip == null || rightHip == null) {
-      return false;
-    }
-
-    // 計算肩膀和臀部的垂直距離
-    final shoulderY = (leftShoulder.y + rightShoulder.y) / 2;
-    final hipY = (leftHip.y + rightHip.y) / 2;
-    
-    // 如果肩膀和臀部的距離較小於腿長，可能在蹲下
-    final torsoHeight = (hipY - shoulderY).abs();
-    
-    // 檢查膝蓋位置（如果可用的話）
-    // 蹲下時，膝盖會低於臀部
-    return hipY < shoulderY + 50; // 簡化的判斷
-  }
-
-  /// 分析手臂姿勢
-  String _analyzeArmPose(
-    PoseLandmark? leftShoulder, PoseLandmark? rightShoulder,
-    PoseLandmark? leftElbow, PoseLandmark? rightElbow,
-    PoseLandmark? leftWrist, PoseLandmark? rightWrist,
-  ) {
-    if (leftWrist == null && rightWrist == null) {
-      return 'none';
-    }
-
-    // 計算手臂伸展程度
-    int extendedCount = 0;
-    int bentCount = 0;
-
-    // 檢查左臂
-    if (leftShoulder != null && leftElbow != null && leftWrist != null) {
-      final upperArmLength = _distance(leftShoulder, leftElbow);
-      final forearmLength = _distance(leftElbow, leftWrist);
-      final totalArmLength = upperArmLength + forearmLength;
-      
-      // 計算手腕和肩膀的距離
-      final wristToShoulder = _distance(leftWrist, leftShoulder);
-      
-      // 如果手腕到肩膀的距離接近整隻手臂長度，手臂是伸展的
-      if (wristToShoulder > totalArmLength * 0.7) {
-        extendedCount++;
-      } else if (wristToShoulder < totalArmLength * 0.5) {
-        bentCount++;
-      }
-    }
-
-    // 檢查右臂
-    if (rightShoulder != null && rightElbow != null && rightWrist != null) {
-      final upperArmLength = _distance(rightShoulder, rightElbow);
-      final forearmLength = _distance(rightElbow, rightWrist);
-      final totalArmLength = upperArmLength + forearmLength;
-      
-      final wristToShoulder = _distance(rightWrist, rightShoulder);
-      
-      if (wristToShoulder > totalArmLength * 0.7) {
-        extendedCount++;
-      } else if (wristToShoulder < totalArmLength * 0.5) {
-        bentCount++;
-      }
-    }
-
-    // 檢查是否高舉（手腕高於肩膀）
-    final leftWristAbove = leftWrist != null && leftShoulder != null && 
-        leftWrist.y < leftShoulder.y - 30;
-    final rightWristAbove = rightWrist != null && rightShoulder != null && 
-        rightWrist.y < rightShoulder.y - 30;
-
-    if (leftWristAbove || rightWristAbove) {
-      return 'raised';
-    }
-
-    if (extendedCount > 0) return 'extended';
-    if (bentCount > 0) return 'bent';
-    return 'none';
-  }
-
-  /// 計算兩點之間的距離
-  double _distance(PoseLandmark a, PoseLandmark b) {
-    return ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-  }
-
-  void _showNoPersonDialog(String photoPath) {
-    setState(() => _isAnalyzing = false);
-    _pulseController.stop();
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Text('🤔', style: TextStyle(fontSize: 60)),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              '沒有偵測到人影',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '請確保你在鏡頭範圍內，並且光線充足\n这样我才能分析你的姿勢 💕',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _restartCamera();
-                },
-                child: const Text('再試一次', style: TextStyle(fontSize: 16)),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showResultDialog(String pose, String advice, String interactionType, String photoPath) {
-    setState(() => _isAnalyzing = false);
-    _pulseController.stop();
-
-    // 根據互動類型選擇表情
-    String emoji;
-    switch (interactionType) {
-      case 'play':
-        emoji = '🎾';
-        break;
-      case 'pet':
-        emoji = '💕';
-        break;
-      case 'feed':
-        emoji = '🍽';
-        break;
-      case 'scare':
-        emoji = '😿';
-        break;
-      case 'bond':
-        emoji = '🐱';
-        break;
-      default:
-        emoji = '🐾';
-    }
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // 顯示拍的照片
-            if (photoPath.isNotEmpty)
-              Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  image: DecorationImage(
-                    image: FileImage(File(photoPath)),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            const SizedBox(height: 16),
-            Text(
-              emoji,
-              style: const TextStyle(fontSize: 48),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              '🔍 姿勢分析結果',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              pose,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              advice,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _restartCamera();
-                },
-                child: const Text('再拍一張', style: TextStyle(fontSize: 16)),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _restartCamera() async {
-    if (_cameraController != null) {
-      await _cameraController!.dispose();
-    }
-    setState(() {
-      _isCameraInitialized = false;
-      _isAnalyzing = false;
     });
-    await _initializeCamera();
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
+  void _showPoseDetail(CatPose pose) {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Text('📷 ', style: TextStyle(fontSize: 24)),
-            Text('相機問題'),
-          ],
-        ),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('關閉'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              _restartCamera();
-            },
-            child: const Text('重試'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showPermissionDeniedDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Text('📷 ', style: TextStyle(fontSize: 24)),
-            Text('需要相機權限'),
-          ],
-        ),
-        content: const Text(
-          '姿勢辨識需要使用相機功能，請到設定中開啟相機權限。',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              openAppSettings();
-            },
-            child: const Text('開啟設定'),
-          ),
-        ],
-      ),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => _PoseDetailSheet(pose: pose),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: KawaiiTheme.background,
       appBar: AppBar(
-        title: const Text('姿勢辨識'),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
         elevation: 0,
-        actions: [
-          if (_isCameraInitialized)
-            IconButton(
-              icon: const Icon(Icons.flip_camera_ios),
-              onPressed: () async {
-                // 切換前後相機（如果有多個相機）
-                // 目前先不支援
-              },
-            ),
-        ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: KawaiiTheme.primaryPink),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          '🐱 貓咪肢體語言',
+          style: TextStyle(
+            color: KawaiiTheme.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          labelColor: KawaiiTheme.primaryPink,
+          unselectedLabelColor: KawaiiTheme.textSecondary,
+          indicatorColor: KawaiiTheme.primaryPink,
+          tabs: CatPoseLibrary.categories.map((cat) {
+            return Tab(text: '${cat.emoji} ${cat.label}');
+          }).toList(),
+        ),
       ),
-      body: _buildBody(),
-    );
-  }
-
-  Widget _buildBody() {
-    // 權限被拒絕
-    if (!_hasPermission) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.camera_alt_outlined,
-                  size: 64,
-                  color: Colors.orange.shade400,
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                '需要相機權限',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '請允許使用相機，這樣才能進行姿勢辨識',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: _showPermissionDeniedDialog,
-                child: const Text('開啟設定'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // 相機錯誤
-    if (_isCameraError) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.red.shade400,
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                '相機無法使用',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '抱歉，您的裝置不支援相機功能',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () => Navigator.pop(context),
-                child: const Text('返回上一頁'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // 分析中
-    if (_isAnalyzing) {
-      return _buildAnalyzingView();
-    }
-
-    // 相機就緒
-    if (_isCameraInitialized && _cameraController != null) {
-      return _buildCameraView();
-    }
-
-    // 載入中
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      body: Column(
         children: [
-          CircularProgressIndicator(color: Colors.orange),
-          SizedBox(height: 16),
-          Text(
-            '相機初始化中...',
-            style: TextStyle(fontSize: 16),
+          // 搜尋列
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: Colors.white,
+            child: TextField(
+              controller: _searchController,
+              onChanged: _onSearch,
+              decoration: InputDecoration(
+                hintText: '搜尋姿勢...',
+                prefixIcon: const Icon(Icons.search, color: KawaiiTheme.primaryPink),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          _onSearch('');
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: KawaiiTheme.background,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+            ),
+          ),
+
+          // 內容
+          Expanded(
+            child: _isSearching ? _buildSearchResults() : _buildCategoryTabs(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCameraView() {
-    return Column(
-      children: [
-        // 說明
-        Container(
-          margin: const EdgeInsets.all(16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.orange.shade50,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Row(
-            children: [
-              Icon(Icons.info_outline, color: Colors.orange),
-              SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  '對準你的貓咪（或自己），按下按鈕分析姿勢',
-                  style: TextStyle(color: Colors.orange),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // 相機預覽
-        Expanded(
-          child: Container(
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: CameraPreview(_cameraController!),
-            ),
-          ),
-        ),
-
-        // 拍照按鈕
-        Padding(
-          padding: const EdgeInsets.all(24),
-          child: SizedBox(
-            width: double.infinity,
-            height: 64,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(32),
-                ),
-              ),
-              onPressed: _takePhotoAndAnalyze,
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.camera_alt, size: 28),
-                  SizedBox(width: 12),
-                  Text(
-                    '拍照並分析',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAnalyzingView() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Center(
+  Widget _buildSearchResults() {
+    if (_searchResults.isEmpty) {
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedBuilder(
-              animation: _pulseController,
-              builder: (context, child) {
-                return Container(
-                  width: 120 + (_pulseController.value * 20),
-                  height: 120 + (_pulseController.value * 20),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withValues(
-                      alpha: 0.3 * (1 - _pulseController.value),
-                    ),
-                    shape: BoxShape.circle,
-                  ),
-                );
-              },
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: KawaiiTheme.softPink.withValues(alpha: 0.5),
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Text('🔍', style: TextStyle(fontSize: 50)),
+              ),
             ),
             const SizedBox(height: 24),
+            Text(
+              '找不到「${_searchController.text}」的姿勢',
+              style: const TextStyle(
+                fontSize: 16,
+                color: KawaiiTheme.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
             const Text(
-              '🔍 分析中...',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              '試試其他關鍵詞，例如：睡、玩、吃',
+              style: TextStyle(
+                fontSize: 14,
+                color: KawaiiTheme.textLight,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _searchResults.length,
+      itemBuilder: (context, index) {
+        final pose = _searchResults[index];
+        return _PoseCard(pose: pose, onTap: () => _showPoseDetail(pose));
+      },
+    );
+  }
+
+  Widget _buildCategoryTabs() {
+    return TabBarView(
+      controller: _tabController,
+      children: CatPoseLibrary.categories.map((category) {
+        final poses = CatPoseLibrary.getByCategory(category);
+        return _buildPoseGrid(poses);
+      }).toList(),
+    );
+  }
+
+  Widget _buildPoseGrid(List<CatPose> poses) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.9,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+      ),
+      itemCount: poses.length,
+      itemBuilder: (context, index) {
+        final pose = poses[index];
+        return _PoseCard(pose: pose, onTap: () => _showPoseDetail(pose));
+      },
+    );
+  }
+}
+
+/// 姿勢卡片 Widget
+class _PoseCard extends StatelessWidget {
+  final CatPose pose;
+  final VoidCallback onTap;
+
+  const _PoseCard({required this.pose, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Emoji
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: KawaiiTheme.softPink.withValues(alpha: 0.3),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(pose.emoji, style: const TextStyle(fontSize: 32)),
+              ),
             ),
             const SizedBox(height: 12),
-            Text(
-              '請稍候，正在分析姿勢',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
+            // 名稱
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                pose.name,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: KawaiiTheme.textPrimary,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 4),
+            // 情緒標籤
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: KawaiiTheme.primaryPink.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                pose.mood,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: KawaiiTheme.primaryPink,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
               ),
             ),
           ],
@@ -863,15 +281,181 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
   }
 }
 
-/// 姿勢分析結果
-class _PoseAnalysisResult {
-  final String pose;
-  final String advice;
-  final String interactionType;
+/// 姿勢詳細資訊 Bottom Sheet
+class _PoseDetailSheet extends StatelessWidget {
+  final CatPose pose;
 
-  _PoseAnalysisResult({
-    required this.pose,
-    required this.advice,
-    required this.interactionType,
-  });
+  const _PoseDetailSheet({required this.pose});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 拖動條
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Emoji + 名稱
+                  Row(
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: KawaiiTheme.softPink.withValues(alpha: 0.5),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(pose.emoji, style: const TextStyle(fontSize: 48)),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              pose.name,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: KawaiiTheme.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: KawaiiTheme.primaryPink.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                pose.mood,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: KawaiiTheme.primaryPink,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 姿勢描述
+                  _buildSection(
+                    '📝 姿勢描述',
+                    pose.description,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 情緒分析
+                  _buildSection(
+                    '💡 情緒解讀',
+                    pose.emotionalInsight,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 互動建議
+                  _buildSection(
+                    '🎯 互動建議',
+                    pose.advice,
+                    isHighlight: true,
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 關閉按鈕
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: KawaiiTheme.primaryPink,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        '我知道了',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, String content, {bool isHighlight = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isHighlight ? KawaiiTheme.primaryPink : KawaiiTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isHighlight
+                ? KawaiiTheme.primaryPink.withValues(alpha: 0.08)
+                : KawaiiTheme.background,
+            borderRadius: BorderRadius.circular(12),
+            border: isHighlight
+                ? Border.all(color: KawaiiTheme.primaryPink.withValues(alpha: 0.2))
+                : null,
+          ),
+          child: Text(
+            content,
+            style: TextStyle(
+              fontSize: 15,
+              height: 1.6,
+              color: isHighlight ? KawaiiTheme.textPrimary : KawaiiTheme.textSecondary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
