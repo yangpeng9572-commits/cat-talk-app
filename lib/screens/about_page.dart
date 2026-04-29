@@ -17,7 +17,7 @@ class AboutPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          '關於貓語通',
+          '關於喵心語',
           style: TextStyle(
             color: Colors.black87,
             fontSize: 18,
@@ -49,7 +49,7 @@ class AboutPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    '貓語通',
+                    '喵心語',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -138,7 +138,7 @@ class AboutPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    '貓語通會根據聲音特徵、姿勢、貓咪資料與使用者回饋，'
+                    '喵心語會根據聲音特徵、姿勢、貓咪資料與使用者回饋，'
                     '推測貓咪可能的情緒或需求。',
                     style: TextStyle(
                       fontSize: 14,
@@ -233,7 +233,7 @@ class AboutPage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    '© 2026 貓語通',
+                    '© 2026 喵心語',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey.shade600,

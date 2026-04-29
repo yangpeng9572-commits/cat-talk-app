@@ -128,7 +128,7 @@ class ProfilePage extends StatelessWidget {
               ),
               _buildMenuItem(
                 icon: Icons.campaign,
-                title: '關於貓語通',
+                title: '關於喵心語',
                 onTap: () {
                   Navigator.push(
                     context,
@@ -235,7 +235,7 @@ class ProfilePage extends StatelessWidget {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('請透過設定 > 應用程式 > 貓語通 刪除所有資料 🐾'),
+                  content: const Text('請透過設定 > 應用程式 > 喵心語 刪除所有資料 🐾'),
                   backgroundColor: Colors.red,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
@@ -263,7 +263,7 @@ class ProfilePage extends StatelessWidget {
           ],
         ),
         content: const Text(
-          '確定要退出登入嗎？\n\n退出後需要重新登入才能使用貓語通。',
+          '確定要退出登入嗎？\n\n退出後需要重新登入才能使用喵心語。',
         ),
         actions: [
           TextButton(

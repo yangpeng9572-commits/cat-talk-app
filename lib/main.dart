@@ -24,7 +24,7 @@ class CatTalkApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '貓語通',
+      title: '喵心語',
       debugShowCheckedModeBanner: false,
       theme: KawaiiTheme.themeData,
       home: const MainScreen(),

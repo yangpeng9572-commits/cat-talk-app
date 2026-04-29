@@ -405,7 +405,7 @@ $tags''';
       // 底部品牌
       _drawText(
         canvas,
-        '來自 貓語通 Cat Talk',
+        '來自 喵心語 Cat Talk',
         const Rect.fromLTWH(0, 980, 1080, 60),
         const TextStyle(fontSize: 18, color: Color(0xFFB0A0A0)),
         textAlign: TextAlign.center,

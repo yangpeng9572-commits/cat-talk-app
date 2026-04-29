@@ -80,7 +80,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             _buildSection(
               emoji: '🎤',
               title: '錄音與麥克風使用',
-              content: '''貓語通需要使用麥克風來錄下貓咪的叫聲。
+              content: '''喵心語需要使用麥克風來錄下貓咪的叫聲。
 
 當您長按錄音按鈕時，App 會：
 • 啟動麥克風收音
@@ -152,7 +152,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             _buildSection(
               emoji: '⚠️',
               title: '重要安全聲明',
-              content: '''貓語通的翻譯結果：
+              content: '''喵心語的翻譯結果：
 • 基於聲音特徵與規律進行的推測
 • 僅供日常觀察與參考
 • 不能取代專業獸醫診斷

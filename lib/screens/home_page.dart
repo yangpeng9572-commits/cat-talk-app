@@ -595,7 +595,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ],
         ),
         content: const Text(
-          '貓語通需要麥克風權限才能錄下貓咪的叫聲。\n\n請到設定中開啟麥克風權限，這樣才能使用翻譯功能喔！',
+          '喵心語需要麥克風權限才能錄下貓咪的叫聲。\n\n請到設定中開啟麥克風權限，這樣才能使用翻譯功能喔！',
         ),
         actions: [
           TextButton(

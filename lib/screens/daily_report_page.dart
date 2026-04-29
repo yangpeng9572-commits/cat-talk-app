@@ -1284,7 +1284,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
       if (filePath != null) {
         await Share.shareXFiles(
           [XFile(filePath)],
-          text: '${_currentCat!.name} 今天的小日記 🐱 #貓語通 #貓咪日記',
+          text: '${_currentCat!.name} 今天的小日記 🐱 #喵心語 #貓咪日記',
         );
       } else {
         _showShareError();

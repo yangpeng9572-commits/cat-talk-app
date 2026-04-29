@@ -98,7 +98,7 @@ class _PersonalityCardPageState extends State<PersonalityCardPage> {
       if (mounted && imagePath != null) {
         await Share.shareXFiles(
           [XFile(imagePath)],
-          text: '${widget.cat.name} 的 7 天小檔案 🐱 #貓語通 #貓咪个性',
+          text: '${widget.cat.name} 的 7 天小檔案 🐱 #喵心語 #貓咪个性',
         );
       }
     } catch (e) {

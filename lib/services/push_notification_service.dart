@@ -496,7 +496,7 @@ class PushNotificationService {
         android: AndroidNotificationDetails(
           'cat_talk_test',
           '測試通知',
-          channelDescription: '貓語通測試推播',
+          channelDescription: '喵心語測試推播',
           importance: Importance.high,
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
@@ -823,7 +823,7 @@ class PushNotificationService {
         android: AndroidNotificationDetails(
           'cat_talk_daily',
           '每日提醒',
-          channelDescription: '貓語通每日提醒',
+          channelDescription: '喵心語每日提醒',
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
           icon: '@mipmap/ic_launcher',

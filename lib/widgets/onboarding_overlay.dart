@@ -17,7 +17,7 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
   final List<_OnboardingStep> _steps = [
     _OnboardingStep(
       emoji: '🐱',
-      title: '歡迎使用貓語通',
+      title: '歡迎使用喵心語',
       description: '透過聲音特徵分析，幫你推測你家貓咪可能在表達什麼',
       highlight: null,
     ),

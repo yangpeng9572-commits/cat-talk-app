@@ -153,7 +153,7 @@ class ShareCardWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Text(
-                  'From Cat Talk',
+                  '來自 喵心語 Cat Talk',
                   style: TextStyle(
                     fontSize: 32,
                     color: KawaiiTheme.primaryPink.withOpacity(0.7),
