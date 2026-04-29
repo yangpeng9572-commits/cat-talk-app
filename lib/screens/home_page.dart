@@ -426,7 +426,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
 
       // 保存到歷史記錄
-      _historyService.add(adjustedResult);
+      await _historyService.add(adjustedResult);
 
       // 更新默契值 +2
       await _addBondScore(BondService.eventTranslation, adjustedResult.id, adjustedResult.confidence);
@@ -472,7 +472,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
 
     // 保存到歷史記錄
-    _historyService.add(adjustedResult);
+    await _historyService.add(adjustedResult);
 
     // 更新默契值 +2
     await _addBondScore(BondService.eventTranslation, adjustedResult.id, adjustedResult.confidence);
