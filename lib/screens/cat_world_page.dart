@@ -370,6 +370,8 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
         _buildRoomSection(),
         // 活動卡片
         _buildEventCard(),
+        // Plus 入口卡片
+        _buildPlusCard(),
         // 分類 Tabs
         Expanded(
           child: TabBarView(
@@ -449,6 +451,161 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  // ===== Plus 入口卡片 =====
+  Widget _buildPlusCard() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFE4E1), Color(0xFFFFF0F5)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFFF8FAB).withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  shape: BoxShape.circle,
+                ),
+                child: const Text('✨', style: TextStyle(fontSize: 22)),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '她的小世界 Plus',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFFF6B8A),
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      '讓她的世界更完整一點 🌸',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF9B8B8B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Plus 內容預覽
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              _buildPlusTag('🏠 每月限定房間'),
+              _buildPlusTag('💎 專屬配件'),
+              _buildPlusTag('✨ 特殊情緒動畫'),
+              _buildPlusTag('📱 更多分享卡模板'),
+              _buildPlusTag('📊 更細緻的 7 天分析'),
+              _buildPlusTag('🏡 房間自訂保存'),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _showPlusDialog(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF8FAB),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                '看看 Plus 內容',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlusTag(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 11,
+          color: Color(0xFF6B4B4B),
+        ),
+      ),
+    );
+  }
+
+  void _showPlusDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('✨', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 16),
+            const Text(
+              'Plus 內容即將開放 🐾',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF6B4B4B),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '再等等，我正在為她準備更完整的小世界 🌸',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF9B8B8B),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: KawaiiTheme.primaryPink,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
+              child: const Text('好'),
+            ),
+          ],
+        ),
       ),
     );
   }
