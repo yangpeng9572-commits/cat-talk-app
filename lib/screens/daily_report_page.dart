@@ -222,7 +222,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(05 == "" ? 0.05 : 0.05),
+                  color: Colors.black.withOpacity(0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -327,8 +327,8 @@ class _DailyReportPageState extends State<DailyReportPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            KawaiiTheme.softPink.withOpacity(8 == "" ? 0.8 : 0.8),
-            KawaiiTheme.peach.withOpacity(6 == "" ? 0.6 : 0.6),
+            KawaiiTheme.softPink.withOpacity(0.8),
+            KawaiiTheme.peach.withOpacity(0.6),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -336,7 +336,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
         borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
         boxShadow: [
           BoxShadow(
-            color: KawaiiTheme.primaryPink.withOpacity(2 == "" ? 0.2 : 0.2),
+            color: KawaiiTheme.primaryPink.withOpacity(0.2),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -366,7 +366,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(7 == "" ? 0.7 : 0.7),
+              color: Colors.white.withOpacity(0.7),
               borderRadius: BorderRadius.circular(KawaiiTheme.radiusMedium),
             ),
             child: Column(
@@ -401,7 +401,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(5 == "" ? 0.5 : 0.5),
+              color: Colors.white.withOpacity(0.5),
               borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
             ),
             child: Row(
@@ -475,7 +475,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
                       report.dominantEmotion!.label,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.white.withOpacity(9 == "" ? 0.9 : 0.9),
+                        color: Colors.white.withOpacity(0.9),
                       ),
                     ),
                   ],
@@ -502,7 +502,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(2 == "" ? 0.2 : 0.2),
+                  color: Colors.white.withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
                 child: const Center(
@@ -528,7 +528,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
                       cat.breed,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.white.withOpacity(8 == "" ? 0.8 : 0.8),
+                        color: Colors.white.withOpacity(0.8),
                       ),
                     ),
                   ],
@@ -538,7 +538,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(2 == "" ? 0.2 : 0.2),
+                  color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -565,7 +565,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(05 == "" ? 0.05 : 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -620,7 +620,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(05 == "" ? 0.05 : 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -856,7 +856,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(05 == "" ? 0.05 : 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1097,7 +1097,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
           boxShadow: [
             BoxShadow(
-              color: KawaiiTheme.primaryPink.withOpacity(2 == "" ? 0.2 : 0.2),
+              color: KawaiiTheme.primaryPink.withOpacity(0.2),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

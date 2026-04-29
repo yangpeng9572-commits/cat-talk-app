@@ -64,7 +64,7 @@ class KawaiiMainButton extends StatelessWidget {
               right: 25,
               child: Icon(
                 Icons.favorite,
-                color: Colors.white.withOpacity(4 == "" ? 0.4 : 0.4),
+                color: Colors.white.withOpacity(0.4),
                 size: 20,
               ),
             ),
@@ -75,7 +75,7 @@ class KawaiiMainButton extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(25 == "" ? 0.25 : 0.25),
+                    color: Colors.white.withOpacity(0.25),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -97,7 +97,7 @@ class KawaiiMainButton extends StatelessWidget {
                   Text(
                     subLabel!,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(8 == "" ? 0.8 : 0.8),
+                      color: Colors.white.withOpacity(0.8),
                       fontSize: 11,
                     ),
                   ),
@@ -205,7 +205,7 @@ class KawaiiTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: backgroundColor ?? KawaiiTheme.softPink.withOpacity(5 == "" ? 0.5 : 0.5),
+        color: backgroundColor ?? KawaiiTheme.softPink.withOpacity(0.5),
         borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
       ),
       child: Row(

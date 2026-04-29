@@ -837,7 +837,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: KawaiiTheme.softPink.withOpacity(3 == "" ? 0.3 : 0.3),
+                      color: KawaiiTheme.softPink.withOpacity(0.3),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -897,6 +897,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       body: SafeArea(
         child: Column(
           children: [
+            // DEBUG BANNER - 永遠顯示在最上方
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              color: Colors.red,
+              child: const Text(
+                '🐛 DEBUG BUILD: 2026-04-29-REAL-FIX-V2',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
             _buildCatSelector(),
             // 推播點擊提示（2秒後消失）
             if (_showNotificationHint)
@@ -936,28 +951,49 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         color: Colors.black87,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange, width: 2),
+        border: Border.all(color: Colors.red, width: 2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'DEBUG VERSION: 2026-04-29 FIX',
+            '🐛 DEBUG BUILD: 2026-04-29-REAL-FIX',
             style: TextStyle(
-              color: Colors.orange,
+              color: Colors.red,
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),
           ),
           const SizedBox(height: 12),
-          _debugRow('catId', selectedCat?.id ?? 'null'),
+          _debugRow('app_version', '2026-04-29-REAL-FIX'),
+          _debugRow('cats_count', _cats.length.toString()),
+          _debugRow('selectedCat_id', selectedCat?.id ?? 'null'),
+          _debugRow('selectedCat_name', selectedCat?.name ?? 'null'),
           _debugRow('bondScore', _currentBond?.bondScore.toString() ?? 'null'),
-          _debugRow('bondLevel', _currentBond?.levelName ?? 'null'),
-          _debugRow('cats.length', _cats.length.toString()),
-          _debugRow('selectedCat', selectedCat?.name ?? 'null'),
-          _debugRow('todayReport.isEmpty', _todayReport?.isEmpty.toString() ?? 'null'),
+          _debugRow('todayReport_isEmpty', _todayReport?.isEmpty.toString() ?? 'null'),
+          _debugRow('catWorld_accessible', selectedCat != null ? 'true' : 'false'),
+          _debugRow('onboarding_done', _showOnboarding ? 'false (showing)' : 'true (skipped)'),
           _debugRow('todayTasks', _todayTasks.length.toString()),
           _debugRow('currentStreak', _currentStreak.toString()),
+          const SizedBox(height: 8),
+          // 重置新手教學按鈕
+          ElevatedButton(
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('hasSeenOnboarding', false);
+              await prefs.setBool('hasSeenCatWorld', false);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('已重置新手教學，請重啟App')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+            child: const Text('🔄 重置新手教學', style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
     );
@@ -1093,8 +1129,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            KawaiiTheme.softPink.withOpacity(6 == "" ? 0.6 : 0.6),
-            KawaiiTheme.peach.withOpacity(4 == "" ? 0.4 : 0.4),
+            KawaiiTheme.softPink.withOpacity(0.6),
+            KawaiiTheme.peach.withOpacity(0.4),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -1102,7 +1138,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
         boxShadow: [
           BoxShadow(
-            color: KawaiiTheme.primaryPink.withOpacity(1 == "" ? 0.1 : 0.1),
+            color: KawaiiTheme.primaryPink.withOpacity(0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1137,7 +1173,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(7 == "" ? 0.7 : 0.7),
+                  color: Colors.white.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
                 ),
                 child: Row(
@@ -1161,7 +1197,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(7 == "" ? 0.7 : 0.7),
+                  color: Colors.white.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
                 ),
                 child: Row(
@@ -1248,7 +1284,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(7 == "" ? 0.7 : 0.7),
+                  color: Colors.white.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: FractionallySizedBox(
@@ -1434,7 +1470,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(2 == "" ? 0.2 : 0.2),
+                color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -1453,7 +1489,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
             const Text(
-              '從姿勢讀懂她的小心情',
+              '🐱 貓咪動作庫',
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 11,
@@ -1486,7 +1522,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              KawaiiTheme.primaryPink.withOpacity(9 == "" ? 0.9 : 0.9),
+              KawaiiTheme.primaryPink.withOpacity(0.9),
               KawaiiTheme.coral,
             ],
             begin: Alignment.topLeft,
@@ -1495,7 +1531,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
           boxShadow: [
             BoxShadow(
-              color: KawaiiTheme.primaryPink.withOpacity(3 == "" ? 0.3 : 0.3),
+              color: KawaiiTheme.primaryPink.withOpacity(0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -1506,7 +1542,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(2 == "" ? 0.2 : 0.2),
+                color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
               child: const Text('💕', style: TextStyle(fontSize: 28)),
@@ -1529,7 +1565,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     '看看${selectedCat?.name ?? "你的貓"}今天過得怎麼樣',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.white.withOpacity(9 == "" ? 0.9 : 0.9),
+                      color: Colors.white.withOpacity(0.9),
                     ),
                   ),
                 ],
@@ -1582,7 +1618,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(2 == "" ? 0.2 : 0.2),
+                color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
               child: const Text('🐱', style: TextStyle(fontSize: 28)),
@@ -1638,10 +1674,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFFFB6C1).withAlpha(77)),
+          border: Border.all(color: const Color(0xFFFFB6C1).withOpacity(77/255)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFFFB6C1).withAlpha(51),
+              color: const Color(0xFFFFB6C1).withOpacity(51/255),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -1652,7 +1688,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(6 == "" ? 0.6 : 0.6),
+                color: Colors.white.withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
               child: const Text('🏡', style: TextStyle(fontSize: 28)),

@@ -458,7 +458,7 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
-          color: _isPlaying ? KawaiiTheme.primaryPink : KawaiiTheme.softPink.withOpacity(3 == "" ? 0.3 : 0.3),
+          color: _isPlaying ? KawaiiTheme.primaryPink : KawaiiTheme.softPink.withOpacity(0.3),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(

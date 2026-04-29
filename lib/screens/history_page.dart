@@ -113,13 +113,13 @@ class _HistoryPageState extends State<HistoryPage> {
           borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
           border: Border.all(
             color: hasCorrection
-                ? KawaiiTheme.primaryPink.withOpacity(5 == "" ? 0.5 : 0.5)
+                ? KawaiiTheme.primaryPink.withOpacity(0.5)
                 : KawaiiTheme.divider,
             width: hasCorrection ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(05 == "" ? 0.05 : 0.05),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

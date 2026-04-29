@@ -136,7 +136,7 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: KawaiiTheme.softPink.withOpacity(5 == "" ? 0.5 : 0.5),
+                color: KawaiiTheme.softPink.withOpacity(0.5),
                 shape: BoxShape.circle,
               ),
               child: const Center(
@@ -219,7 +219,7 @@ class _PoseCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(05 == "" ? 0.05 : 0.05),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -233,7 +233,7 @@ class _PoseCard extends StatelessWidget {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: KawaiiTheme.softPink.withOpacity(3 == "" ? 0.3 : 0.3),
+                color: KawaiiTheme.softPink.withOpacity(0.3),
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -261,7 +261,7 @@ class _PoseCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: KawaiiTheme.primaryPink.withOpacity(1 == "" ? 0.1 : 0.1),
+                color: KawaiiTheme.primaryPink.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -324,7 +324,7 @@ class _PoseDetailSheet extends StatelessWidget {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: KawaiiTheme.softPink.withOpacity(5 == "" ? 0.5 : 0.5),
+                          color: KawaiiTheme.softPink.withOpacity(0.5),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -348,7 +348,7 @@ class _PoseDetailSheet extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: KawaiiTheme.primaryPink.withOpacity(1 == "" ? 0.1 : 0.1),
+                                color: KawaiiTheme.primaryPink.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
@@ -439,11 +439,11 @@ class _PoseDetailSheet extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isHighlight
-                ? KawaiiTheme.primaryPink.withOpacity(08 == "" ? 0.08 : 0.08)
+                ? KawaiiTheme.primaryPink.withOpacity(0.08)
                 : KawaiiTheme.background,
             borderRadius: BorderRadius.circular(12),
             border: isHighlight
-                ? Border.all(color: KawaiiTheme.primaryPink.withOpacity(2 == "" ? 0.2 : 0.2))
+                ? Border.all(color: KawaiiTheme.primaryPink.withOpacity(0.2))
                 : null,
           ),
           child: Text(

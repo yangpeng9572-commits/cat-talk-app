@@ -67,7 +67,7 @@ class _CatsPageState extends State<CatsPage> {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: KawaiiTheme.softPink.withOpacity(5 == "" ? 0.5 : 0.5),
+              color: KawaiiTheme.softPink.withOpacity(0.5),
               shape: BoxShape.circle,
             ),
             child: const Center(

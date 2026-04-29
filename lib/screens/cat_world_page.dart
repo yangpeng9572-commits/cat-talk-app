@@ -501,7 +501,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(7 == "" ? 0.7 : 0.7),
+                  color: Colors.white.withOpacity(0.7),
                   shape: BoxShape.circle,
                 ),
                 child: const Text('✨', style: TextStyle(fontSize: 22)),
@@ -575,7 +575,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(6 == "" ? 0.6 : 0.6),
+        color: Colors.white.withOpacity(0.6),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
@@ -644,7 +644,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(08 == "" ? 0.08 : 0.08),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -672,7 +672,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(6 == "" ? 0.6 : 0.6),
+                        color: Colors.white.withOpacity(0.6),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Row(
@@ -691,7 +691,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(6 == "" ? 0.6 : 0.6),
+                      color: Colors.white.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -730,7 +730,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(7 == "" ? 0.7 : 0.7),
+                color: Colors.white.withOpacity(0.7),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.window, color: Color(0xFF9B8B8B), size: 22),
@@ -788,7 +788,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(1 == "" ? 0.1 : 0.1),
+                              color: Colors.black.withOpacity(0.1),
                               blurRadius: 4,
                             ),
                           ],
@@ -808,7 +808,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
               child: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(7 == "" ? 0.7 : 0.7),
+                  color: Colors.white.withOpacity(0.7),
                   shape: BoxShape.circle,
                 ),
                 child: const Text('💕', style: TextStyle(fontSize: 14)),
@@ -840,13 +840,13 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: enabled
-              ? Colors.white.withOpacity(8 == "" ? 0.8 : 0.8)
-              : Colors.white.withOpacity(4 == "" ? 0.4 : 0.4),
+              ? Colors.white.withOpacity(0.8)
+              : Colors.white.withOpacity(0.4),
           borderRadius: BorderRadius.circular(16),
           boxShadow: enabled
               ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(05 == "" ? 0.05 : 0.05),
+                    color: Colors.black.withOpacity(0.05),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -1011,13 +1011,13 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(05 == "" ? 0.05 : 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
         ],
         border: item.isEquipped
-            ? Border.all(color: KawaiiTheme.primaryPink.withOpacity(5 == "" ? 0.5 : 0.5), width: 2)
+            ? Border.all(color: KawaiiTheme.primaryPink.withOpacity(0.5), width: 2)
             : null,
       ),
       child: Column(
@@ -1579,7 +1579,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(08 == "" ? 0.08 : 0.08),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1595,7 +1595,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(6 == "" ? 0.6 : 0.6),
+                color: Colors.white.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
@@ -1693,7 +1693,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
             child: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(6 == "" ? 0.6 : 0.6),
+                color: Colors.white.withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.favorite, color: Color(0xFFFF8FAB), size: 16),
@@ -1709,7 +1709,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
             child: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(7 == "" ? 0.7 : 0.7),
+                color: Colors.white.withOpacity(0.7),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.chair, color: Color(0xFF8B5CF6), size: 18),
@@ -1729,7 +1729,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(1 == "" ? 0.1 : 0.1),
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 4,
                   ),
                 ],
@@ -1747,7 +1747,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
             child: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(6 == "" ? 0.6 : 0.6),
+                color: Colors.white.withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
               child: const Text('💕', style: TextStyle(fontSize: 16)),
@@ -1759,7 +1759,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
             child: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(6 == "" ? 0.6 : 0.6),
+                color: Colors.white.withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
               child: const Text('✨', style: TextStyle(fontSize: 14)),
@@ -1793,7 +1793,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
             child: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(6 == "" ? 0.6 : 0.6),
+                color: Colors.white.withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
               child: const Text('🎀', style: TextStyle(fontSize: 14)),
@@ -1805,7 +1805,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
             child: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(6 == "" ? 0.6 : 0.6),
+                color: Colors.white.withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
               child: const Text('🌸', style: TextStyle(fontSize: 14)),

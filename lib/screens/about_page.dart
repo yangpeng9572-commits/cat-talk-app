@@ -61,7 +61,7 @@ class AboutPage extends StatelessWidget {
                     '版本 1.0.0',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withOpacity(9 == "" ? 0.9 : 0.9),
+                      color: Colors.white.withOpacity(0.9),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -69,7 +69,7 @@ class AboutPage extends StatelessWidget {
                     '讓每一聲喵喵都被聽見',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.white.withOpacity(9 == "" ? 0.9 : 0.9),
+                      color: Colors.white.withOpacity(0.9),
                     ),
                   ),
                 ],
@@ -171,7 +171,7 @@ class AboutPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(05 == "" ? 0.05 : 0.05),
+                    color: Colors.black.withOpacity(0.05),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -271,7 +271,7 @@ class AboutPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(03 == "" ? 0.03 : 0.03),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -335,7 +335,7 @@ class AboutPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(05 == "" ? 0.05 : 0.05),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
