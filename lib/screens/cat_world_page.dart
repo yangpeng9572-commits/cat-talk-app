@@ -6,7 +6,9 @@ import '../services/cat_world_service.dart';
 import '../services/cat_service.dart';
 import '../services/bond_service.dart';
 import '../services/streak_service.dart';
+import '../services/memory_card_service.dart';
 import '../theme/kawaii_theme.dart';
+import 'memory_cards_page.dart';
 
 /// 她的小世界 🏡 - 商店頁面
 class CatWorldPage extends StatefulWidget {
@@ -408,19 +410,45 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
                   color: Color(0xFF6B4B4B),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '今日互動 ${_todayInteractions}/$_maxDailyInteractions',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF9B8B8B),
+              Row(
+                children: [
+                  // 回憶收藏按鈕
+                  GestureDetector(
+                    onTap: () => _openMemoryCards(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        children: [
+                          Text('💎', style: TextStyle(fontSize: 12)),
+                          SizedBox(width: 4),
+                          Text(
+                            '回憶收藏',
+                            style: TextStyle(fontSize: 11, color: Color(0xFF6B4B4B)),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '今日互動 ${_todayInteractions}/$_maxDailyInteractions',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF9B8B8B),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -631,11 +659,21 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
     // 加默契值
     final prefs = await SharedPreferences.getInstance();
     final bondService = BondService()..init(prefs);
+    final memoryCardService = MemoryCardService();
 
     if (_todayBondFromRoom < _maxDailyBondFromRoom) {
       await bondService.addBond(_currentCatId!, BondService.eventActionTap);
       _todayBondFromRoom++;
       await prefs.setInt('cat_world_bond_room_${_getTodayKey()}', _todayBondFromRoom);
+    }
+
+    // 解鎖回憶卡
+    final cardType = _getCardTypeFromInteraction(type);
+    if (cardType != null) {
+      final unlocked = await memoryCardService.unlockMemoryCard(_currentCatId!, cardType);
+      if (unlocked) {
+        _showToast('新的回憶被收藏起來了 💕');
+      }
     }
 
     // 更新今日互動次數
@@ -657,6 +695,29 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
     if (_equippedRoomId!.contains('forest')) return const Color(0xFFE8F5E8);
     if (_equippedRoomId!.contains('birthday')) return const Color(0xFFFFF0E8);
     return const Color(0xFFFFF0F5);
+  }
+
+  MemoryCardType? _getCardTypeFromInteraction(String type) {
+    switch (type) {
+      case 'feed': return MemoryCardType.firstFeed;
+      case 'play': return MemoryCardType.firstPlay;
+      case 'pet': return MemoryCardType.firstPet;
+      case 'talk': return MemoryCardType.firstTalk;
+      default: return null;
+    }
+  }
+
+  void _openMemoryCards() {
+    if (_currentCatId == null) {
+      _showToast('先新增貓咪，我才能幫她佈置小世界 🐱');
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (ctx) => MemoryCardsPage(catId: _currentCatId!),
+      ),
+    );
   }
 
   Widget _buildItemList() {
