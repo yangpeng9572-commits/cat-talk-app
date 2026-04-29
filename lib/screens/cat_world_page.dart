@@ -5,6 +5,7 @@ import '../models/shop_item.dart';
 import '../services/cat_world_service.dart';
 import '../services/cat_service.dart';
 import '../services/bond_service.dart';
+import '../services/streak_service.dart';
 import '../theme/kawaii_theme.dart';
 
 /// 她的小世界 🏡 - 商店頁面
@@ -21,8 +22,24 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
 
   String? _currentCatId;
   int _currentBondScore = 0;
+  int _currentStreakDays = 0;
   List<ShopItem> _displayItems = [];
   bool _isLoading = true;
+
+  // 已裝備狀態
+  String? _equippedRoomId;
+  List<String> _equippedFurnitureIds = [];
+  List<String> _equippedAccessoryIds = [];
+  List<String> _equippedAnimationIds = [];
+
+  // 今日互動狀態
+  int _todayInteractions = 0;
+  int _todayBondFromRoom = 0;
+  bool _surpriseShownToday = false;
+
+  static const int _maxDailyInteractions = 5;
+  static const int _maxDailyBondFromRoom = 3;
+  static const int _bondPerInteraction = 1;
 
   // 分類標籤
   static const List<String> _tabLabels = [
@@ -82,7 +99,39 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
     final bond = bondService.getBond(_currentCatId!);
     _currentBondScore = bond.bondScore;
 
+    // 取得連續天數
+    final streakService = StreakService(prefs);
+    final streak = streakService.getStreak();
+    _currentStreakDays = streak.currentStreak;
+
+    // 載入已裝備狀態
+    await _loadEquippedState();
+
+    // 載入今日互動狀態
+    await _loadTodayInteractionState(prefs);
+
     await _loadItemsByTab(0);
+  }
+
+  Future<void> _loadEquippedState() async {
+    if (_currentCatId == null) return;
+    _equippedRoomId = await _catWorldService.getEquippedRoomTheme(_currentCatId!);
+    _equippedFurnitureIds = await _catWorldService.getEquippedFurniture(_currentCatId!);
+    _equippedAccessoryIds = await _catWorldService.getEquippedAccessories(_currentCatId!);
+    _equippedAnimationIds = await _catWorldService.getEquippedAnimations(_currentCatId!);
+  }
+
+  Future<void> _loadTodayInteractionState(SharedPreferences prefs) async {
+    if (_currentCatId == null) return;
+    final today = _getTodayKey();
+    _todayInteractions = prefs.getInt('cat_world_interact_today_$today') ?? 0;
+    _todayBondFromRoom = prefs.getInt('cat_world_bond_room_$today') ?? 0;
+    _surpriseShownToday = prefs.getBool('cat_world_surprise_shown_$today') ?? false;
+  }
+
+  String _getTodayKey() {
+    final now = DateTime.now();
+    return '${now.year}${now.month}${now.day}';
   }
 
   void _onTabChanged() {
@@ -218,8 +267,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
       return _currentBondScore >= (item.requiredBondScore ?? 0);
     }
     if (item.unlockType == ShopUnlockType.streak) {
-      // streak 解鎖需要連續天數，這裡暫時用默契值判斷
-      return _currentBondScore >= (item.requiredStreakDays ?? 0) * 5;
+      return _currentStreakDays >= (item.requiredStreakDays ?? 0);
     }
     return false;
   }
@@ -313,10 +361,302 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
   }
 
   Widget _buildContent() {
-    return TabBarView(
-      controller: _tabController,
-      children: _categories.map((category) => _buildItemList()).toList(),
+    return Column(
+      children: [
+        // 房間展示區
+        _buildRoomSection(),
+        // 分類 Tabs
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: _categories.map((category) => _buildItemList()).toList(),
+          ),
+        ),
+      ],
     );
+  }
+
+  // ===== 房間展示區 =====
+  Widget _buildRoomSection() {
+    final roomBgColor = _getEquippedRoomColor();
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: roomBgColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // 頂部：標題 + 小驚喜提示
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '🏠 她的小房間',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF6B4B4B),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '今日互動 ${_todayInteractions}/$_maxDailyInteractions',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF9B8B8B),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // 房間內容區
+          _buildRoomContent(),
+          const SizedBox(height: 16),
+          // 互動按鈕列
+          _buildInteractionButtons(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRoomContent() {
+    return SizedBox(
+      height: 140,
+      child: Stack(
+        children: [
+          // 窗戶
+          Positioned(
+            top: 8,
+            right: 16,
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.window, color: Color(0xFF9B8B8B), size: 22),
+            ),
+          ),
+          // 地毯
+          Positioned(
+            bottom: 0,
+            left: 10,
+            right: 10,
+            child: Container(
+              height: 14,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFB6C1).withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(7),
+              ),
+            ),
+          ),
+          // 食碗（左下角）
+          if (_equippedFurnitureIds.any((id) => id.contains('bowl')))
+            Positioned(
+              bottom: 10,
+              left: 20,
+              child: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFE4E1),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                child: const Icon(Icons.pets, color: Color(0xFF9B8B8B), size: 12),
+              ),
+            ),
+          // 貓咪 icon（中央）
+          Positioned(
+            bottom: 18,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Column(
+                children: [
+                  const Icon(Icons.pets, size: 50, color: Color(0xFFFF8FAB)),
+                  // 配件裝飾
+                  if (_equippedAccessoryIds.isNotEmpty &&
+                      !_equippedAccessoryIds.contains('accessory_none'))
+                    Positioned(
+                      bottom: 40,
+                      right: 50,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.star, color: Color(0xFFFFB800), size: 12),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          // 動畫效果提示
+          if (_equippedAnimationIds.isNotEmpty)
+            Positioned(
+              top: 8,
+              left: 16,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  shape: BoxShape.circle,
+                ),
+                child: const Text('💕', style: TextStyle(fontSize: 14)),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInteractionButtons() {
+    final canInteract = _todayInteractions < _maxDailyInteractions;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildInteractBtn('🍽', '餵她', canInteract, () => _onInteract('feed')),
+        _buildInteractBtn('🎾', '陪她玩', canInteract, () => _onInteract('play')),
+        _buildInteractBtn('💕', '摸摸她', canInteract, () => _onInteract('pet')),
+        _buildInteractBtn('🗣', '跟她說話', canInteract, () => _onInteract('talk')),
+      ],
+    );
+  }
+
+  Widget _buildInteractBtn(String emoji, String label, bool enabled, VoidCallback onPressed) {
+    return GestureDetector(
+      onTap: enabled ? onPressed : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: enabled
+              ? Colors.white.withValues(alpha: 0.8)
+              : Colors.white.withValues(alpha: 0.4),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: enabled
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          children: [
+            Text(emoji, style: TextStyle(fontSize: enabled ? 24 : 20)),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: enabled ? const Color(0xFF6B4B4B) : const Color(0xFF9B8B8B),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onInteract(String type) async {
+    if (_currentCatId == null) {
+      _showToast('先新增貓咪，我才能幫她佈置小世界 🐱');
+      return;
+    }
+
+    if (_todayInteractions >= _maxDailyInteractions) {
+      _showToast('今天已經陪她很多了，明天再來看看她 💕');
+      return;
+    }
+
+    // 互動提示
+    String message;
+    switch (type) {
+      case 'feed':
+        message = '她好像安心了一點 🍽';
+        break;
+      case 'play':
+        message = '她今天玩得很開心 🎾';
+        break;
+      case 'pet':
+        message = '她好像更放鬆了 💕';
+        break;
+      case 'talk':
+        message = '她有聽到你的聲音了 🐾';
+        break;
+      default:
+        message = '她知道你在陪她 💕';
+    }
+
+    // 小驚喜（10%機率，每天第一次互動）
+    if (!_surpriseShownToday && _todayInteractions == 0 && DateTime.now().second % 10 == 0) {
+      final surprises = [
+        '今天她特別想靠近你 💕',
+        '她今天在窗邊等你 ☀️',
+      ];
+      message = surprises[DateTime.now().millisecond % surprises.length];
+      _surpriseShownToday = true;
+    }
+
+    // 加默契值
+    final prefs = await SharedPreferences.getInstance();
+    final bondService = BondService()..init(prefs);
+
+    if (_todayBondFromRoom < _maxDailyBondFromRoom) {
+      await bondService.addBond(_currentCatId!, BondService.eventActionTap);
+      _todayBondFromRoom++;
+      await prefs.setInt('cat_world_bond_room_${_getTodayKey()}', _todayBondFromRoom);
+    }
+
+    // 更新今日互動次數
+    _todayInteractions++;
+    await prefs.setInt('cat_world_interact_today_${_getTodayKey()}', _todayInteractions);
+    if (_surpriseShownToday) {
+      await prefs.setBool('cat_world_surprise_shown_${_getTodayKey()}', true);
+    }
+
+    _showToast(message);
+    setState(() {});
+  }
+
+  Color _getEquippedRoomColor() {
+    if (_equippedRoomId == null) return const Color(0xFFFFF0F5);
+    if (_equippedRoomId!.contains('milk_tea')) return const Color(0xFFF5E6D3);
+    if (_equippedRoomId!.contains('pink')) return const Color(0xFFFFE4E1);
+    if (_equippedRoomId!.contains('starry')) return const Color(0xFFE8E0F0);
+    if (_equippedRoomId!.contains('forest')) return const Color(0xFFE8F5E8);
+    if (_equippedRoomId!.contains('birthday')) return const Color(0xFFFFF0E8);
+    return const Color(0xFFFFF0F5);
   }
 
   Widget _buildItemList() {
@@ -427,8 +767,21 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
 
           const SizedBox(height: 12),
 
-          // 按鈕
-          _buildActionButton(item),
+          // 按鈕列（試放看看 + 主操作）
+          Row(
+            children: [
+              // 試放看看按鈕
+              Expanded(
+                child: _buildPreviewBtn(() => _showPreviewDialog(item)),
+              ),
+              const SizedBox(width: 8),
+              // 主操作按鈕
+              Expanded(
+                flex: 2,
+                child: _buildActionButton(item),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -494,6 +847,656 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
         ),
       ],
     );
+  }
+
+  Widget _buildPreviewBtn(VoidCallback onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF9B8B8B),
+          side: const BorderSide(color: Color(0xFFE0E0E0)),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
+        child: const Text(
+          '試放看看',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+        ),
+      ),
+    );
+  }
+
+
+  // ===== 試放看看預覽 Dialog =====
+  void _showPreviewDialog(ShopItem item) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 商品名稱
+                  Text(
+                    item.name,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF6B4B4B),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // 商品描述
+                  Text(
+                    item.description,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF9B8B8B),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // 小房間預覽區
+                  _buildRoomPreview(item),
+                  const SizedBox(height: 16),
+                  // 預覽文案
+                  Text(
+                    item.isUnlocked
+                        ? '她好像很喜歡這個角落 💕'
+                        : '她好像很喜歡這個角落 💕\n解鎖後就可以放進她的小世界。',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF9B8B8B),
+                      height: 1.6,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // 按鈕列
+                  _buildPreviewActionButtons(item, ctx, setDialogState),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // ===== 預覽區按鈕列 =====
+  Widget _buildPreviewActionButtons(
+    ShopItem item,
+    BuildContext dialogCtx,
+    StateSetter setDialogState,
+  ) {
+    // 如果已裝備
+    if (item.isEquipped) {
+      return Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6BBF6B).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                '使用中',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: Color(0xFF6BBF6B),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF9B8B8B),
+                side: const BorderSide(color: Color(0xFFE0E0E0)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: const Text(
+                '關閉',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // 如果已解鎖但未裝備
+    if (item.isUnlocked) {
+      return Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () async {
+                if (_currentCatId == null) {
+                  Navigator.pop(dialogCtx);
+                  _showToast('先新增貓咪，我才能幫她佈置小世界 🐱');
+                  return;
+                }
+                final result = await _catWorldService.equipItem(_currentCatId!, item.id);
+                if (result == EquipResult.success) {
+                  Navigator.pop(dialogCtx);
+                  _showToast('她好像很喜歡這個新角落 💕');
+                  _loadItemsByTab(_tabController.index);
+                } else {
+                  _showToast('這個小物件還不能放進去，先再看看 🐾');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: KawaiiTheme.primaryPink,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                '放進她的小世界',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF9B8B8B),
+                side: const BorderSide(color: Color(0xFFE0E0E0)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: const Text(
+                '先看看',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // 未解鎖：顯示解鎖按鈕或條件未達
+    if (item.unlockType == ShopUnlockType.paid || item.unlockType == ShopUnlockType.limited) {
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton(
+          onPressed: () => Navigator.pop(dialogCtx),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF9B8B8B),
+            side: const BorderSide(color: Color(0xFFE0E0E0)),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          child: const Text(
+            '先看看',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ),
+      );
+    }
+
+    // 條件達成可解鎖
+    if (_canUnlock(item)) {
+      final unlockLabel = item.unlockType == ShopUnlockType.bond
+          ? '用默契解鎖'
+          : '用連續陪伴解鎖';
+      return Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () async {
+                if (_currentCatId == null) {
+                  Navigator.pop(dialogCtx);
+                  _showToast('先新增貓咪，我才能幫她佈置小世界 🐱');
+                  return;
+                }
+                final result = await _catWorldService.unlockItem(_currentCatId!, item.id);
+                if (!mounted) return;
+
+                if (result == UnlockResult.success) {
+                  _showToast('她的小世界變溫暖了一點 🐾');
+                  // 解鎖成功，詢問是否放進去
+                  final shouldEquip = await _showEquipPrompt(dialogCtx);
+                  if (shouldEquip == true) {
+                    final equipResult = await _catWorldService.equipItem(_currentCatId!, item.id);
+                    if (mounted) {
+                      if (equipResult == EquipResult.success) {
+                        Navigator.pop(dialogCtx);
+                        _showToast('她好像很喜歡這個新角落 💕');
+                      } else {
+                        _showToast('這個小物件還不能放進去，先再看看 🐾');
+                      }
+                    }
+                  } else {
+                    Navigator.pop(dialogCtx);
+                  }
+                  _loadItemsByTab(_tabController.index);
+                } else {
+                  Navigator.pop(dialogCtx);
+                  _showToast('這個小物件暫時還不能解鎖，先再看看 🐾');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF8FAB),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                unlockLabel,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF9B8B8B),
+                side: const BorderSide(color: Color(0xFFE0E0E0)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: const Text(
+                '先看看',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // 條件未達
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: const Color(0xFF9B8B8B).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              '再陪她久一點',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: Color(0xFF9B8B8B),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF9B8B8B),
+              side: const BorderSide(color: Color(0xFFE0E0E0)),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: const Text(
+              '先看看',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ===== 解鎖後詢問是否放進去 =====
+  Future<bool?> _showEquipPrompt(BuildContext dialogCtx) async {
+    return showDialog<bool>(
+      context: dialogCtx,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              '🎉',
+              style: TextStyle(fontSize: 48),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              '要現在放進她的小世界嗎？',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF6B4B4B),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: KawaiiTheme.primaryPink,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text('放進去'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF9B8B8B),
+                      side: const BorderSide(color: Color(0xFFE0E0E0)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text('先不要'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ===== 小房間預覽 Widget =====
+  Widget _buildRoomPreview(ShopItem item) {
+    // 房間背景色根據分類變化
+    final bgColor = _getRoomBgColor(item);
+
+    return Container(
+      width: 220,
+      height: 200,
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // 窗戶（右上角）
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.window,
+                color: Color(0xFF9B8B8B),
+                size: 24,
+              ),
+            ),
+          ),
+          // 小地毯（底部）
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: Container(
+              height: 16,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFB6C1).withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          // 食碗（左下角）
+          Positioned(
+            bottom: 28,
+            left: 30,
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFE4E1),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+              child: const Icon(
+                Icons.pets,
+                color: Color(0xFF9B8B8B),
+                size: 14,
+              ),
+            ),
+          ),
+          // 貓咪 icon（中央）
+          Positioned(
+            bottom: 36,
+            left: 0,
+            right: 0,
+            child: const Center(
+              child: Icon(
+                Icons.pets,
+                size: 56,
+                color: Color(0xFFFF8FAB),
+              ),
+            ),
+          ),
+          // 分類特殊裝飾
+          ..._buildCategoryDecorations(item),
+        ],
+      ),
+    );
+  }
+
+  // ===== 取得房間背景色 =====
+  Color _getRoomBgColor(ShopItem item) {
+    switch (item.category) {
+      case ShopItemCategory.roomTheme:
+        // roomTheme 改變背景色
+        if (item.id.contains('milk_tea')) return const Color(0xFFF5E6D3);
+        if (item.id.contains('pink')) return const Color(0xFFFFE4E1);
+        if (item.id.contains('starry')) return const Color(0xFFE8E0F0);
+        if (item.id.contains('forest')) return const Color(0xFFE8F5E8);
+        if (item.id.contains('birthday')) return const Color(0xFFFFF0E8);
+        return const Color(0xFFFFF0F5);
+      case ShopItemCategory.furniture:
+        return const Color(0xFFFFF5F5);
+      case ShopItemCategory.accessory:
+        return const Color(0xFFFFFBE8);
+      case ShopItemCategory.emotionAnimation:
+        return const Color(0xFFFFE8F5);
+      case ShopItemCategory.shareTemplate:
+        return const Color(0xFFE8F5FF);
+      case ShopItemCategory.seasonalBundle:
+        return const Color(0xFFF5FFE8);
+    }
+  }
+
+  // ===== 分類特殊裝飾 =====
+  List<Widget> _buildCategoryDecorations(ShopItem item) {
+    switch (item.category) {
+      case ShopItemCategory.roomTheme:
+        return [
+          // 房間主題：頂部愛心裝飾
+          Positioned(
+            top: 12,
+            left: 12,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.6),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.favorite, color: Color(0xFFFF8FAB), size: 16),
+            ),
+          ),
+        ];
+      case ShopItemCategory.furniture:
+        return [
+          // 家具：左側小 icon
+          Positioned(
+            top: 50,
+            left: 12,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.chair, color: Color(0xFF8B5CF6), size: 18),
+            ),
+          ),
+        ];
+      case ShopItemCategory.accessory:
+        return [
+          // 配件：在貓咪旁顯示蝴蝶結
+          Positioned(
+            bottom: 50,
+            right: 60,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.star, color: Color(0xFFFFB800), size: 14),
+            ),
+          ),
+        ];
+      case ShopItemCategory.emotionAnimation:
+        return [
+          // 動畫：愛心效果
+          Positioned(
+            top: 30,
+            left: 30,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.6),
+                shape: BoxShape.circle,
+              ),
+              child: const Text('💕', style: TextStyle(fontSize: 16)),
+            ),
+          ),
+          Positioned(
+            top: 50,
+            right: 40,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.6),
+                shape: BoxShape.circle,
+              ),
+              child: const Text('✨', style: TextStyle(fontSize: 14)),
+            ),
+          ),
+        ];
+      case ShopItemCategory.shareTemplate:
+        return [
+          // 分享卡：小卡片縮圖
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Container(
+              width: 36,
+              height: 28,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: const Color(0xFFFF8FAB), width: 1.5),
+              ),
+              child: const Icon(Icons.image, color: Color(0xFFFF8FAB), size: 16),
+            ),
+          ),
+        ];
+      case ShopItemCategory.seasonalBundle:
+        return [
+          // 季節套組：彩帶裝飾
+          Positioned(
+            top: 10,
+            left: 50,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.6),
+                shape: BoxShape.circle,
+              ),
+              child: const Text('🎀', style: TextStyle(fontSize: 14)),
+            ),
+          ),
+          Positioned(
+            top: 40,
+            right: 14,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.6),
+                shape: BoxShape.circle,
+              ),
+              child: const Text('🌸', style: TextStyle(fontSize: 14)),
+            ),
+          ),
+        ];
+    }
   }
 
   Widget _buildActionButton(ShopItem item) {
