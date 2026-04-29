@@ -2,7 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 
+/// 姿勢辨識頁面
+/// 使用 Google ML Kit 偵測人體姿勢，推斷與貓咪的互動類型
 class PoseRecognitionPage extends StatefulWidget {
   const PoseRecognitionPage({super.key});
 
@@ -19,6 +22,9 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
   
   CameraController? _cameraController;
   late AnimationController _pulseController;
+  
+  // ML Kit Pose Detector
+  late PoseDetector _poseDetector;
 
   @override
   void initState() {
@@ -28,6 +34,15 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
       vsync: this,
     );
     _initializeCamera();
+    _initializePoseDetector();
+  }
+
+  void _initializePoseDetector() {
+    final options = PoseDetectorOptions(
+      mode: PoseDetectionMode.stream,
+      model: PoseDetectionModel.base,
+    );
+    _poseDetector = PoseDetector(options: options);
   }
 
   Future<void> _initializeCamera() async {
@@ -77,6 +92,7 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
   void dispose() {
     _pulseController.dispose();
     _cameraController?.dispose();
+    _poseDetector.close();
     super.dispose();
   }
 
@@ -99,39 +115,298 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
       // 拍照
       final XFile photo = await _cameraController!.takePicture();
       
-      // 等待分析動畫
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // 模擬分析結果
-      _simulateResult(photo.path);
+      // 使用 ML Kit 分析姿勢
+      await _analyzePose(photo.path);
     } catch (e) {
       debugPrint('拍照失敗: $e');
       setState(() => _isAnalyzing = false);
-      _showErrorDialog('拍照失敗，請稍後再試');
+      _showErrorDialog('姿勢分析失敗，請稍後再試');
     }
   }
 
-  void _simulateResult(String photoPath) {
-    // 模擬姿勢分析結果
-    final results = [
-      ('尾巴豎直向上', '🐱 開心問候！你的貓看到你很高興'),
-      ('耳朵向前', '🎾 好奇興奮！你的貓想要玩耍'),
-      ('瞳孔放大', '😿 有些害怕！環境可能有威脅'),
-      ('揉麵包', '💕 滿足幸福！你的貓很放鬆'),
-      ('飛機耳', '😾 緊張警戒！不要突然靠近'),
-    ];
+  Future<void> _analyzePose(String photoPath) async {
+    try {
+      final inputImage = InputImage.fromFilePath(photoPath);
+      final poses = await _poseDetector.processImage(inputImage);
+      
+      if (!mounted) return;
 
-    final result = results[DateTime.now().second % results.length];
-    
-    setState(() {
-      _isAnalyzing = false;
-    });
-    _pulseController.stop();
+      if (poses.isEmpty) {
+        _showNoPersonDialog(photoPath);
+        return;
+      }
 
-    _showResultDialog(result.$1, result.$2, photoPath);
+      // 分析姿勢並產生結果
+      final result = _analyzePoseResult(poses.first);
+      _showResultDialog(result.pose, result.advice, result.interactionType, photoPath);
+      
+    } catch (e) {
+      debugPrint('姿勢分析失敗: $e');
+      _showNoPersonDialog(photoPath);
+    }
   }
 
-  void _showResultDialog(String pose, String advice, String photoPath) {
+  /// 分析姿勢結果
+  _PoseAnalysisResult _analyzePoseResult(Pose pose) {
+    // 取得關鍵點
+    final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+    final rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+    final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+    final rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+    final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+    final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+    final leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+    final rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+    final leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+    final rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+    final nose = pose.landmarks[PoseLandmarkType.nose];
+
+    // 預設結果
+    String poseName = '放鬆站立';
+    String advice = '你的貓咪正在觀察你，保持溫柔的姿態吧 💕';
+    String interactionType = 'observe';
+
+    // 計算肩膀高度（判断是否蹲下）
+    final bool isCrouching = _isCrouching(leftShoulder, rightShoulder, leftHip, rightHip);
+    
+    // 計算手臂姿勢
+    final armPose = _analyzeArmPose(
+      leftShoulder, rightShoulder,
+      leftElbow, rightElbow,
+      leftWrist, rightWrist,
+    );
+
+    // 根據姿勢組合判斷互動類型
+    if (isCrouching) {
+      if (armPose == 'extended') {
+        poseName = '蹲下伸手';
+        advice = '🐱 你的貓咪感到好奇！這個姿勢很像在邀請玩耍';
+        interactionType = 'play';
+      } else if (armPose == 'bent') {
+        poseName = '蹲下靠近';
+        advice = '💕 你正在溫柔地靠近，貓咪感受到你的善意';
+        interactionType = 'pet';
+      } else {
+        poseName = '蹲下觀察';
+        advice = '🐾 貓咪正在觀察你，保持耐心很重要';
+        interactionType = 'observe';
+      }
+    } else if (armPose == 'extended') {
+      poseName = '伸手互動';
+      advice = '🤲 伸手是友善的姿態，貓咪可能在回應你';
+      interactionType = 'feed';
+    } else if (armPose == 'raised') {
+      poseName = '高舉雙手';
+      advice = '🙀 高舉雙手可能讓貓咪感到威脅，建議降低姿勢';
+      interactionType = 'scare';
+    } else {
+      // 檢查是否有面對貓咪（鼻子指向）
+      if (nose != null) {
+        poseName = '溫柔注視';
+        advice = '👀 貓咪感受到你的關注，這是建立信任的好時機';
+        interactionType = 'bond';
+      }
+    }
+
+    return _PoseAnalysisResult(
+      pose: poseName,
+      advice: advice,
+      interactionType: interactionType,
+    );
+  }
+
+  /// 判斷是否蹲下
+  bool _isCrouching(PoseLandmark? leftShoulder, PoseLandmark? rightShoulder,
+      PoseLandmark? leftHip, PoseLandmark? rightHip) {
+    if (leftShoulder == null || rightShoulder == null ||
+        leftHip == null || rightHip == null) {
+      return false;
+    }
+
+    // 計算肩膀和臀部的垂直距離
+    final shoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+    final hipY = (leftHip.y + rightHip.y) / 2;
+    
+    // 如果肩膀和臀部的距離較小於腿長，可能在蹲下
+    final torsoHeight = (hipY - shoulderY).abs();
+    
+    // 檢查膝蓋位置（如果可用的話）
+    // 蹲下時，膝盖會低於臀部
+    return hipY < shoulderY + 50; // 簡化的判斷
+  }
+
+  /// 分析手臂姿勢
+  String _analyzeArmPose(
+    PoseLandmark? leftShoulder, PoseLandmark? rightShoulder,
+    PoseLandmark? leftElbow, PoseLandmark? rightElbow,
+    PoseLandmark? leftWrist, PoseLandmark? rightWrist,
+  ) {
+    if (leftWrist == null && rightWrist == null) {
+      return 'none';
+    }
+
+    // 計算手臂伸展程度
+    int extendedCount = 0;
+    int bentCount = 0;
+
+    // 檢查左臂
+    if (leftShoulder != null && leftElbow != null && leftWrist != null) {
+      final upperArmLength = _distance(leftShoulder, leftElbow);
+      final forearmLength = _distance(leftElbow, leftWrist);
+      final totalArmLength = upperArmLength + forearmLength;
+      
+      // 計算手腕和肩膀的距離
+      final wristToShoulder = _distance(leftWrist, leftShoulder);
+      
+      // 如果手腕到肩膀的距離接近整隻手臂長度，手臂是伸展的
+      if (wristToShoulder > totalArmLength * 0.7) {
+        extendedCount++;
+      } else if (wristToShoulder < totalArmLength * 0.5) {
+        bentCount++;
+      }
+    }
+
+    // 檢查右臂
+    if (rightShoulder != null && rightElbow != null && rightWrist != null) {
+      final upperArmLength = _distance(rightShoulder, rightElbow);
+      final forearmLength = _distance(rightElbow, rightWrist);
+      final totalArmLength = upperArmLength + forearmLength;
+      
+      final wristToShoulder = _distance(rightWrist, rightShoulder);
+      
+      if (wristToShoulder > totalArmLength * 0.7) {
+        extendedCount++;
+      } else if (wristToShoulder < totalArmLength * 0.5) {
+        bentCount++;
+      }
+    }
+
+    // 檢查是否高舉（手腕高於肩膀）
+    final leftWristAbove = leftWrist != null && leftShoulder != null && 
+        leftWrist.y < leftShoulder.y - 30;
+    final rightWristAbove = rightWrist != null && rightShoulder != null && 
+        rightWrist.y < rightShoulder.y - 30;
+
+    if (leftWristAbove || rightWristAbove) {
+      return 'raised';
+    }
+
+    if (extendedCount > 0) return 'extended';
+    if (bentCount > 0) return 'bent';
+    return 'none';
+  }
+
+  /// 計算兩點之間的距離
+  double _distance(PoseLandmark a, PoseLandmark b) {
+    return ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+  }
+
+  void _showNoPersonDialog(String photoPath) {
+    setState(() => _isAnalyzing = false);
+    _pulseController.stop();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Text('🤔', style: TextStyle(fontSize: 60)),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              '沒有偵測到人影',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '請確保你在鏡頭範圍內，並且光線充足\n这样我才能分析你的姿勢 💕',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade600,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _restartCamera();
+                },
+                child: const Text('再試一次', style: TextStyle(fontSize: 16)),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showResultDialog(String pose, String advice, String interactionType, String photoPath) {
+    setState(() => _isAnalyzing = false);
+    _pulseController.stop();
+
+    // 根據互動類型選擇表情
+    String emoji;
+    switch (interactionType) {
+      case 'play':
+        emoji = '🎾';
+        break;
+      case 'pet':
+        emoji = '💕';
+        break;
+      case 'feed':
+        emoji = '🍽';
+        break;
+      case 'scare':
+        emoji = '😿';
+        break;
+      case 'bond':
+        emoji = '🐱';
+        break;
+      default:
+        emoji = '🐾';
+    }
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -166,6 +441,11 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
                   ),
                 ),
               ),
+            const SizedBox(height: 16),
+            Text(
+              emoji,
+              style: const TextStyle(fontSize: 48),
+            ),
             const SizedBox(height: 16),
             const Text(
               '🔍 姿勢分析結果',
@@ -223,6 +503,10 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
     if (_cameraController != null) {
       await _cameraController!.dispose();
     }
+    setState(() {
+      _isCameraInitialized = false;
+      _isAnalyzing = false;
+    });
     await _initializeCamera();
   }
 
@@ -426,8 +710,8 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: _restartCamera,
-                child: const Text('重試'),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('返回上一頁'),
               ),
             ],
           ),
@@ -478,7 +762,7 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
               SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  '對準你的貓咪，按下按鈕拍照並分析姿勢',
+                  '對準你的貓咪（或自己），按下按鈕分析姿勢',
                   style: TextStyle(color: Colors.orange),
                 ),
               ),
@@ -577,4 +861,17 @@ class _PoseRecognitionPageState extends State<PoseRecognitionPage>
       ),
     );
   }
+}
+
+/// 姿勢分析結果
+class _PoseAnalysisResult {
+  final String pose;
+  final String advice;
+  final String interactionType;
+
+  _PoseAnalysisResult({
+    required this.pose,
+    required this.advice,
+    required this.interactionType,
+  });
 }
