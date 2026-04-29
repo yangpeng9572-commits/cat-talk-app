@@ -357,6 +357,28 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
                 height: 1.5,
               ),
             ),
+            const SizedBox(height: 12),
+            Text(
+              '一起去首頁新增她吧',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                color: Color(0xFF9B8B8B),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: KawaiiTheme.primaryPink,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: const Text('好的，帶我回去'),
+            ),
           ],
         ),
       ),
@@ -749,7 +771,8 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
             left: 0,
             right: 0,
             child: Center(
-              child: Column(
+              child: Stack(
+                clipBehavior: Clip.none,
                 children: [
                   const Icon(Icons.pets, size: 50, color: Color(0xFFFF8FAB)),
                   // 配件裝飾
@@ -757,7 +780,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
                       !_equippedAccessoryIds.contains('accessory_none'))
                     Positioned(
                       bottom: 40,
-                      right: 50,
+                      right: -10,
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
