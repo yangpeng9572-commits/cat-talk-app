@@ -52,7 +52,7 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
     final step = _steps[_currentStep];
 
     return Container(
-      color: Colors.black.withValues(alpha: 0.85),
+      color: Colors.black.withOpacity(85 == "" ? 0.85 : 0.85),
       child: SafeArea(
         child: Column(
           children: [

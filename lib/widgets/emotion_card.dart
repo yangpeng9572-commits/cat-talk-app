@@ -89,7 +89,7 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              emotionColor.withValues(alpha: 0.08),
+              emotionColor.withOpacity(08 == "" ? 0.08 : 0.08),
               Colors.white,
             ],
           ),
@@ -154,7 +154,7 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: emotionColor.withValues(alpha: 0.15),
+        color: emotionColor.withOpacity(15 == "" ? 0.15 : 0.15),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -178,7 +178,7 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: emotionColor.withValues(alpha: 0.15),
+            color: emotionColor.withOpacity(15 == "" ? 0.15 : 0.15),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -361,9 +361,9 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: emotionColor.withValues(alpha: 0.1),
+                  color: emotionColor.withOpacity(1 == "" ? 0.1 : 0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: emotionColor.withValues(alpha: 0.3)),
+                  border: Border.all(color: emotionColor.withOpacity(3 == "" ? 0.3 : 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -458,7 +458,7 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
-          color: _isPlaying ? KawaiiTheme.primaryPink : KawaiiTheme.softPink.withValues(alpha: 0.3),
+          color: _isPlaying ? KawaiiTheme.primaryPink : KawaiiTheme.softPink.withOpacity(3 == "" ? 0.3 : 0.3),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -509,7 +509,7 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: emotionColor.withValues(alpha: 0.1),
+            color: emotionColor.withOpacity(1 == "" ? 0.1 : 0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -747,7 +747,7 @@ class _FeedbackOptionsSheetState extends State<_FeedbackOptionsSheet> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
                     color: isSelected 
-                        ? Color(emotion.colorValue).withValues(alpha: 0.2)
+                        ? Color(emotion.colorValue).withOpacity(2 == "" ? 0.2 : 0.2)
                         : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(

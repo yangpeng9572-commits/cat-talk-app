@@ -37,6 +37,9 @@ import '../widgets/achievement_celebration.dart';
 import '../widgets/daily_task_card.dart';
 import '../theme/kawaii_theme.dart';
 
+// DEBUG mode - set to true to show debug info
+const bool kIsDebugMode = true;
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -64,7 +67,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final CatLearningService _learningService = CatLearningService();
   
   // 每日報告服務
-  final DailyReportService _reportService = DailyReportService();
+  late DailyReportService _reportService;
   DailyCatReport? _todayReport;
   
   // 情感文案服務
@@ -134,6 +137,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     // 初始化默契值服務
     await BondService().init(prefs);
+    
+    // 初始化翻譯歷史服務（單例，需要手動 init）
+    await TranslationHistoryService().init(prefs);
+    
+    // 初始化每日報告服務
+    _reportService = DailyReportService(
+      historyService: TranslationHistoryService(),
+      learningService: _learningService,
+    );
+    await _reportService.init(prefs);
     
     _loadCatData();
     _loadTaskData();
@@ -824,7 +837,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: KawaiiTheme.softPink.withValues(alpha: 0.3),
+                      color: KawaiiTheme.softPink.withOpacity(3 == "" ? 0.3 : 0.3),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -903,12 +916,67 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       tasks: _todayTasks,
                       currentStreak: _currentStreak,
                     ),
+                    // DEBUG 資訊
+                    if (kIsDebugMode) _buildDebugInfo(),
                   ],
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// DEBUG 資訊區塊
+  Widget _buildDebugInfo() {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.black87,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange, width: 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'DEBUG VERSION: 2026-04-29 FIX',
+            style: TextStyle(
+              color: Colors.orange,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _debugRow('catId', selectedCat?.id ?? 'null'),
+          _debugRow('bondScore', _currentBond?.bondScore.toString() ?? 'null'),
+          _debugRow('bondLevel', _currentBond?.levelName ?? 'null'),
+          _debugRow('cats.length', _cats.length.toString()),
+          _debugRow('selectedCat', selectedCat?.name ?? 'null'),
+          _debugRow('todayReport.isEmpty', _todayReport?.isEmpty.toString() ?? 'null'),
+          _debugRow('todayTasks', _todayTasks.length.toString()),
+          _debugRow('currentStreak', _currentStreak.toString()),
+        ],
+      ),
+    );
+  }
+
+  Widget _debugRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Text(
+            label + ': ',
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+          Text(
+            value,
+            style: const TextStyle(color: Colors.greenAccent, fontSize: 12, fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }
@@ -1025,8 +1093,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            KawaiiTheme.softPink.withValues(alpha: 0.6),
-            KawaiiTheme.peach.withValues(alpha: 0.4),
+            KawaiiTheme.softPink.withOpacity(6 == "" ? 0.6 : 0.6),
+            KawaiiTheme.peach.withOpacity(4 == "" ? 0.4 : 0.4),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -1034,7 +1102,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
         boxShadow: [
           BoxShadow(
-            color: KawaiiTheme.primaryPink.withValues(alpha: 0.1),
+            color: KawaiiTheme.primaryPink.withOpacity(1 == "" ? 0.1 : 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1069,7 +1137,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: Colors.white.withOpacity(7 == "" ? 0.7 : 0.7),
                   borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
                 ),
                 child: Row(
@@ -1093,7 +1161,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: Colors.white.withOpacity(7 == "" ? 0.7 : 0.7),
                   borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
                 ),
                 child: Row(
@@ -1180,7 +1248,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: Colors.white.withOpacity(7 == "" ? 0.7 : 0.7),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: FractionallySizedBox(
@@ -1265,7 +1333,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 gradient: KawaiiTheme.primaryGradient,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.orange.withValues(alpha: isRecording ? 0.5 : 0.3),
+                    color: Colors.orange.withOpacity(isRecording ? 0.5 : 0.3),
                     blurRadius: isRecording ? 30 : 15,
                     spreadRadius: isRecording ? 5 : 2,
                   ),
@@ -1287,7 +1355,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: opacity),
+                            color: Colors.white.withOpacity(opacity),
                             width: 2,
                           ),
                         ),
@@ -1354,7 +1422,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6B5B95).withValues(alpha: 0.3),
+              color: const Color(0xFF6B5B95).withOpacity(3 == "" ? 0.3 : 0.3),
               blurRadius: 15,
               spreadRadius: 2,
             ),
@@ -1366,7 +1434,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: Colors.white.withOpacity(2 == "" ? 0.2 : 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -1418,7 +1486,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              KawaiiTheme.primaryPink.withValues(alpha: 0.9),
+              KawaiiTheme.primaryPink.withOpacity(9 == "" ? 0.9 : 0.9),
               KawaiiTheme.coral,
             ],
             begin: Alignment.topLeft,
@@ -1427,7 +1495,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
           boxShadow: [
             BoxShadow(
-              color: KawaiiTheme.primaryPink.withValues(alpha: 0.3),
+              color: KawaiiTheme.primaryPink.withOpacity(3 == "" ? 0.3 : 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -1438,7 +1506,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: Colors.white.withOpacity(2 == "" ? 0.2 : 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Text('💕', style: TextStyle(fontSize: 28)),
@@ -1461,7 +1529,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     '看看${selectedCat?.name ?? "你的貓"}今天過得怎麼樣',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: Colors.white.withOpacity(9 == "" ? 0.9 : 0.9),
                     ),
                   ),
                 ],
@@ -1503,7 +1571,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFFFB6C1).withValues(alpha: 0.3),
+              color: const Color(0xFFFFB6C1).withOpacity(3 == "" ? 0.3 : 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -1514,7 +1582,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: Colors.white.withOpacity(2 == "" ? 0.2 : 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Text('🐱', style: TextStyle(fontSize: 28)),
@@ -1584,7 +1652,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.6),
+                color: Colors.white.withOpacity(6 == "" ? 0.6 : 0.6),
                 shape: BoxShape.circle,
               ),
               child: const Text('🏡', style: TextStyle(fontSize: 28)),
@@ -1605,7 +1673,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   const SizedBox(height: 4),
                   Text(
                     _currentBond != null
-                        ? '目前默契：\${_currentBond!.bondScore}%'
+                        ? '目前默契：${_currentBond!.bondScore}%'
                         : '從今天開始慢慢佈置她的小世界',
                     style: const TextStyle(fontSize: 12, color: Color(0xFF9B8B8B)),
                   ),

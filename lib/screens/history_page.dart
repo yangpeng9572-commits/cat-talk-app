@@ -113,13 +113,13 @@ class _HistoryPageState extends State<HistoryPage> {
           borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
           border: Border.all(
             color: hasCorrection
-                ? KawaiiTheme.primaryPink.withValues(alpha: 0.5)
+                ? KawaiiTheme.primaryPink.withOpacity(5 == "" ? 0.5 : 0.5)
                 : KawaiiTheme.divider,
             width: hasCorrection ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withOpacity(05 == "" ? 0.05 : 0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -171,7 +171,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Color(result.emotionType.colorValue).withValues(alpha: 0.15),
+                    color: Color(result.emotionType.colorValue).withOpacity(15 == "" ? 0.15 : 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(

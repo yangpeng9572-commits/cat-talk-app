@@ -78,7 +78,7 @@ class _MemoryCardsPageState extends State<MemoryCardsPage> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
+                        color: Colors.black.withOpacity(05 == "" ? 0.05 : 0.05),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -124,14 +124,14 @@ class _MemoryCardsPageState extends State<MemoryCardsPage> {
         borderRadius: BorderRadius.circular(16),
         border: isUnlocked
             ? Border.all(
-                color: _getRarityColor(card.rarity).withValues(alpha: 0.3),
+                color: _getRarityColor(card.rarity).withOpacity(3 == "" ? 0.3 : 0.3),
                 width: 1.5,
               )
             : null,
         boxShadow: isUnlocked
             ? [
                 BoxShadow(
-                  color: _getRarityColor(card.rarity).withValues(alpha: 0.1),
+                  color: _getRarityColor(card.rarity).withOpacity(1 == "" ? 0.1 : 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -146,7 +146,7 @@ class _MemoryCardsPageState extends State<MemoryCardsPage> {
             height: 50,
             decoration: BoxDecoration(
               color: isUnlocked
-                  ? _getRarityColor(card.rarity).withValues(alpha: 0.15)
+                  ? _getRarityColor(card.rarity).withOpacity(15 == "" ? 0.15 : 0.15)
                   : const Color(0xFFE0E0E0),
               borderRadius: BorderRadius.circular(12),
             ),
@@ -177,7 +177,7 @@ class _MemoryCardsPageState extends State<MemoryCardsPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: _getRarityColor(card.rarity).withValues(alpha: 0.15),
+                          color: _getRarityColor(card.rarity).withOpacity(15 == "" ? 0.15 : 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(

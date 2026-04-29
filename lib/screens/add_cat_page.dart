@@ -282,7 +282,7 @@ class _AddCatPageState extends State<AddCatPage> {
             activeTrackColor: Colors.orange,
             inactiveTrackColor: Colors.orange.shade100,
             thumbColor: Colors.orange,
-            overlayColor: Colors.orange.withValues(alpha: 0.2),
+            overlayColor: Colors.orange.withOpacity(2 == "" ? 0.2 : 0.2),
           ),
           child: Slider(
             value: _age,
