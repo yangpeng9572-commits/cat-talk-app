@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
@@ -164,7 +166,7 @@ class _AddCatPageState extends State<AddCatPage> {
                   _avatarPath != null
                       ? CircleAvatar(
                           radius: 60,
-                          backgroundImage: AssetImage(_avatarPath!),
+                          backgroundImage: FileImage(File(_avatarPath!)),
                           backgroundColor: Colors.grey.shade200,
                         )
                       : CircleAvatar(

@@ -1851,13 +1851,22 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
                       onPressed: () {
+                        // 先關閉 bottom sheet
                         Navigator.pop(context);
-                        Navigator.push(
+                        // 直接開啟 AddCatPage，用回傳值通知刷新
+                        Navigator.push<Cat>(
                           context,
                           MaterialPageRoute(
                             builder: (context) => const AddCatPage(),
                           ),
-                        ).then((_) => _loadCatData());
+                        ).then((newCat) {
+                          if (newCat != null) {
+                            _loadCatData();
+                            setState(() {
+                              selectedCat = newCat;
+                            });
+                          }
+                        });
                       },
                       icon: const Icon(Icons.add),
                       label: const Text('新增貓咪'),
@@ -1896,13 +1905,22 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               const SizedBox(height: 8),
               ElevatedButton.icon(
                 onPressed: () {
+                  // 先關閉 bottom sheet
                   Navigator.pop(context);
-                  Navigator.push(
+                  // 直接開啟 AddCatPage，用回傳值通知刷新
+                  Navigator.push<Cat>(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const AddCatPage(),
                     ),
-                  ).then((_) => _loadCatData());
+                  ).then((newCat) {
+                    if (newCat != null) {
+                      _loadCatData();
+                      setState(() {
+                        selectedCat = newCat;
+                      });
+                    }
+                  });
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('新增貓咪'),
