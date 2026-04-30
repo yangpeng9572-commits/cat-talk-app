@@ -28,6 +28,7 @@ import '../widgets/birthday_gift_dialog.dart';
 import 'pose_recognition_page.dart';
 import 'daily_report_page.dart';
 import 'add_cat_page.dart';
+import 'edit_cat_page.dart';
 import 'home_interaction_page.dart';
 import 'cat_world_page.dart';
 import 'love_meter_page.dart';
@@ -1993,9 +1994,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                     title: Text(cat.name),
                     subtitle: Text(cat.breed.isNotEmpty ? cat.breed : '尚未設定'),
-                    trailing: selectedCat?.id == cat.id
-                        ? const Icon(Icons.check, color: Colors.orange)
-                        : null,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.grey, size: 20),
+                          onPressed: () async {
+                            Navigator.pop(context); // close bottom sheet first
+                            final result = await Navigator.push<bool>(
+                              context,
+                              MaterialPageRoute(builder: (_) => EditCatPage(cat: cat)),
+                            );
+                            if (result == true) {
+                              await _loadCatData();
+                              if (mounted) setState(() {});
+                            }
+                          },
+                        ),
+                        if (selectedCat?.id == cat.id)
+                          const Icon(Icons.check, color: Colors.orange),
+                      ],
+                    ),
                     onTap: () {
                       setState(() => selectedCat = cat);
                       Navigator.pop(context);
