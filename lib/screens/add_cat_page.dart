@@ -258,7 +258,7 @@ class _AddCatPageState extends State<AddCatPage> {
                         backgroundColor: Colors.green,
                       ),
                     );
-                    Navigator.pop(context, cat);
+                    Navigator.pop(context, true);
                   }
                 },
                 child: const Text('添加', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),

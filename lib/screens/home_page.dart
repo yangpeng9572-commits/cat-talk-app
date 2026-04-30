@@ -1850,23 +1850,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
-                      onPressed: () {
-                        // 先關閉 bottom sheet
-                        Navigator.pop(context);
-                        // 直接開啟 AddCatPage，用回傳值通知刷新
-                        Navigator.push<Cat>(
+                      onPressed: () async {
+                        // 直接開啟 AddCatPage 等結果
+                        final result = await Navigator.push<bool>(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => const AddCatPage(),
-                          ),
-                        ).then((newCat) {
-                          if (newCat != null) {
-                            _loadCatData();
-                            setState(() {
-                              selectedCat = newCat;
-                            });
-                          }
-                        });
+                          MaterialPageRoute(builder: (_) => const AddCatPage()),
+                        );
+                        // AddCatPage 回傳 true 才 reload
+                        if (result == true) {
+                          await _loadCatData();
+                          if (mounted) setState(() {});
+                        }
                       },
                       icon: const Icon(Icons.add),
                       label: const Text('新增貓咪'),
@@ -1904,23 +1898,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             if (_cats.isNotEmpty) ...[
               const SizedBox(height: 8),
               ElevatedButton.icon(
-                onPressed: () {
-                  // 先關閉 bottom sheet
-                  Navigator.pop(context);
-                  // 直接開啟 AddCatPage，用回傳值通知刷新
-                  Navigator.push<Cat>(
+                onPressed: () async {
+                  // 直接開啟 AddCatPage 等結果
+                  final result = await Navigator.push<bool>(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const AddCatPage(),
-                    ),
-                  ).then((newCat) {
-                    if (newCat != null) {
-                      _loadCatData();
-                      setState(() {
-                        selectedCat = newCat;
-                      });
-                    }
-                  });
+                    MaterialPageRoute(builder: (_) => const AddCatPage()),
+                  );
+                  // AddCatPage 回傳 true 才 reload
+                  if (result == true) {
+                    await _loadCatData();
+                    if (mounted) setState(() {});
+                  }
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('新增貓咪'),
