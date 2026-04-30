@@ -92,7 +92,8 @@ class TermsOfServicePage extends StatelessWidget {
 
 本 App 的翻譯結果僅為參考用途，不構成任何醫療建議、獸醫診斷或專業行為評估。''',
 
-              ), const SizedBox(height: 16),
+              ),
+            const SizedBox(height: 16),
 
             // 使用者年齡限制
             _buildSection(
@@ -104,7 +105,8 @@ class TermsOfServicePage extends StatelessWidget {
 
 父母或監護人應告知未成年使用者如何安全使用本 App，包括錄音功能的正確使用方式。''',
 
-              ), const SizedBox(height: 16),
+              ),
+            const SizedBox(height: 16),
 
             // 智慧財產權
             _buildSection(
@@ -120,7 +122,8 @@ class TermsOfServicePage extends StatelessWidget {
 
 本 App 使用的開源軟體元件，請參閱各元件之授權條款。''',
 
-              ), const SizedBox(height: 16),
+              ),
+            const SizedBox(height: 16),
 
             // 使用者責任
             _buildSection(
@@ -136,7 +139,8 @@ class TermsOfServicePage extends StatelessWidget {
 • 對您的貓咪負有完全之照顧與管理責任
 • 定期更新 App 至最新版本，以獲得最佳安全性''',
 
-              ), const SizedBox(height: 16),
+              ),
+            const SizedBox(height: 16),
 
             // 禁止事項
             _buildSection(
@@ -151,7 +155,8 @@ class TermsOfServicePage extends StatelessWidget {
 • 以自動化方式大量註冊帳戶或干擾本 App 正常運作
 • 散佈任何含有誹謗、騷擾、威脅、或不實內容的資訊''',
 
-              ), const SizedBox(height: 16),
+              ),
+            const SizedBox(height: 16),
 
             // 醫療免責聲明（重要）
             _buildWarningSection(
@@ -173,7 +178,8 @@ class TermsOfServicePage extends StatelessWidget {
 
 本 App 的情緒分析結果是根據統計規律與聲音特徵推測，並非獸醫學或動物行為學的專業判斷。開發者不對翻譯結果的準確性作出任何保證，亦不對用戶因信賴翻譯結果而延誤就醫之情事承擔任何法律責任。''',
 
-              ), const SizedBox(height: 16),
+              ),
+            const SizedBox(height: 16),
 
             // 責任限制
             _buildSection(
@@ -196,7 +202,8 @@ class TermsOfServicePage extends StatelessWidget {
 
 本條之限制不影響消費者依法享有之權利，亦不適用於因開發者故意或重大過失所致之責任。''',
 
-              ), const SizedBox(height: 16),
+              ),
+            const SizedBox(height: 16),
 
             // 第三方服務與 SDK
             _buildSection(
@@ -212,7 +219,8 @@ class TermsOfServicePage extends StatelessWidget {
 
 開發者不對任何第三方服務的作為或不作為負責。使用第三方服務時，請同時閱讀其各自之服務條款與隱私政策。''',
 
-              ), const SizedBox(height: 16),
+              ),
+            const SizedBox(height: 16),
 
             // 資料管理
             _buildSection(
@@ -229,7 +237,8 @@ class TermsOfServicePage extends StatelessWidget {
 
 刪除後資料將無法復原，請謹慎操作。''',
 
-              ), const SizedBox(height: 16),
+              ),
+            const SizedBox(height: 16),
 
             // 條款修改
             _buildSection(
@@ -243,7 +252,8 @@ class TermsOfServicePage extends StatelessWidget {
 
 繼續使用本 App 即表示您接受修改後的條款。如您不接受修改後的條款，請停止使用本 App 並刪除本 App。''',
 
-              ), const SizedBox(height: 16),
+              ),
+            const SizedBox(height: 16),
 
             // 終止服務
             _buildSection(
@@ -259,7 +269,8 @@ class TermsOfServicePage extends StatelessWidget {
 
 本 App 的終止不影響任何在此之前已產生之權利或義務。''',
 
-              ), const SizedBox(height: 16),
+              ),
+            const SizedBox(height: 16),
 
             // 適用法律
             _buildSection(
@@ -271,7 +282,8 @@ class TermsOfServicePage extends StatelessWidget {
 
 但若您為消費者（依《消費者保護法》定義），前述限制應不適用於您依法享有之權利。''',
 
-              ), const SizedBox(height: 16),
+              ),
+            const SizedBox(height: 16),
 
             // 聯繫方式
             _buildSection(
@@ -287,6 +299,33 @@ class TermsOfServicePage extends StatelessWidget {
 如您為未成年人，請在父母或監護人陪同下與我們聯繫。''',
 
               ), const SizedBox(height: 40),
+
+
+            const SizedBox(height: 16),
+
+            // 版本更新與服務終止
+            _buildSection(
+              emoji: "📲",
+              title: "十三、版本更新與服務終止",
+              content: """【版本更新】
+開發者可能不時發布本 App 的更新版本。
+更新可能包括錯誤修復、功能改進或安全強化。
+您有權選擇是否安裝更新，但建議您使用最新版本以獲得最佳體驗與安全性。
+
+【服務終止】
+本 App 或其任何部分可能在將來被終止或替換。
+若我們決定完全停止提供本 App，我們會：
+• 提前至少 30 天通過 App 內公告通知您
+• 提供合理的時間讓您導出您的資料
+• 說明資料的處理方式
+
+【意外終止】
+若因不可抗力因素（如天災、網路中斷）導致服務意外終止，我們不對此造成的損失負責。
+
+【第三方平台政策】
+本 App 在 Google Play 和 App Store 上架。
+若 Google Play 或 App Store 的政策變更影響本 App 的提供，我們會設法通知您並提供替代方案。""",
+            ),
 
             // 底部宣告
             Container(
