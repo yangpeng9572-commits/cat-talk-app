@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'privacy_policy_page.dart';
+import 'terms_of_service_page.dart';
 
 /// 關於頁面
 class AboutPage extends StatelessWidget {
@@ -209,6 +210,24 @@ class AboutPage extends StatelessWidget {
             ),
 
             const SizedBox(height: 24),
+
+            // 使用協議入口
+            _buildMenuItem(
+              context: context,
+              emoji: '📜',
+              title: '使用協議',
+              description: '使用前請詳閱本 App 之服務條款',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TermsOfServicePage(),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 16),
 
             // 隱私政策入口
             _buildMenuItem(
