@@ -202,7 +202,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  void _loadCatData() {
+  Future<void> _loadCatData() async {
     _cats = _catService!.getAllCats();
     // 自動選擇第一隻貓
     if (_cats.isNotEmpty && selectedCat == null) {
