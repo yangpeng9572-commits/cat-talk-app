@@ -204,9 +204,9 @@ class PrivacyPolicyPage extends StatelessWidget {
 用於姿勢參考功能。
 隱私政策：https://policies.google.com/privacy
 
-【Firebase（Google Analytics）】
-用於匿名使用統計與崩溃報告。
-隱私政策：https://firebase.google.com/support/privacy
+【Firebase（Firebase Analytics）】
+本 App 使用 Firebase 收集匿名的使用行為與崩潰報告，以幫助我们改進 App 體驗。
+Firebase 的資料處理受 Google 隱私政策約束：https://firebase.google.com/support/privacy
 
 【作業系統麥克風權限】
 錄音功能需要您的主動授權。
