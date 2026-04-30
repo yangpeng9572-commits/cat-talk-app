@@ -1,7 +1,7 @@
 class Cat {
   final String id;
   final String name;
-  final String? imageUrl;
+  final String? avatarPath;
   final String gender;  // 'male' or 'female'
   final String ageStage;  // 'kitten', 'junior', 'adult', 'senior', 'geriatric'
   final String breed;
@@ -11,7 +11,7 @@ class Cat {
   Cat({
     required this.id,
     required this.name,
-    this.imageUrl,
+    this.avatarPath,
     this.gender = 'female',
     this.ageStage = 'kitten',
     this.breed = '',
@@ -24,7 +24,7 @@ class Cat {
     return Cat(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
-      imageUrl: json['imageUrl'],
+      avatarPath: json['avatarPath'],
       gender: json['gender'] ?? 'female',
       ageStage: json['ageStage'] ?? 'kitten',
       breed: json['breed'] ?? '',
@@ -40,7 +40,7 @@ class Cat {
     return {
       'id': id,
       'name': name,
-      'imageUrl': imageUrl,
+      'avatarPath': avatarPath,
       'gender': gender,
       'ageStage': ageStage,
       'breed': breed,

@@ -28,6 +28,7 @@ import 'daily_report_page.dart';
 import 'add_cat_page.dart';
 import 'home_interaction_page.dart';
 import 'cat_world_page.dart';
+import 'love_meter_page.dart';
 import '../widgets/emotion_card.dart';
 import '../widgets/onboarding_overlay.dart';
 import '../widgets/achievement_celebration.dart';
@@ -926,6 +927,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     _buildDailyReportCard(),
                     _buildInteractionCard(),
                     _buildCatWorldCard(),
+                    if (selectedCat != null) _buildLoveMeterCard(),
                     // 今日任務卡片
                     DailyTaskCard(
                       tasks: _todayTasks,
@@ -1717,6 +1719,72 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
             const Icon(Icons.arrow_forward_ios, color: Color(0xFFB0A0A0), size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  /// 她喜歡你嗎 💗 入口卡片
+  Widget _buildLoveMeterCard() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LoveMeterPage()),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFF69B4), Color(0xFFFFB6C1)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.pink.withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Text('💗', style: TextStyle(fontSize: 28)),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    '她喜歡你嗎 💗',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '看看你們今天的親密度',
+                    style: TextStyle(fontSize: 12, color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
           ],
         ),
       ),
