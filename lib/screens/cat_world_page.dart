@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/cat_world_items.dart';
+import '../models/cat.dart';
 import '../models/shop_item.dart';
 import '../services/cat_world_service.dart';
 import '../services/cat_service.dart';
@@ -8,6 +9,7 @@ import '../services/bond_service.dart';
 import '../services/streak_service.dart';
 import '../services/memory_card_service.dart';
 import '../services/seasonal_event_service.dart';
+import '../services/cat_birthday_service.dart';
 import '../theme/kawaii_theme.dart';
 import 'memory_cards_page.dart';
 
@@ -39,6 +41,10 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
   int _todayInteractions = 0;
   int _todayBondFromRoom = 0;
   bool _surpriseShownToday = false;
+
+  // 生日服務
+  final CatBirthdayService _birthdayService = CatBirthdayService();
+  Cat? _birthdayCatToday;
 
   static const int _maxDailyInteractions = 5;
   static const int _maxDailyBondFromRoom = 3;
@@ -112,6 +118,15 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
 
     // 載入今日互動狀態
     await _loadTodayInteractionState(prefs);
+
+    // 檢查今天是否有貓生日
+    _birthdayCatToday = null;
+    for (final cat in cats) {
+      if (cat.birthdayType != 'unknown' && _birthdayService.isBirthdayToday(cat)) {
+        _birthdayCatToday = cat;
+        break;
+      }
+    }
 
     await _loadItemsByTab(0);
   }
@@ -391,6 +406,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
         // 房間展示區
         _buildRoomSection(),
         // 活動卡片
+        if (_birthdayCatToday != null) _buildBirthdayEventCard(),
         _buildEventCard(),
         // Plus 入口卡片
         _buildPlusCard(),
@@ -402,6 +418,91 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
           ),
         ),
       ],
+    );
+  }
+
+  // ===== 生日活動卡片 =====
+  Widget _buildBirthdayEventCard() {
+    return GestureDetector(
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('生日派對功能即將開放 🐾'),
+            backgroundColor: Color(0xFFFF8FAB),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFE4E1), Color(0xFFFFF8F5)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFFFFB6C1).withOpacity(0.5),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.6),
+                shape: BoxShape.circle,
+              ),
+              child: const Text('🎂', style: TextStyle(fontSize: 22)),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '今天是她的小派對 🎂',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFFFF8FAB),
+                    ),
+                  ),
+                  if (_birthdayCatToday != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      '祝 ${_birthdayCatToday!.name} 生日快樂！',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF9B8B8B),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF8FAB).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                '活動中',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFFF8FAB),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

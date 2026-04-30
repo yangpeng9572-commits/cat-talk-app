@@ -17,6 +17,7 @@ enum MemoryCardType {
   firstChangeRoom,  // 第一次換房間
   firstShareDiary,  // 第一次分享小日記
   firstWeekAnalysis, // 第一次完成 7 天分析
+  firstBirthday,    // 第一次陪她過生日
 }
 
 /// 回憶卡片資料
@@ -214,6 +215,15 @@ class MemoryCardService {
         type: MemoryCardType.firstWeekAnalysis,
         icon: '📊',
         rarity: MemoryCardRarity.epic,
+      ),
+      MemoryCard(
+        id: 'first_birthday',
+        catId: catId,
+        title: '第一次陪她過生日 🎉',
+        description: '今天是她特別的一天，也被你記住了。',
+        type: MemoryCardType.firstBirthday,
+        icon: '🎂',
+        rarity: MemoryCardRarity.rare,
       ),
     ];
   }

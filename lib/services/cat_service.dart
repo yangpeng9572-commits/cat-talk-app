@@ -19,8 +19,8 @@ class CatService {
     }
     
     try {
-      final List<dynamic> catsList = catsJson as List<dynamic>;
-      return catsList.map((json) => Cat.fromJson(json)).toList();
+      final List<dynamic> catsList = jsonDecode(catsJson) as List<dynamic>;
+      return catsList.map((json) => Cat.fromJson(json as Map<String, dynamic>)).toList();
     } catch (e) {
       return [];
     }

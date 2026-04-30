@@ -23,6 +23,8 @@ import '../services/bond_service.dart';
 import '../services/emotional_headline_service.dart';
 import '../services/push_notification_service.dart';
 import '../services/review_service.dart';
+import '../services/cat_birthday_service.dart';
+import '../widgets/birthday_gift_dialog.dart';
 import 'pose_recognition_page.dart';
 import 'daily_report_page.dart';
 import 'add_cat_page.dart';
@@ -102,6 +104,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   // 貓咪服務
   CatService? _catService;
   List<Cat> _cats = [];
+
+  // 生日服務
+  final CatBirthdayService _birthdayService = CatBirthdayService();
 
   // Timer for max recording duration
   Timer? _maxDurationTimer;
@@ -926,6 +931,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     _buildMainButton(),
                     _buildDailyReportCard(),
                     _buildInteractionCard(),
+                    _buildBirthdayCard(),
                     _buildCatWorldCard(),
                     if (selectedCat != null) _buildLoveMeterCard(),
                     // 今日任務卡片
@@ -1785,6 +1791,106 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
             const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 生日卡片
+  Widget _buildBirthdayCard() {
+    // 找出最近有生日的貓（0-7天內）
+    if (_cats.isEmpty) return const SizedBox.shrink();
+
+    Cat? upcomingBirthdayCat;
+    int? daysUntil;
+
+    for (final cat in _cats) {
+      if (cat.birthdayType == 'unknown') continue;
+      final days = _birthdayService.getDaysUntilBirthday(cat);
+      if (days != null && days >= 0 && days <= 7) {
+        // 選擇最近的
+        if (upcomingBirthdayCat == null || days < daysUntil!) {
+          upcomingBirthdayCat = cat;
+          daysUntil = days;
+        }
+      }
+    }
+
+    if (upcomingBirthdayCat == null) return const SizedBox.shrink();
+
+    String message;
+    if (daysUntil == 0) {
+      message = '今天是 ${upcomingBirthdayCat.name} 的生日！🎉';
+    } else if (daysUntil == 1) {
+      message = '明天是 ${upcomingBirthdayCat.name} 的生日 🎂';
+    } else {
+      message = '${upcomingBirthdayCat.name} 生日還有 $daysUntil 天 🎂';
+    }
+
+    return GestureDetector(
+      onTap: () => showBirthdayGiftDialog(context),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFE4E1), Color(0xFFFFF8F5)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: const Color(0xFFFFB6C1).withOpacity(77/255),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFFFB6C1).withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.6),
+                shape: BoxShape.circle,
+              ),
+              child: const Text('🎂', style: TextStyle(fontSize: 28)),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF6B4B4B),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    '點擊看看生日小驚喜 🎁',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF9B8B8B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Color(0xFF9B8B8B),
+              size: 16,
+            ),
           ],
         ),
       ),

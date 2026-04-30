@@ -5,6 +5,7 @@ import 'screens/cats_page.dart';
 import 'screens/history_page.dart';
 import 'screens/profile_page.dart';
 import 'theme/kawaii_theme.dart';
+import 'services/push_notification_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +42,18 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // 檢查生日推播提醒
+    _checkBirthdayReminders();
+  }
+
+  Future<void> _checkBirthdayReminders() async {
+    final pushService = PushNotificationService();
+    await pushService.checkBirthdayReminders();
+  }
 
   final List<Widget> _pages = const [
     HomePage(),

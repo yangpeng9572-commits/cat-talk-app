@@ -1,10 +1,14 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/translation_result.dart';
+import '../models/cat.dart';
 import 'bond_service.dart';
+import 'cat_service.dart';
+import 'cat_birthday_service.dart';
 
 /// 推播服務
 /// 情感型推播：讓使用者感覺是「貓咪在找主人」
@@ -912,6 +916,91 @@ class PushNotificationService {
         'clicked_B': prefs.getInt('${_abClickedKey}affectionate_B') ?? 0,
       },
     };
+  }
+
+  // ==================== 生日推播提醒 ====================
+
+  /// 檢查生日提醒並發送推播
+  /// 在 App 啟動時呼叫
+  Future<void> checkBirthdayReminders() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final catService = CatService(prefs);
+      final birthdayService = CatBirthdayService();
+      final cats = catService.getAllCats();
+      final now = DateTime.now();
+      final year = now.year;
+
+      for (final cat in cats) {
+        // 跳過 birthdayType == unknown 或無法計算天數的貓
+        if (cat.birthdayType == 'unknown') continue;
+        final daysUntil = birthdayService.getDaysUntilBirthday(cat);
+        if (daysUntil == null) continue;
+
+        // 明天是生日：推播明天提醒
+        if (daysUntil == 1) {
+          final sentKey = 'birthday_reminder_${cat.id}_${year}_tomorrow';
+          final alreadySent = prefs.getBool(sentKey) ?? false;
+          if (!alreadySent) {
+            await _notifications.show(
+              1000 + cat.id.hashCode,
+              '🎂',
+              '明天是 ${cat.name} 的生日 🎂 要不要幫她準備一個小驚喜？',
+              const NotificationDetails(
+                android: AndroidNotificationDetails(
+                  'cat_birthday',
+                  '生日提醒',
+                  channelDescription: '你家貓咪的生日提醒',
+                  importance: Importance.high,
+                  priority: Priority.high,
+                  icon: '@mipmap/ic_launcher',
+                ),
+                iOS: DarwinNotificationDetails(
+                  presentAlert: true,
+                  presentBadge: true,
+                  presentSound: true,
+                ),
+              ),
+              payload: 'birthday:${cat.id}',
+            );
+            await prefs.setBool(sentKey, true);
+          }
+        }
+
+        // 今天是生日：推播今天提醒
+        if (daysUntil == 0) {
+          final sentKey = 'birthday_reminder_${cat.id}_${year}_today';
+          final alreadySent = prefs.getBool(sentKey) ?? false;
+          if (!alreadySent) {
+            await _notifications.show(
+              2000 + cat.id.hashCode,
+              '🎉',
+              '今天是 ${cat.name} 的生日！🎉 祝她被滿滿愛包圍 🐾',
+              const NotificationDetails(
+                android: AndroidNotificationDetails(
+                  'cat_birthday',
+                  '生日提醒',
+                  channelDescription: '你家貓咪的生日提醒',
+                  importance: Importance.high,
+                  priority: Priority.high,
+                  icon: '@mipmap/ic_launcher',
+                ),
+                iOS: DarwinNotificationDetails(
+                  presentAlert: true,
+                  presentBadge: true,
+                  presentSound: true,
+                ),
+              ),
+              payload: 'birthday:${cat.id}',
+            );
+            await prefs.setBool(sentKey, true);
+          }
+        }
+      }
+    } catch (e) {
+      // 推播失敗不閃退
+      debugPrint('生日推播檢查失敗: $e');
+    }
   }
 }
 

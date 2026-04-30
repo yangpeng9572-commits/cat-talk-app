@@ -8,6 +8,12 @@ class Cat {
   final double age;  // 年齡（歲）
   final DateTime createdAt;
 
+  // Birthday fields
+  final int? birthMonth;
+  final int? birthDay;
+  final int? birthYear;
+  final String birthdayType; // 'exact' | 'monthDayOnly' | 'adoptionDay' | 'unknown'
+
   Cat({
     required this.id,
     required this.name,
@@ -17,10 +23,23 @@ class Cat {
     this.breed = '',
     this.age = 0,
     DateTime? createdAt,
+    this.birthMonth,
+    this.birthDay,
+    this.birthYear,
+    this.birthdayType = 'unknown',
   }) : createdAt = createdAt ?? DateTime.now();
 
   /// 從 JSON 建立
   factory Cat.fromJson(Map<String, dynamic> json) {
+    // Safe handling of birthdayType - convert invalid values to 'unknown'
+    String birthdayType = 'unknown';
+    if (json['birthdayType'] != null) {
+      final bt = json['birthdayType'] as String;
+      if (bt == 'exact' || bt == 'monthDayOnly' || bt == 'adoptionDay' || bt == 'unknown') {
+        birthdayType = bt;
+      }
+    }
+
     return Cat(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
@@ -29,9 +48,13 @@ class Cat {
       ageStage: json['ageStage'] ?? 'kitten',
       breed: json['breed'] ?? '',
       age: (json['age'] ?? 0).toDouble(),
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt']) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
+      birthMonth: json['birthMonth'] as int?,
+      birthDay: json['birthDay'] as int?,
+      birthYear: json['birthYear'] as int?,
+      birthdayType: birthdayType,
     );
   }
 
@@ -46,7 +69,42 @@ class Cat {
       'breed': breed,
       'age': age,
       'createdAt': createdAt.toIso8601String(),
+      'birthMonth': birthMonth,
+      'birthDay': birthDay,
+      'birthYear': birthYear,
+      'birthdayType': birthdayType,
     };
+  }
+
+  /// copyWith
+  Cat copyWith({
+    String? id,
+    String? name,
+    String? avatarPath,
+    String? gender,
+    String? ageStage,
+    String? breed,
+    double? age,
+    DateTime? createdAt,
+    int? birthMonth,
+    int? birthDay,
+    int? birthYear,
+    String? birthdayType,
+  }) {
+    return Cat(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      avatarPath: avatarPath ?? this.avatarPath,
+      gender: gender ?? this.gender,
+      ageStage: ageStage ?? this.ageStage,
+      breed: breed ?? this.breed,
+      age: age ?? this.age,
+      createdAt: createdAt ?? this.createdAt,
+      birthMonth: birthMonth ?? this.birthMonth,
+      birthDay: birthDay ?? this.birthDay,
+      birthYear: birthYear ?? this.birthYear,
+      birthdayType: birthdayType ?? this.birthdayType,
+    );
   }
 
   /// 取得性別標籤

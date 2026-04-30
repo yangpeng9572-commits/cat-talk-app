@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,6 +19,14 @@ class _AddCatPageState extends State<AddCatPage> {
   String? _avatarPath;
   final TextEditingController _nameController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
+
+  // Birthday fields
+  int? _birthMonth;
+  int? _birthDay;
+  int? _birthYear;
+  String _birthdayType = 'unknown'; // 'exact', 'monthDayOnly', 'adoptionDay', 'unknown'
+  bool _isUnknownBirthday = false;
+  bool _isAdoptionDay = false;
 
   final List<String> _breeds = [
     '英國短毛貓',
@@ -52,7 +59,30 @@ class _AddCatPageState extends State<AddCatPage> {
     return '高齡貓 (11+歲)';
   }
 
+  int _getDaysInMonth(int month, [int? year]) {
+    if (month == 2) {
+      if (year != null && _isLeapYear(year)) return 29;
+      return 28;
+    }
+    if ([4, 6, 9, 11].contains(month)) return 30;
+    return 31;
+  }
+
+  bool _isLeapYear(int year) {
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+  }
+
   Future<void> _pickImage() async {
+    if (_isUnknownBirthday || _isAdoptionDay) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('請先取消「不知道生日」或「領養日」的勾選'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final source = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.white,
@@ -114,6 +144,53 @@ class _AddCatPageState extends State<AddCatPage> {
     }
   }
 
+  void _onBirthdayTypeChanged() {
+    setState(() {
+      if (_isUnknownBirthday) {
+        _isAdoptionDay = false;
+        _birthMonth = null;
+        _birthDay = null;
+        _birthYear = null;
+        _birthdayType = 'unknown';
+      } else if (_isAdoptionDay) {
+        _birthdayType = 'adoptionDay';
+      } else if (_birthMonth != null && _birthDay != null && _birthYear != null) {
+        _birthdayType = 'exact';
+      } else if (_birthMonth != null && _birthDay != null) {
+        _birthdayType = 'monthDayOnly';
+      }
+    });
+  }
+
+  void _onBirthFieldChanged() {
+    setState(() {
+      if (_birthMonth != null && _birthDay != null && _birthYear != null) {
+        _birthdayType = 'exact';
+      } else if (_birthMonth != null && _birthDay != null) {
+        _birthdayType = 'monthDayOnly';
+      }
+    });
+  }
+
+  String? _validateBirthday() {
+    if (_isUnknownBirthday || _isAdoptionDay) return null;
+    
+    if (_birthMonth == null && _birthDay == null) return null;
+    
+    if (_birthMonth != null && (_birthMonth! < 1 || _birthMonth! > 12)) {
+      return '請輸入 1-12 月';
+    }
+    
+    if (_birthDay != null) {
+      int maxDay = _getDaysInMonth(_birthMonth ?? 1, _birthYear);
+      if (_birthDay! < 1 || _birthDay! > maxDay) {
+        return '請輸入正確日期';
+      }
+    }
+    
+    return null;
+  }
+
   Widget _buildPickOption({required IconData icon, required String label, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
@@ -157,24 +234,29 @@ class _AddCatPageState extends State<AddCatPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // 頭像 - 可點擊選擇照片
+            // 頭像
             GestureDetector(
               onTap: _pickImage,
               child: Stack(
                 children: [
-                  // 頭像圓形
                   _avatarPath != null
                       ? CircleAvatar(
                           radius: 60,
-                          backgroundImage: FileImage(File(_avatarPath!)),
                           backgroundColor: Colors.grey.shade200,
+                          child: ClipOval(
+                            child: Image.file(
+                              File(_avatarPath!),
+                              width: 120,
+                              height: 120,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         )
                       : CircleAvatar(
                           radius: 60,
                           backgroundColor: Colors.grey.shade200,
                           child: const Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
                         ),
-                  // 相機按鈕
                   Positioned(
                     right: 0,
                     bottom: 0,
@@ -208,6 +290,10 @@ class _AddCatPageState extends State<AddCatPage> {
 
             // 品種
             _buildBreedSelector(),
+            const SizedBox(height: 24),
+
+            // 生日區塊
+            _buildBirthdaySection(),
             const SizedBox(height: 48),
 
             // 添加按鈕
@@ -223,7 +309,6 @@ class _AddCatPageState extends State<AddCatPage> {
                   ),
                 ),
                 onPressed: () async {
-                  // 驗證名字
                   final name = _nameController.text.trim();
                   if (name.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -235,7 +320,17 @@ class _AddCatPageState extends State<AddCatPage> {
                     return;
                   }
                   
-                  // 建立新貓咪
+                  final birthdayError = _validateBirthday();
+                  if (birthdayError != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(birthdayError),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
+                  
                   final cat = Cat(
                     id: DateTime.now().millisecondsSinceEpoch.toString(),
                     name: name,
@@ -244,9 +339,12 @@ class _AddCatPageState extends State<AddCatPage> {
                     age: _age,
                     ageStage: _getAgeStage(_age),
                     avatarPath: _avatarPath,
+                    birthMonth: _birthMonth,
+                    birthDay: _birthDay,
+                    birthYear: _birthYear,
+                    birthdayType: _birthdayType,
                   );
                   
-                  // 儲存
                   final prefs = await SharedPreferences.getInstance();
                   final catService = CatService(prefs);
                   await catService.addCat(cat);
@@ -432,6 +530,161 @@ class _AddCatPageState extends State<AddCatPage> {
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildBirthdaySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          children: [
+            Text('🎂', style: TextStyle(fontSize: 20)),
+            SizedBox(width: 8),
+            Text('她的生日', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '不知道也沒關係，我們可以先用領養日記錄她的小日子。',
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+        ),
+        const SizedBox(height: 16),
+
+        // 我不知道生日
+        CheckboxListTile(
+          value: _isUnknownBirthday,
+          onChanged: (v) {
+            setState(() => _isUnknownBirthday = v ?? false);
+            _onBirthdayTypeChanged();
+          },
+          title: const Text('我不知道生日'),
+          controlAffinity: ListTileControlAffinity.leading,
+          contentPadding: EdgeInsets.zero,
+        ),
+
+        // 用領養日當生日
+        CheckboxListTile(
+          value: _isAdoptionDay,
+          onChanged: _isUnknownBirthday ? null : (v) {
+            setState(() => _isAdoptionDay = v ?? false);
+            _onBirthdayTypeChanged();
+          },
+          title: const Text('用領養日當生日'),
+          controlAffinity: ListTileControlAffinity.leading,
+          contentPadding: EdgeInsets.zero,
+        ),
+
+        if (!_isUnknownBirthday && !_isAdoptionDay) ...[
+          const SizedBox(height: 16),
+          // 月份
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('月份', style: TextStyle(fontSize: 14)),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: DropdownButton<int?>(
+                        value: _birthMonth,
+                        hint: const Text('選擇月份'),
+                        isExpanded: true,
+                        items: List.generate(12, (i) {
+                          final m = i + 1;
+                          return DropdownMenuItem(value: m, child: Text('$m 月'));
+                        }),
+                        onChanged: (v) {
+                          setState(() {
+                            _birthMonth = v;
+                            if (_birthDay != null) {
+                              final maxDay = _getDaysInMonth(v ?? 1, _birthYear);
+                              if (_birthDay! > maxDay) _birthDay = maxDay;
+                            }
+                          });
+                          _onBirthFieldChanged();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('日期', style: TextStyle(fontSize: 14)),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: DropdownButton<int?>(
+                        value: _birthDay,
+                        hint: const Text('選擇日期'),
+                        isExpanded: true,
+                        items: _birthMonth != null
+                            ? List.generate(_getDaysInMonth(_birthMonth!, _birthYear), (i) {
+                                final d = i + 1;
+                                return DropdownMenuItem(value: d, child: Text('$d 日'));
+                              })
+                            : [],
+                        onChanged: (v) {
+                          setState(() => _birthDay = v);
+                          _onBirthFieldChanged();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // 年份（可選）
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('年份（可選）', style: TextStyle(fontSize: 14)),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: DropdownButton<int?>(
+                  value: _birthYear,
+                  hint: const Text('選擇年份'),
+                  isExpanded: true,
+                  items: List.generate(25, (i) {
+                    final y = DateTime.now().year - i;
+                    return DropdownMenuItem(value: y, child: Text('$y 年'));
+                  }),
+                  onChanged: (v) {
+                    setState(() {
+                      _birthYear = v;
+                      if (_birthMonth == 2 && _birthDay == 29 && !_isLeapYear(v!)) {
+                        _birthDay = 28;
+                      }
+                    });
+                    _onBirthFieldChanged();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
