@@ -134,6 +134,14 @@ class TermsOfServicePage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
+
+            // 動物福利聲明
+            _buildSection(
+              emoji: '🐾',
+              title: '五之一、動物福利聲明',
+              content: '''【重要】\n\n本 App 的設計初衷是促進人類與貓咪之間的理解與情感連結。\n\n我們堅決反對任何形式之動物虐待。\n\n翻譯結果不應被用於：\n• 忽略或駁回貓咪的基本需求（食物、水、關注、獸醫照護）\n• 將貓咪的行為變化歸因於翻譯結果而延誤就醫\n• 作為減少對貓咪關注或照護的正當理由\n• 將翻譯結果作為延誤處理貓咪健康問題的藉口\n\n請記住：\n本 App 是輔助工具，不能取代您對寵物的基本責任與愛護。\n如果您的貓咪有任何疑慮，請以獸醫專業意見為主。''',
+            ),
+
             // 禁止事項
             _buildSection(
               emoji: '🚫',

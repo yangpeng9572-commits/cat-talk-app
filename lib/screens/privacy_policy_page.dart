@@ -167,6 +167,54 @@ class PrivacyPolicyPage extends StatelessWidget {
 
             const SizedBox(height: 20),
 
+
+            // 您的權利
+            _buildSection(
+              emoji: '👤',
+              title: '您的權利',
+              content: '''根據《個人資料保護法》（中華民國）或其他適用法律，您享有以下權利：
+
+【查閱權】
+您有權隨時查閱本 App 儲存的您的個人資料與貓咪資料。
+
+【更正權】
+您有權要求更正不正確的個人資料。
+
+【刪除權】
+您有權要求刪除您的帳戶與所有相關資料。
+刪除後，所有資料將從我們的系統中永久移除。
+
+【資料可攜權】
+您有權要求輸出您的資料副本。
+
+【如何行使權利】
+請通過 App 內的回饋功能提交您的請求。
+我們會在 30 天內處理您的請求。''',
+            ),
+
+            const SizedBox(height: 20),
+
+            // 第三方 SDK 說明
+            _buildSection(
+              emoji: '🔗',
+              title: '第三方服務說明',
+              content: '''本 App 使用以下第三方服務：
+
+【Google ML Kit（姿勢偵測）】
+用於姿勢參考功能。
+隱私政策：https://policies.google.com/privacy
+
+【Firebase（Google Analytics）】
+用於匿名使用統計與崩溃報告。
+隱私政策：https://firebase.google.com/support/privacy
+
+【作業系統麥克風權限】
+錄音功能需要您的主動授權。
+作業系統的隱私設定不受本政策約束，請參考您的裝置設定。''',
+            ),
+
+            const SizedBox(height: 20),
+
             // 聯繫我們
             _buildSection(
               emoji: '💬',
