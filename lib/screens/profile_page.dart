@@ -8,7 +8,9 @@ import '../theme/kawaii_theme.dart';
 import '../widgets/onboarding_overlay.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  const ProfilePage({super.key, this.onReplayOnboarding});
+
+  final VoidCallback? onReplayOnboarding;
 
   @override
   Widget build(BuildContext context) {
@@ -108,14 +110,15 @@ class ProfilePage extends StatelessWidget {
                 icon: Icons.replay,
                 title: '再看一次新手教程',
                 onTap: () async {
-                  // 重置新手教學狀態並顯示
+                  // 重置新手教學狀態並通知首頁重新顯示
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setBool('hasSeenOnboarding', false);
+                  // 通知 HomePage 重新顯示 onboarding
+                  widget.onReplayOnboarding?.call();
                   if (context.mounted) {
-                    Navigator.pop(context); // 返回首頁
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text('新手教程已重置，向下滑動即可查看 🐾'),
+                        content: const Text('新手教程已重新開啟 🐾'),
                         backgroundColor: KawaiiTheme.primaryPink,
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(

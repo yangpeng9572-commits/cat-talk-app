@@ -327,6 +327,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     setState(() => _showOnboarding = false);
   }
 
+
+  /// 公開方法：供 MainScreen 呼叫重新播放新手教程
+  void replayOnboarding() {
+    setState(() => _showOnboarding = true);
+  }
+
   @override
   void dispose() {
     _pulseController.dispose();
@@ -892,11 +898,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: () async {
+                      final result = await Navigator.push<bool>(
                         context,
                         MaterialPageRoute(builder: (context) => const AddCatPage()),
                       );
+                      if (result == true) {
+                        await _loadCatData();
+                        if (mounted) setState(() {});
+                      }
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('新增我的貓咪'),

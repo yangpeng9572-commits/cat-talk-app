@@ -8,7 +8,7 @@
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
     
     <application
-        android:label="貓語通"
+        android:label="喵心語"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

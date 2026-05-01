@@ -48,6 +48,23 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
+  // callback 供 ProfilePage 使用：切回首頁並重播 onboarding
+  void _handleReplayOnboarding() {
+    // 切回首頁 tab
+    if (_currentIndex != 0) {
+      setState(() => _currentIndex = 0);
+    }
+    // 通知 HomePage 顯示 onboarding（透過 public method）
+    (_pages[0] as HomePage).replayOnboarding();
+  }
+
+  final List<Widget> _pages = [
+    const HomePage(),
+    const CatsPage(),
+    const HistoryPage(),
+    ProfilePage(onReplayOnboarding: _handleReplayOnboarding),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -60,13 +77,6 @@ class _MainScreenState extends State<MainScreen> {
     await pushService.checkBirthdayReminders();
   }
 
-  final List<Widget> _pages = const [
-    HomePage(),
-    CatsPage(),
-    HistoryPage(),
-    ProfilePage(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +86,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: KawaiiTheme.cardBackground,
           boxShadow: [
             BoxShadow(
               color: KawaiiTheme.primaryPink.withOpacity(0.15),
@@ -91,7 +101,7 @@ class _MainScreenState extends State<MainScreen> {
             currentIndex: _currentIndex,
             onTap: (index) => setState(() => _currentIndex = index),
             type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.white,
+            backgroundColor: KawaiiTheme.cardBackground,
             selectedItemColor: KawaiiTheme.primaryPink,
             unselectedItemColor: KawaiiTheme.textLight,
             selectedLabelStyle: const TextStyle(
