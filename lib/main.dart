@@ -7,6 +7,11 @@ import 'screens/profile_page.dart';
 import 'theme/kawaii_theme.dart';
 import 'services/push_notification_service.dart';
 
+/// Debug Tools 開關：flutter run --dart-define=ENABLE_DEBUG_TOOLS=true
+/// release 模式下此值為 false（kDebugMode 為 false）
+const bool kEnableDebugTools =
+    bool.fromEnvironment('ENABLE_DEBUG_TOOLS', defaultValue: false);
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   

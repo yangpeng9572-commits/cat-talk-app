@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../debug/debug_entry_detector.dart';
+import '../debug/debug_verification_screen.dart';
 import '../models/cat.dart';
 import '../models/translation.dart';
 import '../models/translation_result.dart';
@@ -109,6 +112,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   // 生日服務
   final CatBirthdayService _birthdayService = CatBirthdayService();
 
+  // Debug 入口偵測器（長按 5 次）
+  late final DebugEntryDetector _debugEntryDetector;
+
   // Timer for max recording duration
   Timer? _maxDurationTimer;
 
@@ -132,6 +138,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _waveController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
+    );
+
+    // 初始化 Debug 入口偵測器（只有在 debug mode + ENABLE_DEBUG_TOOLS 時才會運作）
+    _debugEntryDetector = DebugEntryDetector(
+      onTriggered: () {
+        debugPrint('[Debug] Debug 驗收工具已觸發');
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const DebugVerificationScreen(),
+          ),
+        );
+      },
     );
   }
 
@@ -919,7 +937,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            _buildCatSelector(),
+            // Debug 入口：長按 / 點擊貓咪選擇器區域 5 次
+            if (kDebugMode && kEnableDebugTools)
+              GestureDetector(
+                onTap: () => _debugEntryDetector.recordTap(),
+                child: _buildCatSelector(),
+              )
+            else
+              _buildCatSelector(),
             // 推播點擊提示（2秒後消失）
             if (_showNotificationHint)
               _buildNotificationHintBanner(),
