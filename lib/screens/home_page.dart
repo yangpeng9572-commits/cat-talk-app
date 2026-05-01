@@ -43,6 +43,7 @@ import '../widgets/onboarding_overlay.dart';
 import '../widgets/achievement_celebration.dart';
 import '../widgets/daily_task_card.dart';
 import '../theme/kawaii_theme.dart';
+import '../screens/cat_pose_camera_page.dart';
 
 // DEBUG mode - set to true to show debug info
 const bool kIsDebugMode = true;
@@ -969,6 +970,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     _buildInteractionCard(),
                     _buildBirthdayCard(),
                     _buildCatWorldCard(),
+                    _buildPoseCameraCard(),
                     if (selectedCat != null) _buildLoveMeterCard(),
                     // 今日任務卡片
                     DailyTaskCard(
@@ -1767,6 +1769,74 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+
+  /// 貓咪姿勢拍照入口卡片
+  Widget _buildPoseCameraCard() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CatPoseCameraPage()),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF8B7FBF), Color(0xFF6B5B95)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6B5B95).withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Text('📷', style: TextStyle(fontSize: 28)),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    '🐱 貓咪姿勢拍照',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '拍下主子的姿勢，之後可以用來分析狀態',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
 
   /// 她喜歡你嗎 💗 入口卡片
   Widget _buildLoveMeterCard() {
