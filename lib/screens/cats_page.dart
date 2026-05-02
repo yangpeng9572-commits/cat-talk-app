@@ -4,6 +4,7 @@ import '../models/cat.dart';
 import '../services/cat_service.dart';
 import '../theme/kawaii_theme.dart';
 import 'add_cat_page.dart';
+import 'edit_cat_page.dart';
 
 class CatsPage extends StatefulWidget {
   const CatsPage({super.key});
@@ -100,9 +101,15 @@ class _CatsPageState extends State<CatsPage> {
 
   Widget _buildCatCard(Cat cat) {
     return GestureDetector(
-      onTap: () {
-        // 選中這隻貓咪
-        Navigator.pop(context, cat);
+      onTap: () async {
+        // 編輯這隻貓咪
+        final result = await Navigator.push<Cat>(
+          context,
+          MaterialPageRoute(builder: (context) => EditCatPage(cat: cat)),
+        );
+        if (result != null) {
+          _loadCats(); // 重新載入貓咪列表
+        }
       },
       child: Container(
         decoration: BoxDecoration(
