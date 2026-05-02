@@ -241,5 +241,5 @@ void main() {
 
 String _getTodayKey() {
   final now = DateTime.now();
-  return '${now.year}${now.month}${now.day}';
+  return '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
 }
