@@ -114,7 +114,7 @@ class ProfilePage extends StatelessWidget {
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setBool('hasSeenOnboarding', false);
                   // 通知 HomePage 重新顯示 onboarding
-                  widget.onReplayOnboarding?.call();
+                  onReplayOnboarding?.call();
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(

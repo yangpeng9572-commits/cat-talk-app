@@ -46,6 +46,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final _homePageKey = GlobalKey<HomePageState>();
   int _currentIndex = 0;
 
   // callback 供 ProfilePage 使用：切回首頁並重播 onboarding
@@ -54,12 +55,15 @@ class _MainScreenState extends State<MainScreen> {
     if (_currentIndex != 0) {
       setState(() => _currentIndex = 0);
     }
-    // 通知 HomePage 顯示 onboarding（透過 public method）
-    (_pages[0] as HomePage).replayOnboarding();
+    // 等下一幀再通知 HomePage 顯示 onboarding（確保 IndexedStack 已切換完成）
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _homePageKey.currentState?.replayOnboarding();
+    });
   }
 
-  final List<Widget> _pages = [
-    const HomePage(),
+  late final List<Widget> _pages = [
+    HomePage(key: _homePageKey),
     const CatsPage(),
     const HistoryPage(),
     ProfilePage(onReplayOnboarding: _handleReplayOnboarding),
