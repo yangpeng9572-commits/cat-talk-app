@@ -949,7 +949,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
             // Debug 入口：長按 / 點擊貓咪選擇器區域 5 次
-            if (kDebugMode && kEnableDebugTools)
+            if (kDebugMode)
               GestureDetector(
                 onTap: () => _debugEntryDetector.recordTap(),
                 child: _buildCatSelector(),

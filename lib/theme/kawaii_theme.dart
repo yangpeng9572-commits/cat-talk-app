@@ -128,7 +128,7 @@ class KawaiiTheme {
     ),
     
     // 卡片
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: cardBackground,
       elevation: 0,
       shape: RoundedRectangleBorder(
