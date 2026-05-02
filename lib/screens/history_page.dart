@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/translation_result.dart';
 import '../models/cat.dart';
 import '../services/translation_history_service.dart';
@@ -18,10 +19,14 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   void initState() {
     super.initState();
-    // 載入 Mock 資料（未來改為從資料庫讀取）
-    if (_historyService.count == 0) {
-      _historyService.addMockData();
-    }
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    await _historyService.init(prefs);
+    if (!mounted) return;
+    setState(() {});
   }
 
   @override
