@@ -318,20 +318,7 @@ class _HistoryPageState extends State<HistoryPage> {
           _historyService.updateWithFeedback(result, feedback);
           setState(() {});
           // 顯示感謝
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.green),
-                  const SizedBox(width: 12),
-                  Expanded(child: Text('謝謝修正，之後會更懂牠 🐱')),
-                ],
-              ),
-              backgroundColor: Colors.white,
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 2),
-            ),
-          );
+          TopToast.success(context, message: '謝謝修正，之後會更懂牠 🐱');
         },
         onClose: () => Navigator.pop(context),
       ),

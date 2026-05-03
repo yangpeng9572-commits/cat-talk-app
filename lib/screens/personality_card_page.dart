@@ -103,9 +103,7 @@ class _PersonalityCardPageState extends State<PersonalityCardPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('分享卡生成失敗，請稍後再試 🥺')),
-        );
+        TopToast.error(context, message: '分享卡生成失敗，請稍後再試 🥺');
       }
     } finally {
       if (mounted) {

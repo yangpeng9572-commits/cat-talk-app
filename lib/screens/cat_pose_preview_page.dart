@@ -206,23 +206,11 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
       if (!mounted) return;
 
       if (result != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('已保存照片，之後可用於姿勢辨識 🐾'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        TopToast.success(context, message: '已保存照片，之後可用於姿勢辨識 🐾');
         // 返回上一頁（或是首頁，取決於導航堆疊）
         Navigator.pop(context);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('照片儲存失敗，請再試一次'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        TopToast.error(context, message: '照片儲存失敗，請再試一次');
       }
     } finally {
       if (mounted) {
@@ -237,13 +225,7 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
 
     if (!status.isGranted) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('相機開啟失敗，請確認權限後再試一次。'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        TopToast.error(context, message: '相機開啟失敗，請確認權限後再試一次。');
       }
       return;
     }
@@ -265,13 +247,7 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
 
       if (!File(imagePath).existsSync()) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('照片存取失敗，請確認權限後再試一次。'),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          TopToast.error(context, message: '照片存取失敗，請確認權限後再試一次。');
         }
         return;
       }
@@ -291,12 +267,7 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('相機開啟失敗，請確認權限後再試一次。'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
+        TopToast.error(context, message: '相機開啟失敗，請確認權限後再試一次。');
         );
       }
     }

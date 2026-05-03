@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../theme/kawaii_theme.dart';
+import '../widgets/top_toast.dart';
 import '../widgets/cat_pose_camera_frame.dart';
 import 'cat_pose_preview_page.dart';
 
@@ -148,13 +149,7 @@ class _CatPoseCameraPageState extends State<CatPoseCameraPage> {
 
     if (!status.isGranted) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('相機開啟失敗，請確認權限後再試一次。'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        TopToast.error(context, message: '相機開啟失敗，請確認權限後再試一次。');
       }
       return;
     }
@@ -178,13 +173,7 @@ class _CatPoseCameraPageState extends State<CatPoseCameraPage> {
       // 3. 檢查檔案是否存在
       if (!File(imagePath).existsSync()) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('照片存取失敗，請確認權限後再試一次。'),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          TopToast.error(context, message: '照片存取失敗，請確認權限後再試一次。');
         }
         return;
       }
@@ -201,13 +190,7 @@ class _CatPoseCameraPageState extends State<CatPoseCameraPage> {
     } catch (e) {
       // 5. 發生錯誤
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('相機開啟失敗，請確認權限後再試一次。'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        TopToast.error(context, message: '相機開啟失敗，請確認權限後再試一次。');
       }
     }
   }

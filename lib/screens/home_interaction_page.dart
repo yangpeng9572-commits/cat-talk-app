@@ -98,9 +98,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
   }
 
   void _showFeedbackMessage(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
-    );
+    TopToast.show(context, message: msg, backgroundColor: const Color(0xFFFF8FAB));
   }
 
   Future<void> _updateCatState() async {
@@ -273,9 +271,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
 
     if (result != null && mounted) {
       setState(() => _shareCardPath = result);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('分享卡已生成 💕'), duration: const Duration(seconds: 2)),
-      );
+      TopToast.success(context, message: '分享卡已生成 💕');
     }
   }
 

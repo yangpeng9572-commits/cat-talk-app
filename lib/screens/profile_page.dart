@@ -64,16 +64,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                     onPressed: () {
                       // 升級 - 未來功能
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('高級版功能即將推出 🐾'),
-                          backgroundColor: KawaiiTheme.primaryPink,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      );
+                      TopToast.info(context, message: '高級版功能即將推出 🐾');
                     },
                     child: const Text('她的小世界 Plus'),
                   ),
@@ -116,16 +107,7 @@ class ProfilePage extends StatelessWidget {
                   // 通知 HomePage 重新顯示 onboarding
                   onReplayOnboarding?.call();
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('新手教程已重新開啟 🐾'),
-                        backgroundColor: KawaiiTheme.primaryPink,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    );
+                    TopToast.success(context, message: '新手教程已重新開啟 🐾');
                   }
                 },
               ),
@@ -236,16 +218,7 @@ class ProfilePage extends StatelessWidget {
             ),
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('請透過設定 > 應用程式 > 喵心語 刪除所有資料 🐾'),
-                  backgroundColor: Colors.red,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              );
+              TopToast.error(context, message: '請透過設定 > 應用程式 > 喵心語 刪除所有資料 🐾');
             },
             child: const Text('確定刪除'),
           ),
@@ -283,16 +256,7 @@ class ProfilePage extends StatelessWidget {
             ),
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('退出功能即將開放 🐾'),
-                  backgroundColor: KawaiiTheme.primaryPink,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              );
+              TopToast.info(context, message: '退出功能即將開放 🐾');
             },
             child: const Text('確定退出'),
           ),

@@ -46,18 +46,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
       _bondService.addBond(_currentCatId!, 'summer_window');
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '和貓咪一起享受涼涼的風～ 🐱💨',
-          style: const TextStyle(fontSize: 14),
-        ),
-        backgroundColor: const Color(0xFF87CEEB),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    TopToast.show(context, message: '和貓咪一起享受涼涼的風～ 🐱💨', backgroundColor: const Color(0xFF87CEEB));
   }
 
   @override

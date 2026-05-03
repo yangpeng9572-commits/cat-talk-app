@@ -11,6 +11,7 @@ import '../services/memory_card_service.dart';
 import '../services/seasonal_event_service.dart';
 import '../services/cat_birthday_service.dart';
 import '../theme/kawaii_theme.dart';
+import '../widgets/top_toast.dart';
 import 'memory_cards_page.dart';
 import 'summer_window_page.dart';
 
@@ -216,18 +217,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
   }
 
   void _showToast(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(fontSize: 14),
-        ),
-        backgroundColor: KawaiiTheme.primaryPink,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    TopToast.show(context, message: message, backgroundColor: KawaiiTheme.primaryPink);
   }
 
   void _showPaidDialog() {
@@ -436,14 +426,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
   Widget _buildBirthdayEventCard() {
     return GestureDetector(
       onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('生日派對功能即將開放 🐾'),
-            backgroundColor: Color(0xFFFF8FAB),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-          ),
-        );
+        TopToast.info(context, message: '生日派對功能即將開放 🐾');
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

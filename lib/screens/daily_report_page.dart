@@ -14,6 +14,7 @@ import '../services/translation_history_service.dart';
 import '../services/personality_analysis_service.dart';
 import '../widgets/share_card_widget.dart';
 import '../theme/kawaii_theme.dart';
+import '../widgets/top_toast.dart';
 import 'personality_card_page.dart';
 
 /// 每日貓咪報告頁面
@@ -1129,16 +1130,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
   /// 顯示分享選單
   void _showShareMenu() {
     if (_currentDiary == null || _currentCat == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('今天還沒有小日記可以分享 🐾'),
-          backgroundColor: KawaiiTheme.primaryPink,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
-          ),
-        ),
-      );
+      TopToast.info(context, message: '今天還沒有小日記可以分享 🐾');
       return;
     }
 
@@ -1209,29 +1201,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
     if (_currentDiary == null || _currentCat == null) return;
 
     // Show loading
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(width: 12),
-            Text('產生分享卡片中...'),
-          ],
-        ),
-        backgroundColor: KawaiiTheme.primaryPink,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
-        ),
-      ),
-    );
+    TopToast.show(context, message: '產生分享卡片中...', backgroundColor: KawaiiTheme.primaryPink);
 
     // Get top speech (from latest translation if available)
     final topSpeech = _report?.totalTranslations != null && _report!.totalTranslations > 0
@@ -1317,22 +1287,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
   /// 顯示分享錯誤
   void _showShareError() {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(Icons.error_outline, color: Colors.white, size: 20),
-            SizedBox(width: 12),
-            Text('分享失敗了，請再試一次 🐾'),
-          ],
-        ),
-        backgroundColor: Colors.red.shade400,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
-        ),
-      ),
-    );
+    TopToast.error(context, message: '分享失敗了，請再試一次 🐾');
   }
 
   /// 取得情緒句
