@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 貓語通 Kawaii 風格主題
+/// 喵心語 Cat Talk Kawaii 風格主題
 /// 柔和 pastel 色調，圓角設計，可愛裝飾
 class KawaiiTheme {
   // ===== 主色系 =====
