@@ -293,8 +293,8 @@ $tags''';
       canvas.drawRect(Rect.fromLTWH(0, 0, 1080, 1080), bgPaint);
 
       // 頂部裝飾愛心
-      _drawHeart(canvas, 100, 80, 40, const Color(0xFFFF8FAB).withOpacity(0.3));
-      _drawHeart(canvas, 980, 120, 30, const Color(0xFFFF8FAB).withOpacity(0.2));
+      _drawHeart(canvas, 100, 80, 40, const Color(0xFFFF8FAB).withValues(alpha: 0.3));
+      _drawHeart(canvas, 980, 120, 30, const Color(0xFFFF8FAB).withValues(alpha: 0.2));
 
       // 主卡片背景（白色圓角）
       final cardPaint = Paint()..color = Colors.white;
@@ -306,7 +306,7 @@ $tags''';
 
       // 卡片陰影
       final shadowPaint = Paint()
-        ..color = Colors.black.withOpacity(0.1)
+        ..color = Colors.black.withValues(alpha: 0.1)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);
       canvas.drawRRect(cardRRect, shadowPaint);
       canvas.drawRRect(cardRRect, cardPaint);
@@ -341,7 +341,7 @@ $tags''';
       );
 
       // 個性類型標籤
-      final labelBgPaint = Paint()..color = Colors.white.withOpacity(0.25);
+      final labelBgPaint = Paint()..color = Colors.white.withValues(alpha: 0.25);
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           const Rect.fromLTWH(340, 270, 400, 60),

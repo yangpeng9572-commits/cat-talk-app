@@ -93,7 +93,7 @@ class _MainScreenState extends State<MainScreen> {
           color: KawaiiTheme.cardBackground,
           boxShadow: [
             BoxShadow(
-              color: KawaiiTheme.primaryPink.withOpacity(0.15),
+              color: KawaiiTheme.primaryPink.withValues(alpha: 0.15),
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
@@ -154,7 +154,7 @@ class _PawIcon extends StatelessWidget {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: KawaiiTheme.primaryPink.withOpacity(0.15),
+        color: KawaiiTheme.primaryPink.withValues(alpha: 0.15),
         shape: BoxShape.circle,
       ),
       child: const Icon(
