@@ -202,7 +202,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
             width: 160,
             height: 160,
             decoration: BoxDecoration(
-              color: Colors.orange.shade50,
+              color: KawaiiTheme.softPink.withValues(alpha: 0.3),
               shape: BoxShape.circle,
             ),
             child: const Center(

@@ -152,7 +152,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: KawaiiTheme.softPink,
+              color: KawaiiTheme.softPink.withValues(alpha: 0.3),
               shape: BoxShape.circle,
             ),
             child: const Text(
@@ -185,7 +185,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: KawaiiTheme.softPink,
+              color: KawaiiTheme.softPink.withValues(alpha: 0.3),
               shape: BoxShape.circle,
             ),
             child: const Text(
