@@ -37,13 +37,15 @@ OpenClaw 不直接修改 Windows repo。
 
 - Stable branch: main
 - Stable remote: origin/main
-- 最新確認穩定 commit: ef7a750（handoff 更新）
+- 最新確認穩定 commit: bce2395（P0-4 貓咪選擇滑動修復）
 - 已推送 commit:
   - `af17dce`：cat management navigation and profile flow
   - `3baf846`：delete cat action in edit page
   - `0373aba`：summer window activity page
   - `e6011de`：agent monitor dashboard MVP
   - `ef7a750`：handoff reset to IDLE
+  - `bce2395`：P0-4 貓咪選擇滑動修復
+  - `6652a28`：handoff WAITING_FOR_HERMES
 
 ---
 
@@ -56,6 +58,9 @@ OpenClaw 不直接修改 Windows repo。
 - P3-1 ✅ 全批次完成
 - P3-2 ✅ PASS
 - TOOL-1 ✅ PASS
+
+### 執行中（等待 Hermes 驗收）
+- P0-4：全 App 超出螢幕都必須能滑動（commit bce2395）
 
 ### 等待 Hermes 手機實測回歸
 - P0-1 新手教程 replayOnboarding
@@ -72,9 +77,8 @@ OpenClaw 不直接修改 Windows repo。
 ## 是否允許 OpenClaw 開新任務
 
 - P0-1 + P0-3 已由 Hermes 驗收 PASS
-- handoff 已重置為 IDLE
-- 下一個候選任務：P0-4（全 App 滑動問題）或 P0-5（提示改上方）
-- 等待 Andy 確認方向
+- P0-4 已完成，等待 Hermes 驗收
+- 下一個候選任務（需等 Hermes PASS）：P0-5（完成提示改上方）
 
 ---
 
@@ -88,7 +92,6 @@ Windows repo 目前可能有以下 untracked，不得加入 commit：
 
 ## OpenClaw 工作樹狀態
 
-- git status --short：CLEAN（無 modified/untracked）
-- 所有 withOpacity 已清除（P3-1 完成）
-- handoff 已重置為 IDLE
-- 可接收新任務
+- git status --short：CLEAN
+- handoff 狀態：WAITING_FOR_HERMES
+- P0-4 完成，等待 Hermes 驗收
