@@ -7,31 +7,36 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-04 05:17:02
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw (小龍女)
+- Last updated at: 2026-05-04 05:22 AM (Asia/Taipei)
 
 ---
 
-## 本輪任務：P3-3 夏日窗邊活動升級 — TopToast import 修復
+## 本輪任務：P2-6 成就頁進度接入 — Hermes 驗收請求
 
 ### 任務 ID
-- Task ID: P3-3
-- Task name: 夏日窗邊活動升級
+- Task ID: P2-6
+- Task name: 成就頁加入解鎖條件與進度
 
 ### 完成的修改
 
-- **Commit:** `a9b55ce`
+- **Commit:** `0fe20f2`
 - **Branch:** main
+- **代碼已完成時間：** 2026-05-04 前次 session（已 push）
 
 ### 修改內容
 
-修正 `lib/screens/summer_window_page.dart` 缺少 `import '../widgets/top_toast.dart';` 的問題。`SummerWindowPage` 使用了 `TopToast.show()` 但未引入 widget，若程式碼走到第 49 行 `_interact()` 時會在 Runtime 出錯。
+成就頁已完整接入 `AchievementService`，顯示：
+- 等級名稱（`AchievementSystem.getLevel()`）
+- 等級進度條（`AchievementSystem.getLevelProgress()`）
+- 已解鎖 / 總成就數
+- 各成就的 unlock 狀態與圖示
 
 ### 修改檔案
 
-- `lib/screens/summer_window_page.dart`（+1 行 import）
+- `lib/screens/achievement_page.dart`（接入 AchievementService）
 
 ### Required Hermes Actions
 
@@ -39,8 +44,8 @@ Hermes 每次驗收前應先讀取本檔案。
 1. `git pull --ff-only`
 2. `flutter analyze`
 3. `flutter test`
-4. 驗證：進入夏日窗邊頁，點擊「一起吹涼風」按鈕，TopToast 應正確顯示
+4. 驗證：進入成就頁，確認顯示正確的等級、進度條、已解鎖成就數
 
 ---
 
-_Last updated: 2026-05-04 05:10 AM (Asia/Taipei)_
+_Last updated: 2026-05-04 05:22 AM (Asia/Taipei)_
