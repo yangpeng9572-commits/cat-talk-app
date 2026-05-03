@@ -222,7 +222,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -327,8 +327,8 @@ class _DailyReportPageState extends State<DailyReportPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            KawaiiTheme.softPink.withOpacity(0.8),
-            KawaiiTheme.peach.withOpacity(0.6),
+            KawaiiTheme.softPink.withValues(alpha: 0.8),
+            KawaiiTheme.peach.withValues(alpha: 0.6),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -336,7 +336,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
         borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
         boxShadow: [
           BoxShadow(
-            color: KawaiiTheme.primaryPink.withOpacity(0.2),
+            color: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -366,7 +366,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(KawaiiTheme.radiusMedium),
             ),
             child: Column(
@@ -401,7 +401,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
             ),
             child: Row(
@@ -475,7 +475,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
                       report.dominantEmotion!.label,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
@@ -502,7 +502,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: const Center(
@@ -528,7 +528,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
                       cat.breed,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
@@ -538,7 +538,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -565,7 +565,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -620,7 +620,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -671,10 +671,10 @@ class _DailyReportPageState extends State<DailyReportPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Color(report.dominantEmotion!.colorValue).withOpacity(0.1),
+                color: Color(report.dominantEmotion!.colorValue).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Color(report.dominantEmotion!.colorValue).withOpacity(0.3),
+                  color: Color(report.dominantEmotion!.colorValue).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -806,7 +806,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -856,7 +856,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -867,7 +867,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -966,7 +966,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
             margin: const EdgeInsets.only(top: 16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: KawaiiTheme.softPink.withOpacity(0.3),
+              color: KawaiiTheme.softPink.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -975,7 +975,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: KawaiiTheme.primaryPink.withOpacity(0.2),
+                    color: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -1097,7 +1097,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
           boxShadow: [
             BoxShadow(
-              color: KawaiiTheme.primaryPink.withOpacity(0.2),
+              color: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -1378,9 +1378,9 @@ class _ShareOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -1411,7 +1411,7 @@ class _ShareOption extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 13,
-                      color: color.withOpacity(0.7),
+                      color: color.withValues(alpha: 0.7),
                     ),
                   ),
                 ],

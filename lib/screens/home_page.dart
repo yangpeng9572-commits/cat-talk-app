@@ -896,7 +896,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: KawaiiTheme.softPink.withOpacity(0.3),
+                      color: KawaiiTheme.softPink.withValues(alpha: 0.3),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -1105,8 +1105,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  KawaiiTheme.primaryPink.withOpacity(0.8),
-                  KawaiiTheme.coral.withOpacity(0.8),
+                  KawaiiTheme.primaryPink.withValues(alpha: 0.8),
+                  KawaiiTheme.coral.withValues(alpha: 0.8),
                 ],
               ),
             ),
@@ -1212,8 +1212,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            KawaiiTheme.softPink.withOpacity(0.6),
-            KawaiiTheme.peach.withOpacity(0.4),
+            KawaiiTheme.softPink.withValues(alpha: 0.6),
+            KawaiiTheme.peach.withValues(alpha: 0.4),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -1221,7 +1221,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
         boxShadow: [
           BoxShadow(
-            color: KawaiiTheme.primaryPink.withOpacity(0.1),
+            color: KawaiiTheme.primaryPink.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1256,7 +1256,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
                 ),
                 child: Row(
@@ -1280,7 +1280,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
                 ),
                 child: Row(
@@ -1367,7 +1367,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: FractionallySizedBox(
@@ -1461,7 +1461,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6B5B95).withOpacity(0.3),
+              color: const Color(0xFF6B5B95).withValues(alpha: 0.3),
               blurRadius: 15,
               spreadRadius: 2,
             ),
@@ -1473,7 +1473,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -1525,7 +1525,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              KawaiiTheme.primaryPink.withOpacity(0.9),
+              KawaiiTheme.primaryPink.withValues(alpha: 0.9),
               KawaiiTheme.coral,
             ],
             begin: Alignment.topLeft,
@@ -1534,7 +1534,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
           boxShadow: [
             BoxShadow(
-              color: KawaiiTheme.primaryPink.withOpacity(0.3),
+              color: KawaiiTheme.primaryPink.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -1545,7 +1545,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Text('💕', style: TextStyle(fontSize: 28)),
@@ -1568,7 +1568,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     '看看${selectedCat?.name ?? "你的貓"}今天過得怎麼樣',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
                   ),
                 ],
@@ -1610,7 +1610,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFFFB6C1).withOpacity(0.3),
+              color: const Color(0xFFFFB6C1).withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -1621,7 +1621,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Text('🐱', style: TextStyle(fontSize: 28)),
@@ -1677,10 +1677,10 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFFFB6C1).withOpacity(77/255)),
+          border: Border.all(color: const Color(0xFFFFB6C1).withValues(alpha: 77/255)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFFFB6C1).withOpacity(51/255),
+              color: const Color(0xFFFFB6C1).withValues(alpha: 51/255),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -1691,7 +1691,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.6),
+                color: Colors.white.withValues(alpha: 0.6),
                 shape: BoxShape.circle,
               ),
               child: const Text('🏡', style: TextStyle(fontSize: 28)),
@@ -1748,7 +1748,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6B5B95).withOpacity(0.3),
+              color: const Color(0xFF6B5B95).withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -1759,7 +1759,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Text('📷', style: TextStyle(fontSize: 28)),
@@ -1816,7 +1816,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.pink.withOpacity(0.3),
+              color: Colors.pink.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -1827,7 +1827,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Text('💗', style: TextStyle(fontSize: 28)),
@@ -1904,12 +1904,12 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color(0xFFFFB6C1).withOpacity(77/255),
+            color: const Color(0xFFFFB6C1).withValues(alpha: 77/255),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFFFB6C1).withOpacity(0.2),
+              color: const Color(0xFFFFB6C1).withValues(alpha: 0.2),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -1920,7 +1920,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.6),
+                color: Colors.white.withValues(alpha: 0.6),
                 shape: BoxShape.circle,
               ),
               child: const Text('🎂', style: TextStyle(fontSize: 28)),

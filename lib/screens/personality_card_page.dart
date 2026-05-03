@@ -153,7 +153,7 @@ class _PersonalityCardPageState extends State<PersonalityCardPage> {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: KawaiiTheme.softPink.withOpacity(77/255),
+                color: KawaiiTheme.softPink.withValues(alpha: 77/255),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -183,7 +183,7 @@ class _PersonalityCardPageState extends State<PersonalityCardPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: KawaiiTheme.softPink.withOpacity(51/255),
+                color: KawaiiTheme.softPink.withValues(alpha: 51/255),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Text(
@@ -245,7 +245,7 @@ class _PersonalityCardPageState extends State<PersonalityCardPage> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: KawaiiTheme.primaryPink.withOpacity(77/255),
+            color: KawaiiTheme.primaryPink.withValues(alpha: 77/255),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -267,7 +267,7 @@ class _PersonalityCardPageState extends State<PersonalityCardPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(51/255),
+              color: Colors.white.withValues(alpha: 51/255),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -286,7 +286,7 @@ class _PersonalityCardPageState extends State<PersonalityCardPage> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white.withOpacity(230/255),
+              color: Colors.white.withValues(alpha: 230/255),
               height: 1.5,
             ),
           ),
@@ -303,7 +303,7 @@ class _PersonalityCardPageState extends State<PersonalityCardPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(13/255),
+            color: Colors.black.withValues(alpha: 13/255),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -379,7 +379,7 @@ class _PersonalityCardPageState extends State<PersonalityCardPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(13/255),
+            color: Colors.black.withValues(alpha: 13/255),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -451,7 +451,7 @@ class _PersonalityCardPageState extends State<PersonalityCardPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: hasWarning ? KawaiiTheme.peach.withOpacity(77/255) : KawaiiTheme.lavender.withOpacity(77/255),
+        color: hasWarning ? KawaiiTheme.peach.withValues(alpha: 77/255) : KawaiiTheme.lavender.withValues(alpha: 77/255),
         borderRadius: BorderRadius.circular(20),
         border: hasWarning ? Border.all(color: KawaiiTheme.peach, width: 2) : null,
       ),

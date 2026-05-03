@@ -59,8 +59,8 @@ class _LoveMeterPageState extends State<LoveMeterPage> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              KawaiiTheme.softPink.withOpacity(0.3),
-              KawaiiTheme.peach.withOpacity(0.2),
+              KawaiiTheme.softPink.withValues(alpha: 0.3),
+              KawaiiTheme.peach.withValues(alpha: 0.2),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -81,7 +81,7 @@ class _LoveMeterPageState extends State<LoveMeterPage> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.pink.withOpacity(0.2),
+                        color: Colors.pink.withValues(alpha: 0.2),
                         blurRadius: 20,
                         spreadRadius: 5,
                       ),
@@ -131,7 +131,7 @@ class _LoveMeterPageState extends State<LoveMeterPage> {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.pink.withOpacity(0.15),
+                          color: Colors.pink.withValues(alpha: 0.15),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -197,7 +197,7 @@ class _LoveMeterPageState extends State<LoveMeterPage> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                       elevation: 8,
-                      shadowColor: KawaiiTheme.primaryPink.withOpacity(0.4),
+                      shadowColor: KawaiiTheme.primaryPink.withValues(alpha: 0.4),
                     ),
                   ),
                 ],
@@ -208,7 +208,7 @@ class _LoveMeterPageState extends State<LoveMeterPage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
