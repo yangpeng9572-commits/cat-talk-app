@@ -361,13 +361,13 @@ OpenClaw 每輪回報必須包含：
 | P1-1 | ✅ PASS | 動作庫已移至姿勢拍照頁（首頁按鈕已移除）|
 | P1-2 | ✅ PASS | 移除今日還沒聽牠說話 — 生活文案替換錄音導向空狀態（commit c4b4a8f，Hermes pass aecd811） |
 | P1-3 | ✅ PASS | 任務內容調整 — 已替換 translate/feedback → pose_photo + cat_world_interact（commit 64d3843，Hermes pass b89bd28） |
-| P1-4 | TODO | 記錄頁改生活日記 |
-| P1-5 | TODO | 品牌統一 |
-| P1-6 | TODO | Logo整合 |
-| P1-7 | TODO | 新手教程黑屏 |
-| P1-8 | TODO | 照片同步修正 |
-| P1-9 | TODO | 編輯頁頭像入口 |
-| P1-10 | TODO | 生日領養日一致化 |
+| P1-4 | ✅ DONE (commit b1ac215) | 記錄頁改生活日記 |
+| P1-5 | ✅ DONE (commit c910ca6) | 品牌統一 |
+| P1-6 | TODO | Logo整合（需 Andy 提供素材）|
+| P1-7 | ✅ DONE (commit b4adbfc) | 新手教程黑屏 |
+| P1-8 | ✅ DONE (commit e1c5654) | 照片同步修正 |
+| P1-9 | ✅ DONE (已有頭像編輯入口) | 編輯頁頭像入口 |
+| P1-10 | ✅ DONE (commit 3b6635b) | 生日領養日一致化 |
 | P2-1 | ✅ PASS | 姿勢拍照入口整理（Hermes 2026-05-03）|
 | P2-2 | TODO | 姿勢拍照必須在App內完成 |
 | P2-3 | TODO | 姿勢照片品質檢查 |
