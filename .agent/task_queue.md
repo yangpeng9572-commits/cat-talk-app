@@ -149,3 +149,19 @@ OpenClaw 每輪回報必須包含：
 9. 是否 commit + push
 10. 給 Hermes 的下一步
 11. 是否需要 Andy 介入
+
+---
+
+## P3-1 進度追蹤
+
+### 已完成
+
+| Batch | 檔案 | Commit | Hermes 狀態 |
+|-------|------|--------|-------------|
+| Batch 1 | lib/screens/daily_task_card.dart | `685e186` | ✅ PASS |
+| Batch 2 | lib/widgets/*.dart（7 檔） | `99b8f7b` | ⏳ 待 Hermes 驗收 |
+
+### 待處理
+
+- Batch 3: lib/screens/ 其餘檔案（~15 個檔案，約 120+ 處 withOpacity）
+
