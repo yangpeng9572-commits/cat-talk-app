@@ -11,42 +11,50 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Result: PASS
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes
-- Last reviewed at: 2026-05-03 17:05 GMT+8
+- Last reviewed at: 2026-05-03 17:06 GMT+8
 
 ---
 
-## 本次驗收摘要
+## Reviewed Tasks
 
-- Origin main tip: `569263f` (OpenClaw 16:54 push)
-- Local pull: ✅ Fast-forward succeeded
-- WSL2 git status: CLEAN
-- Windows git status: CLEAN（CMD 的 ?? 為 WSL2 interop 顯示問題，無實際影響）
+### Task: TOOL-1 Agent Monitor Dashboard
+- Commit: `e6011de`（5 個新檔案，tools/ 目錄）
+- Handoff: `7135977`
+- Type: Python Flask 工具（非 Flutter App）
+- Status: **PASS**
+
+**驗收結果：**
+- ✅ Flutter analyze：0 errors（201 issues，無變化）
+- ✅ Flutter test：264 passed
+- ✅ APK：95.3MB（existing build）
+- ✅ git status：CLEAN
+
+**工具本身（Flask Dashboard）：**
+- ✅ py_compile：PASS
+- ✅ /api/status：正確 JSON 回應
+- ✅ Dashboard：http://127.0.0.1:8787/ 可渲染
+- ✅ 8 種 CSS 角色動畫
+- ✅ 每 5 秒自動刷新（fetch API）
+- ✅ 響應式手機版
 
 ---
 
-## 驗收項目：OpenClaw 定期更新（handoff only，無新 code commit）
+## 歷史任務摘要
 
-| 檢查項 | 結果 |
-|--------|------|
-| flutter analyze | ✅ 0 errors（201 issues） |
-| flutter test | ✅ 264 passed |
-| APK 存在 | ✅ 95.3MB（2026-05-03 16:31） |
-| git status | ✅ CLEAN |
-
----
-
-## 目前整體狀態
-
-- **所有 P2/P3 任務已完成**（withOpacity 重構全部清除）
-- **P2-1, P2-4, P2-5, P3-2**：全部 PASS（已在 hermes_review 歷史中）
-- **P2-2**：task_queue.md 無描述，無法執行
-- **P0 系列**（P0-1, P0-2, P1-1, P1-2）：af17dce 已整合，需 Hermes **手機實測回歸確認**
-- **無新 code commit 需要驗收**，僅文件同步
+| Task | Commit | Status | Date |
+|------|--------|--------|------|
+| P3-1 Batch 1-4 | multiple | PASS | 2026-05-03 |
+| P3-2 | `ea846dd` | PASS | 2026-05-03 |
+| P2-1 | `cee79b2` | PASS | 2026-05-03 |
+| P2-4 | `73e1aa1` | PASS | 2026-05-03 |
+| P2-5 | `0373aba` | PASS（已合併） | 2026-05-03 |
+| TOOL-1 Dashboard | `e6011de` | PASS | 2026-05-03 |
 
 ---
 
 ## Notes
 
-- OpenClaw push → Hermes pull → 驗收流程正常運作
-- 建議 Andy 安排時間對 P0 系列整合功能做**手機實測**（翻譯流程、貓咪房間互動、情緒報告推送等）
-- 無需每次都建 APK，本輪僅驗證到 analyze + test
+- 所有 P2/P3 任務 + TOOL-1 全部 PASS
+- P0 系列需手機實測（CLI 無法驗證）
+- OpenClaw 可繼續新任務
+
