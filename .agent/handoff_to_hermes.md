@@ -7,36 +7,40 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-04 05:29:02
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw Auto Cron
+- Last updated at: 2026-05-04 05:50 AM (Asia/Taipei)
 
 ---
 
-## 本輪任務：P2-6 成就頁進度接入 — Hermes 驗收請求
+## 本輪任務：P3-7 全 App 空狀態統一
 
 ### 任務 ID
-- Task ID: P2-6
-- Task name: 成就頁加入解鎖條件與進度
+- Task ID: P3-7
+- Task name: 全 App 空狀態統一
 
 ### 完成的修改
 
-- **Commit:** `0fe20f2`
+- **Commit:** `f22f2dc`
 - **Branch:** main
-- **代碼已完成時間：** 2026-05-04 前次 session（已 push）
+- **完成時間：** 2026-05-04 05:50 AM
 
 ### 修改內容
 
-成就頁已完整接入 `AchievementService`，顯示：
-- 等級名稱（`AchievementSystem.getLevel()`）
-- 等級進度條（`AchievementSystem.getLevelProgress()`）
-- 已解鎖 / 總成就數
-- 各成就的 unlock 狀態與圖示
+標準化全 App 空狀態的背景透明度為 0.3（77/255）：
+
+- `lib/screens/cats_page.dart`：空狀態背景透明度 0.5 → 0.3
+- `lib/screens/history_page.dart`：翻譯空狀態 + 日記空狀態 full opacity → 0.3
+- `lib/screens/daily_report_page.dart`：背景色 orange.shade50 → softPink 0.3（同時修正色系不一致）
+
+所有空狀態裝飾圓形背景現統一使用 `KawaiiTheme.softPink.withValues(alpha: 0.3)`。
 
 ### 修改檔案
 
-- `lib/screens/achievement_page.dart`（接入 AchievementService）
+- `lib/screens/cats_page.dart`
+- `lib/screens/history_page.dart`
+- `lib/screens/daily_report_page.dart`
 
 ### Required Hermes Actions
 
@@ -44,8 +48,11 @@ Hermes 每次驗收前應先讀取本檔案。
 1. `git pull --ff-only`
 2. `flutter analyze`
 3. `flutter test`
-4. 驗證：進入成就頁，確認顯示正確的等級、進度條、已解鎖成就數
+4. 驗證：檢查以下頁面的空狀態背景是否為統一的淡粉色（30% 透明度）
+   - 貓咪頁（cats_page）
+   - 歷史記錄頁（history_page）- 翻譯空狀態、日記空狀態
+   - 每日報告頁（daily_report_page）
 
 ---
 
-_Last updated: 2026-05-04 05:22 AM (Asia/Taipei)_
+_Last updated: 2026-05-04 05:50 AM (Asia/Taipei)_
