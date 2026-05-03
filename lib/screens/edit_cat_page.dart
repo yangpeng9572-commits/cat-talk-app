@@ -381,10 +381,60 @@ class _EditCatPageState extends State<EditCatPage> {
                 child: const Text('儲存變更', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
             ),
+            const SizedBox(height: 16),
+
+            // 刪除貓咪按鈕
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red.shade400,
+                  side: BorderSide(color: Colors.red.shade300),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                onPressed: _showDeleteConfirmation,
+                child: const Text('刪除這隻貓咪', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void _showDeleteConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('確定要刪除？'),
+        content: Text('確定要刪除「${widget.cat.name}」嗎？這個動作無法復原。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () {
+              Navigator.pop(context); // 關閉 dialog
+              _deleteCat(); // 執行刪除
+            },
+            child: const Text('確定刪除'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteCat() async {
+    final prefs = await SharedPreferences.getInstance();
+    final catService = CatService(prefs);
+    await catService.deleteCat(widget.cat.id);
+    if (!mounted) return;
+    Navigator.pop(context, true); // 回傳 true 給上一層刷新
   }
 
   Widget _buildNameField() {
