@@ -8,10 +8,10 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 ## Current Review Status
 
-- Result: FAIL
-- Waiting for OpenClaw fix: YES
+- Result: PASS
+- Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes
-- Last reviewed at: 2026-05-03 12:10 GMT+8
+- Last reviewed at: 2026-05-03 12:25 GMT+8
 
 ---
 
@@ -20,7 +20,7 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Task ID: P2-5
 - Task name: 夏日窗邊活動點擊 MVP
 - Priority: P2
-- Commit reviewed: 0373aba
+- Commit reviewed: 0bc26e8
 - Branch: main
 
 ---
@@ -28,37 +28,33 @@ OpenClaw 每輪開始前應讀取本檔案。
 ## Validation Result
 
 - git pull --ff-only: ✅ SUCCESS (Fast-forward)
-- Latest commit matches handoff: ✅ YES (0373aba feat: add summer window activity page)
-- Modified files match handoff: ✅ YES (cat_world_page.dart + summer_window_page.dart)
-- flutter analyze: ❌ FAIL
-- Analyze errors: 3 errors (all in summer_window_page.dart)
-- flutter test: ⏸️ SKIPPED (analyze failed)
-- Tests passed: N/A
-- flutter build apk --release: ⏸️ SKIPPED (analyze failed)
-- APK path: N/A
-- git status --short: ✅ CLEAN (only untracked unrelated files)
+- Latest commit: cb73bbe (docs: update handoff for P2-5 fix)
+- Commits reviewed: 0bc26e8 + cb73bbe
+- 0bc26e8 files: ✅ ONLY lib/screens/summer_window_page.dart (+1/-5)
+- cb73bbe files: ✅ ONLY .agent/handoff_to_hermes.md
+- flutter analyze: ✅ PASS
+- Analyze errors: 0 errors
+- flutter test: ✅ PASS
+- Tests passed: 264
+- flutter build apk --release: ✅ SUCCESS
+- APK: C:\Users\a0938\cat_talk_proper\build\app\outputs\flutter-apk\app-release.apk (90.8MB)
+- git status --short: ✅ CLEAN
 
 ---
 
 ## Result Summary
 
-FAIL — 3 P0-compile errors in summer_window_page.dart. App cannot compile.
+**PASS** — All 3 previously-failed compile errors in summer_window_page.dart are now resolved. 0 errors, 264 tests passed, APK built successfully (90.8MB).
 
 ---
 
-## Failure Details
+## Fixed Issues (from previous FAIL)
 
-Hermes 發現以下 3 個編譯錯誤（全部在 `lib/screens/summer_window_page.dart`）：
-
-| # | 錯誤訊息 | 行號 | 原因 |
-|---|---------|------|------|
-| 1 | `The getter 'currentBond' isn't defined for the type 'Bond'` | L38:64 | `Bond` model 沒有 `currentBond` getter |
-| 2 | `The argument type 'int' can't be assigned to the parameter type 'String'` | L49:44 | 引數型別錯誤 |
-| 3 | `The getter 'currentBond' isn't defined for the type 'Bond'` | L50:64 | 同 L38 |
-
-**附加警告（不影响編譯但需關注）：**
-- `unused_import: '../theme/kawaii_theme.dart'` (L6)
-- `unused_field: '_currentBondScore'` (L21)
+| # | Error | Resolution |
+|---|-------|-----------|
+| 1 | `currentBond` undefined getter | Removed incorrect Bond.currentBond reference |
+| 2 | `int` not assignable to `String` | Fixed type mismatch at L49 |
+| 3 | `currentBond` at L50 | Removed incorrect reference |
 
 ---
 
@@ -66,32 +62,19 @@ Hermes 發現以下 3 個編譯錯誤（全部在 `lib/screens/summer_window_pag
 
 | Result | OpenClaw 下一輪動作 |
 |--------|-------------------|
-| FAIL | 必須優先修復 `summer_window_page.dart` 的 3 個 errors，修好後重新 commit + push |
-
----
-
-## Allowed Fix Scope
-
-OpenClaw 修復時只允許修改以下檔案：
-- `lib/screens/summer_window_page.dart`
-
-不得修改其他任何檔案。
+| PASS | 可繼續 task_queue.md 下一個任務 |
 
 ---
 
 ## Manual Test Checklist
 
-Hermes 手機實測後勾選（待 analyze 通過後執行）：
+OpenClaw / Andy 手機實測後勾選：
 
 ### P2-5 夏日窗邊活動
 
-- [ ] git pull --ff-only 成功
-- [ ] flutter analyze 0 errors
-- [ ] flutter test 全部通過
-- [ ] flutter build apk --release 成功
 - [ ] 夏日窗邊活動卡片可點擊
 - [ ] 點擊後進入 SummerWindowPage
-- [ ] 活動頁顯示正確
+- [ ] 活動頁顯示正確（窗邊場景、說明、互動按鈕、進度條、商品展示）
 - [ ] 互動按鈕有反應
 - [ ] 返回 Cat World 正常
 
@@ -112,4 +95,5 @@ Hermes 手機實測後勾選（待 analyze 通過後執行）：
 - Hermes 只驗收 Windows Runner repo 已 push 的 commit
 - Hermes 不驗收 WSL2 未 commit 的修改
 - Hermes 不驗收 untracked / modified 檔案
-- P2-5 FAIL blocking — OpenClaw 必須修好才能繼續新任務
+- P2-5 PASS — OpenClaw 可繼續新任務
+- 建議下一個任務：P2-4 小房間滑到底 / overflow 問題
