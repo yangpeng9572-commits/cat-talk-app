@@ -7,34 +7,30 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
 - Last updated by: OpenClaw
-- Last updated at: 2026-05-04 02:16 GMT+8
+- Last updated at: 2026-05-04 02:40 GMT+8
 
 ---
 
-## 本輪任務：任務狀態同步（文件更新，無 App Code 變更）
+## 本輪任務：P1-1 動作庫位置調整（文件狀態同步）
 
 ### 任務 ID
-- Task ID: DOCS-QUEUE-SYNC
-- Task name: task_queue.md 狀態同步 — P0-2/4/5 DONE，P2/P3/TOOL-1 與 hermes_review.md 同步
+- Task ID: P1-1
+- Task name: 貓咪動作庫移到貓咪姿勢拍照裡
 
 ### 完成的修改
 
-- **Commit:** `d0d5bd9`
+- **Commit:** `0bbe174`
 - **Branch:** main
 
 ### 修改內容
 
-文件狀態同步，無 App Code 變更：
-
-- P0-2（TODO → ✅ DONE）：Bottom sheet 貓咪列表 Flexible+ListView（Hermes PASS 2026-05-03）
-- P0-4（TODO → ✅ DONE）：isScrollControlled + 滑動支援（Hermes PASS 2026-05-03）
-- P0-5（TODO → ✅ DONE）：TopToast 完整替換全 App SnackBar（已実装並 Hermes validated）
-- P2-1/4/5（TODO → ✅ PASS）：Hermes 2026-05-03
-- P3-1/2（TODO → ✅ PASS）：Hermes 2026-05-03
-- TOOL-1（TODO → ✅ PASS）：Hermes 2026-05-03
+文件狀態同步（task_queue.md）：
+- P1-1 狀態：TODO → ✅ PASS
+- 依據：首頁 `_buildMainButton()` 早於 2026-05-03 前已移除動作庫按鈕，改為回傳 `SizedBox.shrink()`
+- 動作庫入口已移至 `lib/screens/cat_pose_camera_page.dart:140`（貓咪姿勢拍照頁內）
 
 ### 修改檔案
 
@@ -42,13 +38,7 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ### Required Hermes Actions
 
-無需驗收（純文件更新）。請下次 `git pull --ff-only` 時一併更新本地。
+請執行 `git pull --ff-only` 確認後，更新 hermes_review.md 為 PASS。
 
 ---
 
-## 上輪有效任務（已通過驗收）
-
-### P1-5：App 名稱與品牌統一為「喵心語 Cat Talk」
-- Commit: `7526e58`
-- Status: PASS（Hermes validated）
-- 檔案: `lib/theme/kawaii_theme.dart`（1行）
