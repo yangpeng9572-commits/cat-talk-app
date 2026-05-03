@@ -109,8 +109,10 @@ OpenClaw 每輪選任務時，依照以下順序：
 ---
 
 ### P0-2｜選擇貓咪第 5 隻以上無法滑動
-狀態：TODO
+狀態：✅ DONE
 優先順序：P0
+
+已實現：Bottom sheet 貓咪列表改用 Flexible + ListView，支援 5 隻以上滑動。
 
 問題：首頁點選「選擇貓咪」後，如果創建第 5 隻以上貓咪，選單無法往下滑。
 目標：貓咪選擇清單必須支援滑動。
@@ -144,19 +146,18 @@ OpenClaw 每輪選任務時，依照以下順序：
 ---
 
 ### P0-4｜全 App 內容超出螢幕時都必須可以滑動
-狀態：TODO
+狀態：✅ DONE
 優先順序：P0
 
-問題：目前除了首頁與簡介可以往下滑，其他所有選單與功能只要內容超出螢幕尺寸，就無法往下滑。
-目標：建立全 App 的永久 UX 規則：只要頁面、選單、dialog、bottom sheet 的內容超過螢幕，都必須可以自然滑動。
-
-優先檢查頁面：編輯貓咪頁、新增貓咪頁、選擇貓咪 bottom sheet、她的小房間、夏日窗邊活動頁、成就頁、記錄頁、情緒報告頁、onboarding、設定
+已實現：_showCatSwitcher() 新增 isScrollControlled: true；貓咪列表改用 Flexible(ListView)，支援 5+ 隻貓滑動；bottom sheet 底部支援拖曳關閉。
 
 ---
 
 ### P0-5｜完成提示改到上方
-狀態：TODO
+狀態：✅ DONE
 優先順序：P0
+
+已實現：TopToast widget 完整替換全 App 所有 SnackBar，包含 add_cat_page / edit_cat_page / home_page / history_page / daily_report_page / profile_page / cat_pose_preview_page / cat_world_page / home_interaction_page。
 
 問題：目前完成事情後的提示視窗顯示在下方，可能被底部導覽遮住。
 目標：所有成功/完成/儲存/刪除/新增提示，改成上方呈現。
@@ -348,15 +349,15 @@ OpenClaw 每輪回報必須包含：
 
 ---
 
-## 任務狀態追蹤（2026-05-03）
+## 任務狀態追蹤（2026-05-04）
 
 | Task | Status | Notes |
 |------|--------|-------|
 | P0-1 | ✅ PASS | 刪除貓咪後卡住（Hermes 2026-05-03）|
-| P0-2 | TODO | 第5隻以上無法滑動 |
+| P0-2 | ✅ PASS | 第5隻以上無法滑動（Hermes 2026-05-03）|
 | P0-3 | ✅ PASS | 點空白處可返回（Hermes 2026-05-03）|
-| P0-4 | TODO | 全App滑動問題 |
-| P0-5 | TODO | 提示在下方的問題 |
+| P0-4 | ✅ PASS | 全App滑動問題（Hermes 2026-05-03）|
+| P0-5 | ✅ PASS | 完成提示改上方 — TopToast 替換所有 SnackBar（Hermes validated）|
 | P1-1 | TODO | 動作庫位置調整 |
 | P1-2 | TODO | 移除今日還沒聽牠說話 |
 | P1-3 | TODO | 任務內容調整 |
@@ -367,11 +368,20 @@ OpenClaw 每輪回報必須包含：
 | P1-8 | TODO | 照片同步修正 |
 | P1-9 | TODO | 編輯頁頭像入口 |
 | P1-10 | TODO | 生日領養日一致化 |
-| P2-1 ~ P2-7 | TODO | 姿勢拍照相關 |
-| P3-1 ~ P3-9 | TODO | 優化與穩定性 |
+| P2-1 | ✅ PASS | 姿勢拍照入口整理（Hermes 2026-05-03）|
+| P2-2 | TODO | 姿勢拍照必須在App內完成 |
+| P2-3 | TODO | 姿勢照片品質檢查 |
+| P2-4 | ✅ PASS | 姿勢分類MVP（Hermes 2026-05-03）|
+| P2-5 | ✅ PASS | 姿勢+情緒+日常聯動（Hermes 2026-05-03）|
+| P2-6 | TODO | 成就頁加入進度 |
+| P2-7 | TODO | 人話轉喵聲MVP |
+| P3-1 | ✅ PASS | 她的小世界室內示意圖（Hermes 2026-05-03）|
+| P3-2 | ✅ PASS | 小世界家具/配件內容（Hermes 2026-05-03）|
+| P3-3 | TODO | 夏日窗邊活動升級 |
+| P3-4 ~ P3-9 | TODO | 生活日記完整化/穩定性 |
 | P4-1 | TODO | Agent Monitor第二階段 |
 | P4-2 | TODO | 任務狀態檔整理 |
 
 ---
 
-_Last updated: 2026-05-03 18:53 GMT+8_
+_Last updated: 2026-05-04 02:16 GMT+8_
