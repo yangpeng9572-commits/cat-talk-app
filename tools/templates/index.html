@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cat Talk Agent War Room</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1>🏰 Cat Talk Agent War Room</h1>
+      <div class="subtitle">OpenClaw 🦞 vs Hermes 🤖</div>
+    </header>
+
+    <!-- Agent Cards Row -->
+    <div class="agents-row">
+      <!-- OpenClaw Card -->
+      <div class="agent-card openclaw-card" id="openclav-card">
+        <div class="agent-avatar" id="openclav-avatar">
+          <div class="avatar-emoji">🦞</div>
+          <div class="avatar-badges" id="openclav-badges"></div>
+        </div>
+        <div class="agent-name">OpenClaw</div>
+        <div class="agent-status" id="openclav-status">Loading...</div>
+        <div class="agent-task" id="openclav-task">—</div>
+        <div class="agent-next" id="openclav-next">Next: —</div>
+      </div>
+
+      <!-- Central Status -->
+      <div class="central-panel" id="central-panel">
+        <div class="decision-light" id="decision-light">⏳</div>
+        <div class="decision-label" id="decision-label">Checking...</div>
+        <div class="handoff-info">
+          <div class="info-row">
+            <span class="info-key">Handoff</span>
+            <span class="info-val" id="handoff-status">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Waiting</span>
+            <span class="info-val" id="waiting-status">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Review</span>
+            <span class="info-val" id="review-result">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Can Continue</span>
+            <span class="info-val" id="can-continue">—</span>
+          </div>
+        </div>
+        <div class="latest-commit" id="latest-commit">—</div>
+      </div>
+
+      <!-- Hermes Card -->
+      <div class="agent-card hermes-card" id="hermes-card">
+        <div class="agent-avatar" id="hermes-avatar">
+          <div class="avatar-emoji">🤖</div>
+          <div class="avatar-badges" id="hermes-badges"></div>
+        </div>
+        <div class="agent-name">Hermes</div>
+        <div class="agent-status" id="hermes-status">Loading...</div>
+        <div class="agent-task" id="hermes-task">—</div>
+        <div class="agent-next" id="hermes-next">Next: —</div>
+      </div>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="activity-section">
+      <div class="section-title">📋 Activity Log</div>
+      <div class="activity-grid">
+        <div class="activity-block">
+          <div class="block-title">Recent Commits</div>
+          <div class="block-content" id="recent-commits">
+            <div class="log-line">Loading...</div>
+          </div>
+        </div>
+        <div class="activity-block">
+          <div class="block-title">Cron Runs</div>
+          <div class="block-content" id="cron-runs">
+            <div class="log-line">Loading...</div>
+          </div>
+        </div>
+        <div class="activity-block">
+          <div class="block-title">Git Status</div>
+          <div class="block-content" id="git-status">
+            <div class="log-line">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span id="last-updated">Last updated: —</span>
+      <span id="current-time">—</span>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

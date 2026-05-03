@@ -1,0 +1,407 @@
+/* Cat Talk Agent War Room — Styles */
+
+:root {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-card: #0f3460;
+  --accent-blue: #4fc3f7;
+  --accent-purple: #b388ff;
+  --accent-green: #69f0ae;
+  --accent-red: #ff5252;
+  --accent-yellow: #ffd54f;
+  --accent-pink: #ff80ab;
+  --text-primary: #e8e8e8;
+  --text-secondary: #a0a0a0;
+  --border-radius: 16px;
+  --card-padding: 20px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 1.8rem;
+  color: var(--accent-pink);
+  text-shadow: 0 0 20px rgba(255, 128, 171, 0.4);
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Agent Cards Row */
+.agents-row {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 20px;
+}
+
+/* Agent Card */
+.agent-card {
+  flex: 1;
+  background: var(--bg-card);
+  border-radius: var(--border-radius);
+  padding: var(--card-padding);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.agent-card:hover {
+  transform: translateY(-4px);
+}
+
+.openclaw-card {
+  border: 2px solid var(--accent-purple);
+  box-shadow: 0 0 20px rgba(179, 136, 255, 0.2);
+}
+
+.hermes-card {
+  border: 2px solid var(--accent-blue);
+  box-shadow: 0 0 20px rgba(79, 195, 247, 0.2);
+}
+
+/* Avatar */
+.agent-avatar {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 12px;
+}
+
+.avatar-emoji {
+  font-size: 56px;
+  line-height: 80px;
+  text-align: center;
+}
+
+.avatar-badges {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 20px;
+}
+
+/* Agent Name */
+.agent-name {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.openclaw-card .agent-name { color: var(--accent-purple); }
+.hermes-card .agent-name { color: var(--accent-blue); }
+
+/* Agent Status */
+.agent-status {
+  font-size: 1.1rem;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.agent-task {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  min-height: 20px;
+}
+
+.agent-next {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* Central Panel */
+.central-panel {
+  flex: 0 0 200px;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: var(--card-padding);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.decision-light {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.decision-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.handoff-info {
+  width: 100%;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 0.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.info-key {
+  color: var(--text-secondary);
+}
+
+.info-val {
+  font-weight: bold;
+}
+
+.latest-commit {
+  font-size: 0.75rem;
+  color: var(--accent-green);
+  word-break: break-all;
+  margin-top: 8px;
+}
+
+/* Activity Section */
+.activity-section {
+  background: var(--bg-card);
+  border-radius: var(--border-radius);
+  padding: var(--card-padding);
+}
+
+.section-title {
+  font-size: 1rem;
+  color: var(--accent-yellow);
+  margin-bottom: 12px;
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.activity-block {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.block-title {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.block-content {
+  font-size: 0.75rem;
+  font-family: 'Courier New', monospace;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.log-line {
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.log-line:last-child {
+  border-bottom: none;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* ========== OPENCLAW ANIMATIONS ========== */
+
+/* Idle: Gentle float */
+.openclaw-card.status-idle .agent-avatar,
+.openclaw-card.status-waiting_hermes .agent-avatar {
+  animation: float 2.5s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Working: Pulse */
+.openclaw-card.status-working .agent-avatar {
+  animation: pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.08); filter: brightness(1.3); }
+}
+
+/* Blocked: Red warning flash */
+.openclaw-card.status-blocked .agent-avatar {
+  animation: warning-flash 0.5s ease-in-out infinite;
+}
+
+@keyframes warning-flash {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+  50% { filter: brightness(1.5) drop-shadow(0 0 12px var(--accent-red)); }
+}
+
+/* Ready: Green glow */
+.openclaw-card.status-ready .agent-avatar {
+  animation: green-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes green-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px var(--accent-green)); }
+  50% { filter: drop-shadow(0 0 16px var(--accent-green)); }
+}
+
+/* Waiting Hermes: Golden pulse */
+.openclaw-card.status-waiting_hermes .agent-avatar {
+  animation: wait-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes wait-pulse {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.04); }
+}
+
+/* Loading dots for waiting state */
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+  100% { content: ''; }
+}
+
+/* ========== HERMES ANIMATIONS ========== */
+
+/* Idle: Soft float */
+.hermes-card.status-idle .agent-avatar {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Reviewing: Scanning */
+.hermes-card.status-reviewing .agent-avatar {
+  animation: scan 1.5s ease-in-out infinite;
+}
+
+@keyframes scan {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 4px var(--accent-blue)); }
+  50% { filter: brightness(1.4) drop-shadow(0 0 20px var(--accent-blue)); }
+}
+
+/* PASS: Celebration bounce + green glow */
+.hermes-card.status-pass .agent-avatar {
+  animation: pass-bounce 0.6s ease-out, green-glow 1s ease-in-out 0.6s infinite;
+}
+
+@keyframes pass-bounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.2); }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+/* FAIL: Red shake */
+.hermes-card.status-fail .agent-avatar {
+  animation: shake 0.4s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); filter: drop-shadow(0 0 8px var(--accent-red)); }
+  25% { transform: translateX(-6px); filter: drop-shadow(0 0 16px var(--accent-red)); }
+  75% { transform: translateX(6px); filter: drop-shadow(0 0 16px var(--accent-red)); }
+}
+
+/* ========== STATUS BADGE COLORS ========== */
+
+.status-idle .agent-status { background: var(--accent-purple); color: #fff; }
+.status-working .agent-status { background: var(--accent-yellow); color: #333; }
+.status-waiting_hermes .agent-status { background: var(--accent-yellow); color: #333; }
+.status-blocked .agent-status { background: var(--accent-red); color: #fff; }
+.status-ready .agent-status { background: var(--accent-green); color: #333; }
+
+.hermes-status.status-idle .agent-status { background: var(--accent-blue); color: #fff; }
+.hermes-status.status-reviewing .agent-status { background: var(--accent-yellow); color: #333; }
+.hermes-status.status-pass .agent-status { background: var(--accent-green); color: #333; }
+.hermes-status.status-fail .agent-status { background: var(--accent-red); color: #fff; }
+
+/* ========== CENTRAL LIGHT ========== */
+
+.decision-light.light-green { color: var(--accent-green); text-shadow: 0 0 20px var(--accent-green); }
+.decision-light.light-yellow { color: var(--accent-yellow); text-shadow: 0 0 20px var(--accent-yellow); }
+.decision-light.light-red { color: var(--accent-red); text-shadow: 0 0 20px var(--accent-red); }
+.decision-light.light-gray { color: var(--text-secondary); }
+
+/* ========== GIT STATUS ========== */
+
+.git-clean { color: var(--accent-green); }
+.git-dirty { color: var(--accent-yellow); }
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 700px) {
+  .agents-row {
+    flex-direction: column;
+  }
+  
+  .central-panel {
+    flex: none;
+    order: -1;
+    padding: 12px;
+  }
+  
+  .header h1 {
+    font-size: 1.4rem;
+  }
+  
+  .avatar-emoji {
+    font-size: 44px;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--bg-card); border-radius: 3px; }
