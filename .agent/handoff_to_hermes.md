@@ -9,50 +9,49 @@ Hermes 每次驗收前應先讀取本檔案。
 
 - Status: IDLE
 - Waiting for Hermes: NO
-- Last updated by: Hermes
-- Last reviewed at: 2026-05-03 17:06 GMT+8
+- Last updated by: OpenClaw
+- Last updated at: 2026-05-03 18:53 GMT+8
 
 ---
 
-## 現狀：所有 P2/P3 任務已完成
+## 最新任務清單已更新
 
-### 已完成任務（全部 Hermes 驗收 PASS）
+本輪 OpenClaw 完成：
+1. 將 Andy 提供的完整開發任務清單（P0-P4，共 33 個任務）寫入 `.agent/task_queue.md`
+2. 包含所有任務的詳細說明、驗收標準、優先順序
+3. Commit: `5ce2a4f` docs: update task queue with full P0-P4 development list
 
-| 任務 | Commit | 狀態 |
-|------|--------|------|
-| P2-1 隱藏分享卡/動畫 tab | `cee79b2` | ✅ PASS |
-| P2-4 CatWorld overflow 修復 | `73e1aa1` | ✅ PASS |
-| P2-5 夏日窗邊活動 | `0373aba` | ✅ PASS |
-| P3-2 整理剩餘 withOpacity | `ea846dd` | ✅ PASS |
-| TOOL-1 Agent Monitor Dashboard | `e6011de` | ✅ PASS |
+### 任務執行順序（建議）
 
-### 待 Hermes 回歸確認（P0 層級）
+**第一批：必修 UX Bug（P0）**
+1. P0-1：刪除貓咪後卡住，不會退回主畫面
+2. P0-2：選擇貓咪第 5 隻以上無法滑動
+3. P0-3：選擇貓咪點空白處可返回
+4. P0-4：全 App 超出螢幕都必須能滑動
+5. P0-5：完成提示改到上方
 
-| 任務 | Commit | 需求 |
-|------|--------|------|
-| P0-1 新手教程 replayOnboarding | `af17dce` | 手機實測不黑屏 |
-| P0-2 翻譯記錄頁空白 | `af17dce` | 手機實測有真實紀錄 |
-| P1-1 新增/編輯貓咪完整性 | `af17dce` | 手機實測立即刷新 |
-| P1-2 貓咪頭像持久化 | `af17dce` | 手機實測重開後仍在 |
-| P0-6 刪除貓咪功能 | `3baf846` | 手機實測刪除流程 |
+**第二批：首頁與任務內容整理（P1）**
+6. P1-1：貓咪動作庫移到貓咪姿勢拍照裡
+7. P1-2：移除首頁「今日還沒聽牠說話」
+8. P1-3：今日陪牠小事任務內容調整
 
-### P3-1 withOpacity 已全數清除
+**第三批：記錄頁改版（P1）**
+9. P1-4：記錄頁改成日常生活記錄 MVP
 
-所有 withOpacity 已从 lib/ 中移除，共替換約 608 處。
-Lib/ 目錄已無 withOpacity 調用。
-
----
-
-## OpenClaw 下一輪選項
-
-1. 等待 Andy 提供 P2-2 任務描述
-2. 等待 Hermes 完成 P0 回歸測試並回報
-3. 若有新任務需求，主動告知 Andy
+...等共 33 個任務
 
 ---
 
-## 備註
+## 上一個等待驗收的任務
 
-- 工作樹乾淨，git status --short 為空
-- 所有開發任務已完成，僅待 Hermes 手機實測回歸
-- OpenClaw workspace commit 已成功 push 到 origin/main
+- TOOL-1: Agent Monitor Dashboard MVP（e6011de）
+- Hermes Review 狀態：需確認是否已 PASS
+
+---
+
+## Notes
+
+- OpenClaw 每次 cron 執行會依 task_queue.md 順序選下一個最高優先任務
+- 任務選擇順序：Hermes FAIL > P0 > P1 > P2 > P3 > P4
+- 每輪只處理一個任務，完成後更新 handoff 並等待 Hermes 驗收
+- 不在 WAITING_FOR_HERMES 狀態下繼續新任務（已列為規則）
