@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart'; // P3-4: 照片功能
+import 'package:table_calendar/table_calendar.dart'; // P3-5: 日曆視圖
 import 'dart:io'; // P3-4: 照片檔案路徑
 import '../models/translation_result.dart';
 import '../models/cat.dart';
@@ -38,6 +39,11 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
 
   // 貓咪資料快取
   Map<String, Cat> _catsMap = {};
+
+  // P3-5: 日曆視圖模式切換（false = 清單，true = 日曆）
+  bool _diaryViewMode = false;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   void initState() {
@@ -132,9 +138,98 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
   Widget _buildDiaryTab() {
     final entries = _diaryService.getAll();
     if (entries.isEmpty) {
-      return _buildDiaryEmptyState();
+      return Column(
+        children: [
+          _buildDiaryViewToggle(),
+          Expanded(child: _buildDiaryEmptyState()),
+        ],
+      );
     }
 
+    return Column(
+      children: [
+        _buildDiaryViewToggle(),
+        Expanded(
+          child: _diaryViewMode
+              ? _buildCalendarView(entries)
+              : _buildDiaryListView(entries),
+        ),
+      ],
+    );
+  }
+
+  /// P3-5: 日曆/清單視圖切換按鈕
+  Widget _buildDiaryViewToggle() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          _buildToggleChip(
+            label: '清單',
+            icon: Icons.list_alt,
+            isSelected: !_diaryViewMode,
+            onTap: () => setState(() {
+              _diaryViewMode = false;
+              _selectedDay = null;
+            }),
+          ),
+          const SizedBox(width: 8),
+          _buildToggleChip(
+            label: '日曆',
+            icon: Icons.calendar_month,
+            isSelected: _diaryViewMode,
+            onTap: () => setState(() => _diaryViewMode = true),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleChip({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? KawaiiTheme.primaryPink.withOpacity(0.15)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? KawaiiTheme.primaryPink : KawaiiTheme.divider,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? KawaiiTheme.primaryPink : KawaiiTheme.textSecondary,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? KawaiiTheme.primaryPink : KawaiiTheme.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// P3-5: 日記清單視圖（原有邏輯）
+  Widget _buildDiaryListView(List<UserDiaryEntry> entries) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: entries.length,
@@ -142,6 +237,125 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
         final entry = entries[index];
         return _buildDiaryCard(entry);
       },
+    );
+  }
+
+  /// P3-5: 日曆視圖
+  Widget _buildCalendarView(List<UserDiaryEntry> entries) {
+    // 建立日期 → 条目列表 的映射
+    final eventsByDay = <DateTime, List<UserDiaryEntry>>{};
+    for (final entry in entries) {
+      final day = DateTime(entry.date.year, entry.date.month, entry.date.day);
+      eventsByDay.putIfAbsent(day, () => []).add(entry);
+    }
+
+    List<UserDiaryEntry> getEventsForDay(DateTime day) {
+      return eventsByDay[DateTime(day.year, day.month, day.day)] ?? [];
+    }
+
+    return Column(
+      children: [
+        TableCalendar<UserDiaryEntry>(
+          firstDay: DateTime(2020),
+          lastDay: DateTime.now(),
+          focusedDay: _focusedDay,
+          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+          eventLoader: getEventsForDay,
+          calendarFormat: CalendarFormat.month,
+          startingDayOfWeek: StartingDayOfWeek.sunday,
+          headerStyle: HeaderStyle(
+            formatButtonVisible: false,
+            titleCentered: true,
+            titleTextStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            leftChevronIcon: const Icon(Icons.chevron_left, color: KawaiiTheme.textPrimary),
+            rightChevronIcon: const Icon(Icons.chevron_right, color: KawaiiTheme.textPrimary),
+          ),
+          calendarStyle: CalendarStyle(
+            todayDecoration: BoxDecoration(
+              color: KawaiiTheme.primaryPink.withOpacity(0.3),
+              shape: BoxShape.circle,
+            ),
+            selectedDecoration: const BoxDecoration(
+              color: KawaiiTheme.primaryPink,
+              shape: BoxShape.circle,
+            ),
+            markerDecoration: const BoxDecoration(
+              color: KawaiiTheme.primaryPink,
+              shape: BoxShape.circle,
+            ),
+            markersMaxCount: 3,
+            outsideDaysVisible: false,
+          ),
+          onDaySelected: (selectedDay, focusedDay) {
+            setState(() {
+              _selectedDay = selectedDay;
+              _focusedDay = focusedDay;
+            });
+          },
+          onPageChanged: (focusedDay) {
+            _focusedDay = focusedDay;
+          },
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: _selectedDay == null
+              ? _buildCalendarHint()
+              : _buildDayEntries(getEventsForDay(_selectedDay!)),
+        ),
+      ],
+    );
+  }
+
+  /// P3-5: 日曆選中日期後顯示該日日記
+  Widget _buildDayEntries(List<UserDiaryEntry> entries) {
+    if (entries.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '📅 ${_formatDate(_selectedDay!)}',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '这天还没有日记',
+              style: TextStyle(
+                fontSize: 14,
+                color: KawaiiTheme.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: entries.length,
+      itemBuilder: (context, index) => _buildDiaryCard(entries[index]),
+    );
+  }
+
+  /// P3-5: 日曆提示文字
+  Widget _buildCalendarHint() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          '👆 點選日期查看日記',
+          style: TextStyle(
+            fontSize: 14,
+            color: KawaiiTheme.textSecondary,
+          ),
+        ),
+      ),
     );
   }
 
