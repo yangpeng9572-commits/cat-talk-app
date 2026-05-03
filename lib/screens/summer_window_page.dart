@@ -4,6 +4,7 @@ import '../services/cat_service.dart';
 import '../services/seasonal_event_service.dart';
 import '../services/bond_service.dart';
 import '../widgets/top_toast.dart';
+import '../models/translation_result.dart';
 
 /// 夏日窗邊活動頁 ☀️
 class SummerWindowPage extends StatefulWidget {
@@ -21,6 +22,8 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
   bool _isLoading = true;
   int _interactionCount = 0;
   static const int _maxInteractions = 3;
+  String? _selectedPose;
+  EmotionType _catEmotion = EmotionType.affectionate; // 預設情緒
 
   @override
   void initState() {
@@ -37,6 +40,45 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
       _currentCat = cats.first;
     }
     setState(() => _isLoading = false);
+  }
+
+  String get _poseEmoji {
+    switch (_selectedPose) {
+      case 'sleeping':
+        return '😴';
+      case 'stretching':
+        return '🧘';
+      case 'playing':
+        return '🎾';
+      case 'grooming':
+        return '🫧';
+      default:
+        return '🐱';
+    }
+  }
+
+  void _interactWithPose(String pose) {
+    if (_interactionCount >= _maxInteractions) return;
+    setState(() {
+      _interactionCount++;
+      _selectedPose = pose;
+    });
+
+    if (_currentCat != null && _bondService != null) {
+      _bondService!.addBond(_currentCat!.id, 'summer_window_pose_${pose}');
+    }
+
+    final poseMessages = {
+      'sleeping': '🌙 ${_currentCat?.name ?? "貓咪"}打個小盹，涼涼的風真舒服～',
+      'stretching': '🧘 ${_currentCat?.name ?? "貓咪"}伸了個懶腰，超級可愛！',
+      'playing': '🎾 ${_currentCat?.name ?? "貓咪"}想玩毛球，夏日動一動！',
+      'grooming': '🫧 ${_currentCat?.name ?? "貓咪"}在整理毛髮，優雅过夏天～',
+    };
+    TopToast.show(
+      context,
+      message: poseMessages[pose] ?? '和${_currentCat?.name ?? "貓咪"}一起享受涼涼的風～ 🐱💨',
+      backgroundColor: const Color(0xFF87CEEB),
+    );
   }
 
   void _interact() {
@@ -83,6 +125,10 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
                 children: [
                   // 場景視覺
                   _buildSceneVisual(themeColor),
+                  const SizedBox(height: 24),
+
+                  // 姿勢選擇區塊
+                  _buildPoseSelector(themeColor),
                   const SizedBox(height: 24),
 
                   // 活動說明
@@ -183,6 +229,111 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
         ],
       ),
     );
+  }
+
+  Widget _buildPoseSelector(Color themeColor) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text('🎭 ${_currentCat?.name ?? "貓咪"}在窗邊的姿勢', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: themeColor)),
+              Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: themeColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text('今天情緒：${_catEmotion.emoji}', style: TextStyle(fontSize: 12, color: themeColor)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _buildPoseButton('sleeping', '😴 打盹', themeColor),
+              _buildPoseButton('stretching', '🧘 伸懶腰', themeColor),
+              _buildPoseButton('playing', '🎾 玩耍', themeColor),
+              _buildPoseButton('grooming', '🫧 整理毛', themeColor),
+            ],
+          ),
+          if (_selectedPose != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: themeColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Text(_poseEmoji, style: const TextStyle(fontSize: 24)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _getPoseStoryText(_selectedPose!),
+                      style: TextStyle(fontSize: 13, color: themeColor),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPoseButton(String pose, String label, Color themeColor) {
+    final isSelected = _selectedPose == pose;
+    final isCompleted = _interactionCount >= _maxInteractions;
+    return GestureDetector(
+      onTap: isCompleted ? null : () => _interactWithPose(pose),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? themeColor : themeColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? themeColor : themeColor.withValues(alpha: 0.3),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            color: isSelected ? Colors.white : themeColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getPoseStoryText(String pose) {
+    final stories = {
+      'sleeping': '${_currentCat?.name ?? "貓咪"}窩在窗邊打盹，涼風吹過，超級舒服～ 😴',
+      'stretching': '伸了個懶腰！夏日的陽光配上有趣的伸展動作，完美～ 🧘',
+      'playing': '對著窗外的蝴蝶挥爪子，嗨到不行！夏日限定活潑模式啟動～ 🎾',
+      'grooming': '優雅地用爪子洗臉，夏天的涼風剛好吹乾毛髮 🫧',
+    };
+    return stories[pose] ?? '${_currentCat?.name ?? "貓咪"}在窗邊度過愉快的時光～';
   }
 
   Widget _buildEventInfo(SeasonalEvent? event, Color themeColor) {
