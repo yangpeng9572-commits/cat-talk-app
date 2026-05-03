@@ -81,9 +81,9 @@ class EmotionalHeadlineService {
   };
   
   static const List<String> _emptyHeadlines = [
-    '{catName} 今天還沒跟你說話',
-    '試著聽聽{catName}今天想表達什麼',
-    '今天也來記錄一聲喵吧 🐾',
+    '今天也來看看{catName}的日常吧 🐾',
+    '記錄每一天與{catName}的小時光',
+    '今天{catName}也想跟你說話 🐱',
   ];
 
   // ===== 副句資料庫 =====
@@ -132,9 +132,9 @@ class EmotionalHeadlineService {
   };
   
   static const List<String> _emptySubtitles = [
-    '長按錄音，記錄今天第一聲喵。',
-    '🐾 今天還沒聽到她的聲音',
-    '試著按下錄音，聽聽她想說什麼',
+    '每天一點，累積珍貴日常 🐾',
+    '用照片與文字記錄她的每一天',
+    '今天的互動，會成為明天的回憶',
   ];
 
   // ===== 情緒標籤 =====

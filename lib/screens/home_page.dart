@@ -1165,7 +1165,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           const SizedBox(height: 4),
           // Subtitle
           Text(
-            _todaySubtitle.isNotEmpty ? _todaySubtitle : '長按錄音，記錄今天第一聲喵',
+            _todaySubtitle.isNotEmpty ? _todaySubtitle : '今天也來記錄她的日常吧 🐾',
             style: TextStyle(
               fontSize: 12,
               color: KawaiiTheme.textSecondary,
