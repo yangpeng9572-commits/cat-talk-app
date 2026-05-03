@@ -12,6 +12,7 @@ class UserDiaryEntry {
   final DateTime date;
   final String content;
   final String? photoPath; // P3-4: 照片路徑（可為 null）
+  final List<String> tags; // P3-4 Phase 2: 標籤
   final DateTime createdAt;
 
   UserDiaryEntry({
@@ -21,6 +22,7 @@ class UserDiaryEntry {
     required this.date,
     required this.content,
     this.photoPath, // P3-4: 照片路徑（可為 null）
+    this.tags = const [], // P3-4 Phase 2: 標籤（預設空）
     required this.createdAt,
   });
 
@@ -32,6 +34,7 @@ class UserDiaryEntry {
       'date': date.toIso8601String(),
       'content': content,
       'photoPath': photoPath, // P3-4: 照片路徑
+      'tags': tags, // P3-4 Phase 2: 標籤
       'createdAt': createdAt.toIso8601String(),
     };
   }
@@ -44,6 +47,7 @@ class UserDiaryEntry {
       date: DateTime.parse(json['date'] as String),
       content: json['content'] as String,
       photoPath: json['photoPath'] as String?, // P3-4: 照片路徑
+      tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? const [], // P3-4 Phase 2: 標籤
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
   }

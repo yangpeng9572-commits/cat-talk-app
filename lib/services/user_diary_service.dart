@@ -50,13 +50,14 @@ class UserDiaryService {
         e.date.day == date.day).toList();
   }
 
-  /// 新增日記（支援 P3-4 照片）
+  /// 新增日記（支援 P3-4 照片、P3-4 Phase 2 標籤）
   Future<void> addEntry({
     required String catId,
     required String catName,
     required DateTime date,
     required String content,
     String? photoPath, // P3-4: 可選照片路徑
+    List<String>? tags, // P3-4 Phase 2: 可選標籤
   }) async {
     if (_prefs == null) return;
     final entry = UserDiaryEntry(
@@ -66,6 +67,7 @@ class UserDiaryService {
       date: date,
       content: content,
       photoPath: photoPath, // P3-4: 照片路徑
+      tags: tags ?? const [], // P3-4 Phase 2: 標籤
       createdAt: DateTime.now(),
     );
     final all = getAll();

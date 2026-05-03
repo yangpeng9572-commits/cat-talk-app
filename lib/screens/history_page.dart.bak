@@ -562,31 +562,6 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                 height: 1.6,
               ),
             ),
-
-            // P3-4 Phase 2: 標籤顯示
-            if (entry.tags.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: entry.tags.map((tag) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: KawaiiTheme.primaryPink.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      tag,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: KawaiiTheme.primaryPink,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
           ],
         ),
       ),
