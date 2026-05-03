@@ -15,9 +15,9 @@ class SummerWindowPage extends StatefulWidget {
 
 class _SummerWindowPageState extends State<SummerWindowPage> {
   final SeasonalEventService _eventService = SeasonalEventService();
-  final BondService _bondService = BondService();
+  BondService? _bondService;
 
-  String? _currentCatId;
+  Cat? _currentCat;
   bool _isLoading = true;
   int _interactionCount = 0;
   static const int _maxInteractions = 3;
@@ -30,10 +30,11 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
 
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
+    _bondService = BondService()..init(prefs);
     final catService = CatService(prefs);
     final cats = catService.getAllCats();
     if (cats.isNotEmpty) {
-      _currentCatId = cats.first.id;
+      _currentCat = cats.first;
     }
     setState(() => _isLoading = false);
   }
@@ -42,12 +43,12 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
     if (_interactionCount >= _maxInteractions) return;
     setState(() => _interactionCount++);
 
-    // 模擬互動增加好感度
-    if (_currentCatId != null) {
-      _bondService.addBond(_currentCatId!, 'summer_window');
+    // 互動增加好感度
+    if (_currentCat != null && _bondService != null) {
+      _bondService!.addBond(_currentCat!.id, 'summer_window');
     }
 
-    TopToast.show(context, message: '和貓咪一起享受涼涼的風～ 🐱💨', backgroundColor: const Color(0xFF87CEEB));
+    TopToast.show(context, message: '和${_currentCat?.name ?? "貓咪"}一起享受涼涼的風～ 🐱💨', backgroundColor: const Color(0xFF87CEEB));
   }
 
   @override
@@ -150,7 +151,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
                 right: 20,
                 child: Text('☀️', style: TextStyle(fontSize: 28, color: themeColor)),
               ),
-              // 貓咪
+              // 貓咪（顯示目前選中的貓）
               Positioned(
                 bottom: 8,
                 child: Container(
@@ -159,16 +160,21 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
                     color: Colors.orange.shade100,
                     shape: BoxShape.circle,
                   ),
-                  child: const Text('🐱', style: TextStyle(fontSize: 36)),
+                  child: Text(
+                    _currentCat != null ? '🐱' : '🐱',
+                    style: const TextStyle(fontSize: 36),
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
-            '🌬️ 涼爽的風吹進窗戶\n和她一起享受夏日的悠閒時光',
+          Text(
+            _currentCat != null
+                ? '🌬️ ${_currentCat!.name}和你一起享受涼爽的微風'
+                : '🌬️ 涼爽的風吹進窗戶',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF6B4B4B),
               height: 1.5,
