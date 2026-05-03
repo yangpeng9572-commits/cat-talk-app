@@ -7,54 +7,43 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-04 03:17:02
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw
+- Last updated at: 2026-05-04 03:22 AM (Asia/Taipei)
 
 ---
 
-## 本輪任務：P1-4 記錄頁改成日常生活日記 MVP
+## 本輪任務：P1-5 App 名稱與品牌統一（第一階段）
 
 ### 任務 ID
-- Task ID: P1-4
-- Task name: 記錄頁改成日常生活日記 MVP
+- Task ID: P1-5（第一階段）
+- Task name: App 名稱與品牌統一
 
 ### 完成的修改
 
-- **Commit:** `b1ac215`
+- **Commit:** `c910ca6`
 - **Branch:** main
 
 ### 修改內容
 
-將記錄頁從單一翻譯記錄改為生活日記 + 翻譯雙 Tab 架構：
+將 `pubspec.yaml` 的 description 更新為品牌方向：
 
-1. **TabBar 架構**
-   - `TabController(length: 2)` 支援「翻譯」和「日記」兩個 tab
-   - Tab bar 顯示在 AppBar 底部
-
-2. **翻譯 tab（重構）**
-   - 原本的翻譯記錄功能遷移到第一個 tab
-   - 改用 `CatService` 取得真實貓咪名稱（取代 `Cat.getDemoCats()`）
-   - `_catsMap`  快取所有貓咪資料
-
-3. **日記 tab（新功能）**
-   - 新增 `_diaryService` 使用 `UserDiaryService` 讀寫日記
-   - 日記卡片支援滑動刪除（`Dismissible` + 確認對話框）
-   - 空狀態引導使用者寫第一篇日記
-
-4. **新增日記功能**
-   - Bottom sheet 形式新增日記
-   - 可選擇貓咪（`ChoiceChip`）和日期（`showDatePicker`）
-   - TextField 輸入日記內容
-   - 儲存時驗證內容不為空
-
-5. **FAB 快速寫日記**
-   - `FloatingActionButton` 直接開啟新增日記 sheet
+- 舊：`貓語翻譯 App - 讓每一聲喵喵都被聽見`
+- 新：`貓咪情緒陪伴與生活記錄 App - 了解每一聲喵喵的心意`
 
 ### 修改檔案
 
-- `lib/screens/history_page.dart`
+- `pubspec.yaml`
+
+### 品牌現況檢查
+
+目前已確認：
+- ✅ Android app label：`喵心語`
+- ✅ main.dart title：`喵心語`
+- ✅ 絕大部分 UI 文字已使用「喵心語」
+- ✅ 無殘留「貓語通」字樣
+- ✅ `pubspec.yaml` description 已更新
 
 ### Required Hermes Actions
 
@@ -62,11 +51,8 @@ Hermes 每次驗收前應先讀取本檔案。
 1. `git pull --ff-only`
 2. `flutter analyze`
 3. `flutter test`
-4. 驗收功能：
-   - 記錄頁有兩個 tab（翻譯 / 日記）
-   - 可以新增、刪除、查看日記
-   - 翻譯 tab 功能正常
+4. 驗證：pubspec.yaml description 已更新
 
 ---
 
-_Last updated: 2026-05-04 02:59 AM (Asia/Taipei)_
+_Last updated: 2026-05-04 03:22 AM (Asia/Taipei)_
