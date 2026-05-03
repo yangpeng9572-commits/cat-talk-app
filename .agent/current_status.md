@@ -37,33 +37,43 @@ OpenClaw 不直接修改 Windows repo。
 
 - Stable branch: main
 - Stable remote: origin/main
-- 最新確認穩定 commit: af17dce
+- 最新確認穩定 commit: ef7a750（handoff 更新）
 - 已推送 commit:
   - `af17dce`：cat management navigation and profile flow
   - `3baf846`：delete cat action in edit page
   - `0373aba`：summer window activity page
+  - `e6011de`：agent monitor dashboard MVP
+  - `ef7a750`：handoff reset to IDLE
 
 ---
 
 ## 當前任務狀態
 
-### P0-6：刪除貓咪功能 MVP
-- Commit: `3baf846`
-- 狀態：Hermes analyze / test / build 已通過
-- 等待：手機實測
+### 所有 P2/P3 任務已完成
+- P2-1 ✅ PASS
+- P2-4 ✅ PASS
+- P2-5 ✅ PASS
+- P3-1 ✅ 全批次完成
+- P3-2 ✅ PASS
+- TOOL-1 ✅ PASS
 
-### P2-5：夏日窗邊活動點擊 MVP
-- Commit: `0373aba`
-- 狀態：Hermes 驗收中
-- 等待：Hermes pull + analyze + test + build + 實測
+### 等待 Hermes 手機實測回歸
+- P0-1 新手教程 replayOnboarding
+- P0-2 翻譯記錄頁空白
+- P1-1 新增/編輯貓咪完整性
+- P1-2 貓咪頭像持久化
+- P0-6 刪除貓咪功能
+
+### 待 Andy 提供任務描述
+- P2-2（task_queue.md 無描述）
 
 ---
 
 ## 是否允許 OpenClaw 開新任務
 
-- 若 Hermes Review 為 FAIL：OpenClaw 必須優先修錯
-- 若 git status 有非預期 modified：必須停止
-- 若雙工作樹未同步：先同步再執行
+- 目前無明确新任務可執行
+- 所有已知開發任務已完成
+- 等待 Hermes 回歸結果 或 Andy 下達新任務
 
 ---
 
@@ -75,8 +85,9 @@ Windows repo 目前可能有以下 untracked，不得加入 commit：
 
 ---
 
-## 下一步建議
+## OpenClaw 工作樹狀態
 
-1. Hermes pull 後驗收 P2-5
-2. P0-6 / P2-5 手機實測通過後，更新本檔穩定基準
-3. OpenClaw 依 task_queue 繼續下一個任務
+- git status --short：CLEAN（無 modified/untracked）
+- 所有 withOpacity 已清除（P3-1 完成）
+- handoff 已重置為 IDLE
+- 可接收新任務
