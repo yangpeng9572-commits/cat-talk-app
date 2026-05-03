@@ -982,9 +982,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               await prefs.setBool('hasSeenOnboarding', false);
               await prefs.setBool('hasSeenCatWorld', false);
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('已重置新手教學，請重啟App')),
-                );
+                TopToast.info(context, message: '已重置新手教學，請重啟App 🐾');
               }
             },
             style: ElevatedButton.styleFrom(
