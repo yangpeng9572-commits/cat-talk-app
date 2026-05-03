@@ -10,20 +10,86 @@ Hermes 每次驗收前應先讀取本檔案。
 - Status: WAITING_FOR_HERMES
 - Waiting for Hermes: YES
 - Last updated by: OpenClaw
-- Last updated at: 2026-05-03 14:58 GMT+8
+- Last updated at: 2026-05-03 15:10 GMT+8
 
 ---
 
-## P3-1 (cont.) withOpacity → withValues 重構第四批（7 個 screens 檔案）
+## P2-4：CatWorld 小房間 overflow 修復
 
-### 完成的修改
+### Commit
 
-- **Commit:** `60810e9`
+- **Commit:** `73e1aa1`
 - **Branch:** main
 
 ### 修改內容
 
-7 個 screens 檔案共 86 處 `withOpacity()` 替換為 `withValues(alpha: x)`：
+重構 `_buildContent()` 佈局結構，解決小型螢幕 overflow 問題：
+
+**變更前（問題結構）：**
+```dart
+SingleChildScrollView(
+  child: Column(
+    children: [
+      _buildRoomSection(),      // 固定高度，約 300px
+      _buildBirthdayEventCard(),
+      _buildEventCard(),
+      _buildPlusCard(),
+      SizedBox(
+        height: MediaQuery.of(context).size.height * 0.45, // 固定 45% 高度
+        child: TabBarView(...),
+      ),
+    ],
+  ),
+)
+```
+
+**問題：**
+- 在小型螢幕（高度 < 700px）， room section (~300px) + 3個卡片 + TabBarView (45%) > 螾幕高度
+- `SingleChildScrollView` + `TabBarView` 滾動手勢衝突
+- 導致 overflow warning 和黃黑警告線
+
+**變更後（修復結構）：**
+```dart
+NestedScrollView(
+  headerSliverBuilder: (context, innerBoxIsScrolled) {
+    return <Widget>[
+      SliverToBoxAdapter(
+        child: Column(
+          children: [
+            _buildRoomSection(),
+            if (_birthdayCatToday != null) _buildBirthdayEventCard(),
+            _buildEventCard(),
+            _buildPlusCard(),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    ];
+  },
+  body: TabBarView(...)  // 填滿剩餘空間，自動滑動
+)
+```
+
+### 修改檔案
+
+- `lib/screens/cat_world_page.dart` — `_buildContent()` 重構
+
+### 驗收要求
+
+- flutter analyze: 0 errors
+- flutter test: 264 tests passed
+- CatWorld 頁面滑到底不出現 overflow
+- 小螢幕（iPhone SE 等）CatWorld 正常顯示
+- TabBarView 滑動順暢，header 跟著滑走
+
+---
+
+## P3-1 Batch 4（已完成，上輪殘留）
+
+- **Commit:** `60810e9`
+- **狀態：** 待 Hermes 驗收（如尚未審閱）
+
+7 個 screens 檔案共 86 處 `withOpacity()` → `withValues(alpha: x)`
 
 | 檔案 | 替換數量 |
 |------|---------|
@@ -35,22 +101,6 @@ Hermes 每次驗收前應先讀取本檔案。
 | lib/screens/home_interaction_page.dart | 9 |
 | lib/screens/memory_cards_page.dart | 5 |
 
-### 修改檔案
-
-- lib/screens/daily_report_page.dart
-- lib/screens/home_page.dart
-- lib/screens/pose_recognition_page.dart
-- lib/screens/personality_card_page.dart
-- lib/screens/love_meter_page.dart
-- lib/screens/home_interaction_page.dart
-- lib/screens/memory_cards_page.dart
-
-### 驗收要求
-
-- flutter analyze: 0 errors
-- flutter test: 264 tests passed
-- UI 視覺不變
-
 ### P3-1 進度總覽
 
 | Batch | 範圍 | Commit | Hermes 狀態 |
@@ -60,20 +110,10 @@ Hermes 每次驗收前應先讀取本檔案。
 | Batch 3 | 10 個 screens 檔案 | `45d6b5d` | ✅ PASS |
 | Batch 4 | 7 個 screens 檔案 | `60810e9` | ⏳ 待 Hermes 驗收 |
 
-### 剩餘 withOpacity
-
-還有少量殘留在：
-- lib/services/share_card_service.dart（4 處）
-- lib/theme/kawaii_theme.dart（7 處）
-- lib/main.dart（2 處）
-
-建議之後統一處理（或視為 P3-2）。
-
 ---
 
 ## Notes
 
 - WSL2 無 Flutter，analyze/test 由 Hermes 執行
-- 這是 P3-1 的第四批重構（7 個 remaining screens）
-- 視覺上無任何改變，純 API 遷移
-- 86 次替換，+-86 行（無 net change）
+- P2-4 純 UI 結構重構，視覺不變
+- P3-1 Batch 4 純 API 遷移（withOpacity → withValues），視覺不變
