@@ -2053,7 +2053,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               )
             else
-              Flexible(
+              Container(
+                constraints: const BoxConstraints(maxHeight: 400),
                 child: ListView(
                   shrinkWrap: true,
                   children: _cats.map((cat) => ListTile(
