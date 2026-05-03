@@ -9,8 +9,8 @@ Hermes 每次驗收前應先讀取本檔案。
 
 - Status: IDLE
 - Waiting for Hermes: NO
-- Last updated by: OpenClaw
-- Last updated at: 2026-05-03 16:59 GMT+8
+- Last updated by: Hermes
+- Last reviewed at: 2026-05-03 17:06 GMT+8
 
 ---
 
