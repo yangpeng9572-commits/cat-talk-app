@@ -111,12 +111,24 @@ OpenClaw 每輪選任務時，依照以下順序：
 
 目前 commit：`73e1aa1` — 使用 NestedScrollView 重構佈局，TabBarView 填滿剩餘空間
 
+### P2-1：隱藏分享卡/動畫 tab
+狀態：✅ WSL2 已 commit + push，Hermes 驗收中
+
+需求：
+- Cat World 頁面隱藏「分享卡」和「動畫」tab
+- 保留 4 個 tab：房間、家具、配件、限定
+
+目前 commit：`cee79b2` feat: P2-1 hide share card/animation tabs in CatWorld
+
 ---
 
 ## P3｜低風險優化
 
 ### P3-1：整理 withOpacity deprecated 警告
-狀態：待處理
+狀態：✅ ALL BATCHES PASS（Hermes 驗收完成 — 60810e9, a5cc616）
+
+備註：
+- 剩餘少量 withOpacity（可作為未來任務）：lib/main.dart（2）、share_card_service.dart（4）、kawaii_theme.dart（7）
 
 需求：
 - 分批處理 deprecated withOpacity
