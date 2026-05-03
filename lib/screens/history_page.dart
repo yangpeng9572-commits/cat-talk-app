@@ -2,10 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/translation_result.dart';
 import '../models/cat.dart';
+import '../models/user_diary_entry.dart';
 import '../services/translation_history_service.dart';
+import '../services/cat_service.dart';
+import '../services/user_diary_service.dart';
 import '../widgets/emotion_card.dart';
+import '../widgets/top_toast.dart';
 import '../theme/kawaii_theme.dart';
 
+/// 記錄頁（生活日記 MVP）
+/// 
+/// P1-4：第一階段將記錄頁改成日常生活日記
+/// - 翻譯記錄（原有功能）
+/// - 使用者自行記錄的生活日記（新功能）
+/// 
+/// 未来扩展方向：
+/// - 第二阶段：照片 + 标签 + 时间轴
+/// - 第三阶段：日历视图
+/// 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
 
@@ -13,46 +27,123 @@ class HistoryPage extends StatefulWidget {
   State<HistoryPage> createState() => _HistoryPageState();
 }
 
-class _HistoryPageState extends State<HistoryPage> {
+class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStateMixin {
   final TranslationHistoryService _historyService = TranslationHistoryService();
+  final UserDiaryService _diaryService = UserDiaryService();
+  late CatService _catService;
+  late TabController _tabController;
+
+  // 貓咪資料快取
+  Map<String, Cat> _catsMap = {};
 
   @override
   void initState() {
     super.initState();
-    _loadHistory();
+    _tabController = TabController(length: 2, vsync: this);
+    _loadData();
   }
 
-  Future<void> _loadHistory() async {
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
     await _historyService.init(prefs);
+    await _diaryService.init(prefs);
+    _catService = CatService(prefs);
+    _loadCats();
     if (!mounted) return;
     setState(() {});
   }
+
+  void _loadCats() {
+    final cats = _catService.getAllCats();
+    _catsMap = { for (var c in cats) c.id: c };
+  }
+
+  Cat? _getCatById(String catId) => _catsMap[catId];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: KawaiiTheme.background,
       appBar: AppBar(
-        title: const Text('翻譯記錄'),
+        title: const Text('生活記錄'),
         backgroundColor: Colors.transparent,
         foregroundColor: KawaiiTheme.textPrimary,
         elevation: 0,
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: KawaiiTheme.primaryPink,
+          unselectedLabelColor: KawaiiTheme.textSecondary,
+          indicatorColor: KawaiiTheme.primaryPink,
+          tabs: [
+            Tab(text: '翻譯'),
+            Tab(text: '日記'),
+          ],
+        ),
         actions: [
-          if (_historyService.count > 0)
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: _showClearAllDialog,
-            ),
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _showAddDiaryDialog(),
+            tooltip: '寫日記',
+          ),
         ],
       ),
-      body: _historyService.count == 0
-          ? _buildEmptyState()
-          : _buildHistoryList(),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildTranslationTab(),
+          _buildDiaryTab(),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddDiaryDialog(),
+        backgroundColor: KawaiiTheme.primaryPink,
+        child: const Icon(Icons.edit, color: Colors.white),
+      ),
     );
   }
 
-  Widget _buildEmptyState() {
+  /// 翻譯記錄 tab
+  Widget _buildTranslationTab() {
+    if (_historyService.count == 0) {
+      return _buildTranslationEmptyState();
+    }
+
+    final history = _historyService.getAll();
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: history.length,
+      itemBuilder: (context, index) {
+        final result = history[index];
+        return _buildHistoryCard(result);
+      },
+    );
+  }
+
+  /// 日記 tab
+  Widget _buildDiaryTab() {
+    final entries = _diaryService.getAll();
+    if (entries.isEmpty) {
+      return _buildDiaryEmptyState();
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: entries.length,
+      itemBuilder: (context, index) {
+        final entry = entries[index];
+        return _buildDiaryCard(entry);
+      },
+    );
+  }
+
+  /// 翻譯記錄空狀態
+  Widget _buildTranslationEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -84,27 +175,56 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
-  Widget _buildHistoryList() {
-    final history = _historyService.getAll();
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: history.length,
-      itemBuilder: (context, index) {
-        final result = history[index];
-        return _buildHistoryCard(result);
-      },
+  /// 日記空狀態
+  Widget _buildDiaryEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: KawaiiTheme.softPink,
+              shape: BoxShape.circle,
+            ),
+            child: const Text(
+              '📔',
+              style: TextStyle(fontSize: 60),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              '還沒有寫日記\n記錄今天和貓咪的特別時光吧！',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, height: 1.5),
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () => _showAddDiaryDialog(),
+            icon: const Icon(Icons.edit),
+            label: const Text('寫下第一篇'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: KawaiiTheme.primaryPink,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
+  /// 翻譯記錄卡片
   Widget _buildHistoryCard(TranslationResult result) {
-    // 取得貓咪名稱
-    final cat = Cat.getDemoCats().firstWhere(
-      (c) => c.id == result.catId,
-      orElse: () => Cat.getDemoCats().first,
-    );
-
-    // 是否有使用者回饋修正
+    final cat = _getCatById(result.catId);
     final hasCorrection = result.userFeedback != null && !result.userFeedback!.isCorrect;
     final isCorrect = result.userFeedback?.isCorrect ?? false;
 
@@ -149,7 +269,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 const SizedBox(width: 12),
                 // 貓咪名稱
                 Text(
-                  cat.name,
+                  cat?.name ?? '未知',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -303,6 +423,315 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
+  /// 日記卡片
+  Widget _buildDiaryCard(UserDiaryEntry entry) {
+    final cat = _getCatById(entry.catId);
+
+    return Dismissible(
+      key: Key(entry.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
+        ),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      confirmDismiss: (direction) async {
+        return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: const Text('刪除日記？'),
+            content: const Text('這個動作無法撤銷。'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('取消'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('刪除'),
+              ),
+            ],
+          ),
+        ) ?? false;
+      },
+      onDismissed: (direction) {
+        _diaryService.deleteEntry(entry.id);
+        setState(() {});
+        TopToast.success(context, message: '已刪除日記');
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
+          border: Border.all(color: KawaiiTheme.divider),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 第一列：貓咪名稱 + 日期
+            Row(
+              children: [
+                // 貓咪頭像
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: KawaiiTheme.softPink,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.pets, color: KawaiiTheme.primaryPink, size: 20),
+                ),
+                const SizedBox(width: 12),
+                // 貓咪名稱
+                Text(
+                  cat?.name ?? entry.catName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                // 日期
+                Text(
+                  _formatDate(entry.date),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: KawaiiTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // 日記內容
+            Text(
+              entry.content,
+              style: const TextStyle(
+                fontSize: 15,
+                height: 1.6,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 新增日記對話框
+  Future<void> _showAddDiaryDialog() async {
+    final cats = _catService.getAllCats();
+    if (cats.isEmpty) {
+      TopToast.warning(context, message: '請先新增貓咪再寫日記');
+      return;
+    }
+
+    final selectedCat = cats.first;
+    final controller = TextEditingController();
+    DateTime selectedDate = DateTime.now();
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          return Container(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 標題列
+                  Row(
+                    children: [
+                      const Text(
+                        '寫日記',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 選擇貓咪
+                  const Text(
+                    '選擇貓咪',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: KawaiiTheme.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: cats.map((cat) {
+                      final isSelected = cat.id == selectedCat.id;
+                      return ChoiceChip(
+                        label: Text(cat.name),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setSheetState(() {});
+                          }
+                        },
+                        selectedColor: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
+                        labelStyle: TextStyle(
+                          color: isSelected ? KawaiiTheme.primaryPink : KawaiiTheme.textPrimary,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 選擇日期
+                  const Text(
+                    '日期',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: KawaiiTheme.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: selectedDate,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(),
+                      );
+                      if (date != null) {
+                        setSheetState(() => selectedDate = date);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: KawaiiTheme.divider),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.calendar_today, size: 18),
+                          const SizedBox(width: 8),
+                          Text(_formatDate(selectedDate)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 日記內容輸入
+                  const Text(
+                    '內容',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: KawaiiTheme.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: controller,
+                    maxLines: 5,
+                    decoration: InputDecoration(
+                      hintText: '記錄今天和貓咪的特別時光...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: KawaiiTheme.divider),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: KawaiiTheme.primaryPink, width: 2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 儲存按鈕
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final content = controller.text.trim();
+                        if (content.isEmpty) {
+                          TopToast.warning(context, message: '請輸入內容');
+                          return;
+                        }
+                        await _diaryService.addEntry(
+                          catId: selectedCat.id,
+                          catName: selectedCat.name,
+                          date: selectedDate,
+                          content: content,
+                        );
+                        if (!mounted) return;
+                        Navigator.pop(context);
+                        setState(() {});
+                        TopToast.success(context, message: '已儲存日記 🐱');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: KawaiiTheme.primaryPink,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        '儲存',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   void _showDetailSheet(TranslationResult result) {
     showModalBottomSheet(
       context: context,
@@ -325,38 +754,6 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
-  void _showClearAllDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('清除所有記錄？'),
-        content: const Text('這個動作無法撤銷，所有翻譯記錄將被刪除。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            onPressed: () {
-              _historyService.clearAll();
-              Navigator.pop(context);
-              setState(() {});
-            },
-            child: const Text('清除'),
-          ),
-        ],
-      ),
-    );
-  }
-
   String _formatTime(DateTime time) {
     final now = DateTime.now();
     final diff = now.difference(time);
@@ -366,6 +763,15 @@ class _HistoryPageState extends State<HistoryPage> {
     if (diff.inHours < 24) return '${diff.inHours}小時前';
     if (diff.inDays < 7) return '${diff.inDays}天前';
     return '${time.month}/${time.day}';
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dateOnly = DateTime(date.year, date.month, date.day);
+    if (dateOnly == today) return '今天';
+    if (dateOnly == today.subtract(const Duration(days: 1))) return '昨天';
+    return '${date.month}月${date.day}日';
   }
 
   Color _getConfidenceColor(double confidence) {
