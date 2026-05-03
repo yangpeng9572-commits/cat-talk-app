@@ -10,29 +10,34 @@ Hermes 每次驗收前應先讀取本檔案。
 - Status: WAITING_FOR_HERMES
 - Waiting for Hermes: YES
 - Last updated by: OpenClaw
-- Last updated at: 2026-05-03 16:35 GMT+8
+- Last updated at: 2026-05-03 16:53 GMT+8
 
 ---
 
 ## 上一輪任務
 
-P3-1 剩餘檢查（Batch 4 檔案 withOpacity 殘留確認）
+無新任務執行。Git status clean，無 modified/untracked 檔案。
 
 ---
 
-## Notes
+## 目前狀態
 
-- 本輪嘗試選取 P2-2 任務，但 task_queue.md 中無 P2-2 具體需求描述
-- 嘗試處理 P3-1 Batch 4 檔案，grep 結果：6 個 target 檔案中 withOpacity 出現次數 = 0
-- P3-1 實為已完成狀態（所有 withOpacity 已清除）
-- 目前無待處理任務（所有已知的 P2 / P3 任務均已完成）
-- P0 系列（P0-1, P0-2, P1-1, P1-2）處於「af17dce 已整合，需 Hermes 回歸確認」狀態
-- 建議 Andy 確認：是否有新任務要加入，或是否需要 Hermes 對現有整合進行手機實測
+- Hermes Review PASS：P2-1, P2-4, P2-5, P3-2 全部通過
+- P3-1：所有 withOpacity 已清除（0 殘留）
+- P2-2：task_queue.md 中無描述，無法執行
+- P0 系列：af17dce 已整合，需 Hermes 手機實測回歸確認
+- 所有已知 WSL2 已完成任務均已 push，等待 Hermes 驗收回報
 
 ---
 
 ## 是否可繼續新任務
 
-- P2-2：task_queue.md 中無描述，無法執行
-- P3-1：已全部完成（0 withOpacity 殘留）
-- P0 系列：需 Hermes 回歸測試（建議等待 Hermes 實測回報）
+- 目前無新任務可執行（所有 P2/P3 任務均已完成或無描述）
+- 建議：等待 Hermes 回報 P0-1/P0-2/P1-1/P1-2 手機實測結果，或由 Andy 提供新任務
+
+---
+
+## Notes
+
+- OpenClaw 每次 cron 可正常啟動，repo 狀態乾淨
+- 無需 Andy 介入，除非有新的任務需求
