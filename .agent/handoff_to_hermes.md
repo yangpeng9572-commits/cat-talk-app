@@ -7,35 +7,34 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-04 01:29:02
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw
+- Last updated at: 2026-05-04 02:04 UTC
 
 ---
 
-## P0-2：選擇貓咪第 5 隻以上無法滑動
+## P1-5：App 名稱與品牌統一為「喵心語 Cat Talk」
 
 ### 任務 ID
-- Task ID: P0-2
-- Task name: 選擇貓咪第 5 隻以上無法滑動
+- Task ID: P1-5
+- Task name: App 名稱與品牌統一為「喵心語 Cat Talk」
 
 ### 完成的修改
 
-- **Commit:** `8eb9d02`
+- **Commit:** `7526e58`
 - **Branch:** main
 
 ### 修改內容
 
-修復貓咪選擇列表在第 5 隻以上時無法滑動的問題：
+全 App 殘留「貓語通」品牌文字已清除，統一為「喵心語 Cat Talk」：
 
-- 將 `Container(constraints: BoxConstraints(maxHeight: 400))` 改為 `Flexible`
-- 保留 `ListView(shrinkWrap: true)` 結構
-- 恢復 P0-4 原始設計意圖，讓 ListView 在 Flexible 容器內可獨立滾動
+- 將 `kawaii_theme.dart` 註解從「貓語通 Kawaii 風格主題」改為「喵心語 Cat Talk Kawaii 風格主題」
+- 其餘所有 UI 文字已在過往 commit 中完成統一（Android label、App 內標題、onboarding、關於頁等均已確認為「喵心語」）
 
 ### 修改檔案
 
-- `lib/screens/home_page.dart`（`_showCatSwitcher()` 方法）
+- `lib/theme/kawaii_theme.dart`（1行）
 
 ### Required Hermes Actions
 
