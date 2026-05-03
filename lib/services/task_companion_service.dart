@@ -11,11 +11,11 @@ class TaskCompanionService {
   String getTitle(TaskType type) {
     switch (type) {
       case TaskType.translate_meow:
-        return '今天聽她說一次話（待調整）';
+        return '今天聽她說一次話'; // 已停用，僅保留結構相容性
       case TaskType.view_daily_report:
         return '看看她今天的小心情';
       case TaskType.give_feedback:
-        return '回應她一次小情緒（待調整）';
+        return '回應她一次小情緒'; // 已停用，僅保留結構相容性
       case TaskType.play_with_cat:
         return '陪她玩一下';
       case TaskType.add_cat_note:
@@ -31,11 +31,11 @@ class TaskCompanionService {
   String getDescription(TaskType type) {
     switch (type) {
       case TaskType.translate_meow:
-        return '錄下一聲喵，看看她今天想表達什麼（待調整）';
+        return '錄下一聲喵，看看她今天想表達什麼'; // 已停用
       case TaskType.view_daily_report:
         return '讀一讀今天的小日記，更了解她一點';
       case TaskType.give_feedback:
-        return '告訴我這次像不像她，我會慢慢記住（待調整）';
+        return '告訴我這次像不像她，我會慢慢記住'; // 已停用
       case TaskType.play_with_cat:
         return '用幾分鐘陪伴，累積你們的小默契';
       case TaskType.add_cat_note:
