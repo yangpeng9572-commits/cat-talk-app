@@ -12,6 +12,7 @@ import '../services/seasonal_event_service.dart';
 import '../services/cat_birthday_service.dart';
 import '../theme/kawaii_theme.dart';
 import 'memory_cards_page.dart';
+import 'summer_window_page.dart';
 
 /// 她的小世界 🏡 - 商店頁面
 class CatWorldPage extends StatefulWidget {
@@ -407,7 +408,15 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
         _buildRoomSection(),
         // 活動卡片
         if (_birthdayCatToday != null) _buildBirthdayEventCard(),
-        _buildEventCard(),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SummerWindowPage()),
+            );
+          },
+          child: _buildEventCard(),
+        ),
         // Plus 入口卡片
         _buildPlusCard(),
         // 分類 Tabs
