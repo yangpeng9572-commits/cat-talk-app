@@ -1,13 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/achievement.dart';
+import '../services/achievement_service.dart';
 
-class AchievementPage extends StatelessWidget {
+class AchievementPage extends StatefulWidget {
   const AchievementPage({super.key});
 
   @override
+  State<AchievementPage> createState() => _AchievementPageState();
+}
+
+class _AchievementPageState extends State<AchievementPage> {
+  AchievementService? _achievementService;
+  List<Achievement> _achievements = [];
+  int _totalActions = 0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAchievements();
+  }
+
+  Future<void> _loadAchievements() async {
+    final prefs = await SharedPreferences.getInstance();
+    final service = AchievementService(prefs);
+    final achievements = service.getAllAchievements();
+    final totalActions = service.getTotalActions();
+
+    if (mounted) {
+      setState(() {
+        _achievementService = service;
+        _achievements = achievements;
+        _totalActions = totalActions;
+        _isLoading = false;
+      });
+    }
+  }
+
+  String get _levelName {
+    return AchievementSystem.getLevel(_totalActions);
+  }
+
+  double get _levelProgress {
+    return AchievementSystem.getLevelProgress(_totalActions) / 100.0;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final achievements = AchievementSystem.getAllAchievements();
-    final unlockedCount = achievements.where((a) => a.isUnlocked).length;
+    final unlockedCount = _achievements.where((a) => a.isUnlocked).length;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -17,81 +58,91 @@ class AchievementPage extends StatelessWidget {
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          // 等級卡片
-          Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFF8C00), Color(0xFFFF6B00)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
               children: [
-                const Text(
-                  '🐱⬆️',
-                  style: TextStyle(fontSize: 64),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  '見習貓奴',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '已解鎖 $unlockedCount / ${achievements.length} 成就',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // 等級進度條
+                // 等級卡片
                 Container(
-                  height: 8,
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white30,
-                    borderRadius: BorderRadius.circular(4),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF8C00), Color(0xFFFF6B00)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
                   ),
-                  child: Row(
+                  child: Column(
                     children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width *
-                            0.3 *
-                            (unlockedCount / achievements.length),
-                        decoration: BoxDecoration(
+                      const Text(
+                        '🐱⬆️',
+                        style: TextStyle(fontSize: 64),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _levelName,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '已解鎖 $unlockedCount / ${_achievements.length} 成就',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // 等級進度條
+                      Container(
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: Colors.white30,
                           borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width *
+                                  0.85 *
+                                  _levelProgress,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '總動作數：$_totalActions',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
                         ),
                       ),
                     ],
                   ),
                 ),
+
+                // 成就列表
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: _achievements.length,
+                    itemBuilder: (context, index) {
+                      final achievement = _achievements[index];
+                      return _buildAchievementCard(achievement);
+                    },
+                  ),
+                ),
               ],
             ),
-          ),
-
-          // 成就列表
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: achievements.length,
-              itemBuilder: (context, index) {
-                final achievement = achievements[index];
-                return _buildAchievementCard(achievement);
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 
