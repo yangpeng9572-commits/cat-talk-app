@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/translation_result.dart';
 import '../services/audio_player_service.dart';
 import '../services/cat_speech_service.dart';
+import '../services/meow_speech_service.dart';
 import '../theme/kawaii_theme.dart';
 import 'top_toast.dart';
 
@@ -30,7 +31,9 @@ class EmotionCard extends StatefulWidget {
 class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStateMixin {
   final AudioPlayerService _playerService = AudioPlayerService();
   final CatSpeechService _catSpeechService = CatSpeechService();
+  final MeowSpeechService _speechService = MeowSpeechService();
   bool _isPlaying = false;
+  bool _isSpeaking = false;
   
   // 解析翻譯結果
   late CatSpeechResult _speechResult;
@@ -137,6 +140,10 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
 
                   // 播放錄音按鈕
                   _buildPlayRecordingButton(),
+                  const SizedBox(height: 12),
+
+                  // 播放貓咪說的話按鈕
+                  _buildPlaySpeechButton(),
                   const SizedBox(height: 16),
 
                   // 回饋區
@@ -486,6 +493,62 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
         _playerService.player.onPlayerComplete.listen((_) {
           if (mounted) setState(() => _isPlaying = false);
         });
+      }
+    }
+  }
+
+  /// 播放貓咪說的話按鈕
+  Widget _buildPlaySpeechButton() {
+    return GestureDetector(
+      onTap: _togglePlaySpeech,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        decoration: BoxDecoration(
+          color: _isSpeaking
+              ? const Color(0xFF87CEEB)
+              : const Color(0xFF87CEEB).withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF87CEEB).withValues(alpha: 0.3),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _isSpeaking ? Icons.stop : Icons.play_arrow,
+              color: _isSpeaking ? Colors.white : const Color(0xFF87CEEB),
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _isSpeaking ? '停止播放' : '🐱 聽她說什麼',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: _isSpeaking ? Colors.white : const Color(0xFF87CEEB),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _togglePlaySpeech() async {
+    if (_isSpeaking) {
+      await _speechService.stop();
+      if (mounted) setState(() => _isSpeaking = false);
+    } else {
+      final success = await _speechService.speakTranslation(
+        widget.result,
+        catName: widget.catName,
+      );
+      if (success) {
+        if (mounted) setState(() => _isSpeaking = true);
+        // 等待播放完成
+        await Future.delayed(const Duration(seconds: 3));
+        if (mounted) setState(() => _isSpeaking = false);
       }
     }
   }
