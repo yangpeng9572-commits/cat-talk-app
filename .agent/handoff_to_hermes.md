@@ -7,36 +7,38 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-04 04:53:02
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw
+- Last updated at: 2026-05-04 04:58 AM (Asia/Taipei)
 
 ---
 
-## 本輪任務：P1-8 貓咪照片顯示與同步修正
+## 本輪任務：P2-6 成就頁加入解鎖條件與進度
 
 ### 任務 ID
-- Task ID: P1-8
-- Task name: 貓咪照片顯示與同步修正
+- Task ID: P2-6
+- Task name: 成就頁加入解鎖條件與進度
 
 ### 完成的修改
 
-- **Commit:** `e1c5654`
+- **Commit:** `0fe20f2`
 - **Branch:** main
 
 ### 修改內容
 
-修復 `_loadCatData()` 只在 `selectedCat == null` 時才賦值，導致編輯貓咪頭像後 `selectedCat` 仍持用舊 `avatarPath`，首頁頭像不同步的問題。
+將 `AchievementPage` 從 `StatelessWidget` 改為 `StatefulWidget`，接入 `AchievementService` 讀取真實成就進度：
 
-修改 `lib/screens/home_page.dart` 第 260 行附近：
-- 新增 `else if (selectedCat != null)` 分支
-- 用 `firstWhere` 從 `_cats` 取最新 Cat 物件賦予 `selectedCat`
-- 從此編輯後首頁立即顯示新頭像
+1. `initState` 初始化 `SharedPreferences` + `AchievementService`
+2. 從 `service.getAllAchievements()` 載入真實成就（含 currentCount、isUnlocked）
+3. 等級名稱改用 `AchievementSystem.getLevel(totalActions)` 根據實際動作數計算
+4. 等級進度條改用 `AchievementSystem.getLevelProgress()` 顯示升級進度
+5. 新增「總動作數：N」顯示
+6. 有進度的未解鎖成就仍顯示 progress bar
 
 ### 修改檔案
 
-- `lib/screens/home_page.dart`（7 行新增）
+- `lib/screens/achievement_page.dart`（114 行新增，63 行刪除）
 
 ### Required Hermes Actions
 
@@ -44,8 +46,8 @@ Hermes 每次驗收前應先讀取本檔案。
 1. `git pull --ff-only`
 2. `flutter analyze`
 3. `flutter test`
-4. 驗證：編輯貓咪頁更换头像后返回首页，头像立即更新显示新照片
+4. 驗證：成就頁載入後顯示真實進度（翻譯/拍照後成就進度條應更新）
 
 ---
 
-_Last updated: 2026-05-04 04:40 AM (Asia/Taipei)_
+_Last updated: 2026-05-04 04:58 AM (Asia/Taipei)_
