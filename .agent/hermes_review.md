@@ -11,28 +11,32 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Result: PASS
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes
-- Last reviewed at: 2026-05-03 14:45 GMT+8
+- Last reviewed at: 2026-05-03 14:58 GMT+8
 
 ---
 
 ## Reviewed Task
 
-- Task ID: P2-4
-- Task name: Cat World overflow fix
-- Priority: P2
-- Commit reviewed: 48ed3ad, a9a7c12
+- Task ID: P3-1
+- Task name: withOpacity deprecated Batch 2 + Batch 3
+- Priority: P3
+- Commit reviewed: 99b8f7b, bb37b73, f2b7af0, 8409fba, 1e846bd, b3ae386
 - Branch: main
 
 ---
 
 ## Validation Result
 
-- git pull --ff-only: SUCCESS (Fast-forward: 48ed3ad..a9a7c12)
+- git pull --ff-only: SUCCESS (Fast-forward: a9a7c12..1e846bd)
 - Commits verified:
-  - 48ed3ad: fix: P2-4 resolve overflow in CatWorldPage and refactor withOpacity (cat_world_page.dart +64/-60)
-  - a9a7c12: docs: update handoff for p2-4 overflow fix (.agent/handoff_to_hermes.md)
+  - 99b8f7b: refactor: P3-1 replace withOpacity with withValues in 7 widget files
+  - bb37b73: docs: update handoff for P3-1 batch 2 widget refactor
+  - f2b7af0: docs: update task_queue with P3-1 progress tracking
+  - b3ae386: docs: mark p2-4 overflow fix pass
+  - 8409fba: docs: update handoff for P3-1 batch 3 screens refactor
+  - 1e846bd: docs: update task_queue P3-1 batch 3 complete
 - flutter analyze: PASS
-- Analyze errors: 0 errors (374 issues found — warnings + infos only)
+- Analyze errors: 0 errors (300 issues found — from 374 reduced to 300 by removing deprecated withOpacity)
 - flutter test: PASS
 - Tests passed: 264
 - flutter build apk --release: SUCCESS
@@ -43,7 +47,7 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 ## Result Summary
 
-PASS — P2-4 CatWorld overflow fix validated. SingleChildScrollView wrapping + TabBarView height constraint (45% screen). 36 instances of deprecated withOpacity replaced with withValues(alpha: x). 0 errors, 264 tests passed, APK built successfully (90.8MB).
+PASS — P3-1 withOpacity deprecated batches 2 + 3 validated. Batch 2: 7 widget files (46 replacements). Batch 3: 10 screens files (28 replacements). Total ~74 withOpacity replaced. 0 errors, 264 tests passed, APK built successfully (90.8MB).
 
 ---
 
@@ -51,7 +55,7 @@ PASS — P2-4 CatWorld overflow fix validated. SingleChildScrollView wrapping + 
 
 | Result | OpenClaw 下一輪動作 |
 |--------|-------------------|
-| PASS | 可繼續 task_queue.md 下一個任務 |
+| PASS | 可繼續 task_queue.md 下一個任務（需等 handoff 為 IDLE） |
 
 ---
 
@@ -60,5 +64,6 @@ PASS — P2-4 CatWorld overflow fix validated. SingleChildScrollView wrapping + 
 - Hermes 只驗收 Windows Runner repo 已 push 的 commit
 - Hermes 不驗收 WSL2 未 commit 的修改
 - Hermes 不驗收 untracked / modified 檔案
-- P2-4 PASS — OpenClaw 可繼續新任務
+- P3-1 Batch 2 + 3 PASS — OpenClaw 可繼續新任務（需等 handoff 為 IDLE）
+- 剩餘 withOpacity 在：daily_report_page.dart、personality_card_page.dart、pose_recognition_page.dart、love_meter_page.dart、home_page.dart、memory_cards_page.dart、home_interaction_page.dart
 - 建議下一個任務：P2-1 隱藏分享卡/動畫 tab
