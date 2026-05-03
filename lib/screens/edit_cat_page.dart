@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cat.dart';
 import '../services/cat_service.dart';
+import '../widgets/top_toast.dart';
 
 class EditCatPage extends StatefulWidget {
   final Cat cat;
@@ -121,12 +122,7 @@ class _EditCatPageState extends State<EditCatPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('無法開啟相機：$e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        TopToast.error(context, message: '無法開啟相機：$e');
       }
     }
   }
@@ -237,23 +233,13 @@ class _EditCatPageState extends State<EditCatPage> {
   Future<void> _saveCat() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('名字不能為空 🐱'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      TopToast.error(context, message: '名字不能為空 🐱');
       return;
     }
 
     final birthdayError = _validateBirthday();
     if (birthdayError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(birthdayError),
-          backgroundColor: Colors.red,
-        ),
-      );
+      TopToast.error(context, message: birthdayError ?? '生日資料有誤');
       return;
     }
 

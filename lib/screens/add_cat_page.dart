@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../widgets/top_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
@@ -126,12 +127,7 @@ class _AddCatPageState extends State<AddCatPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('無法開啟相機：$e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        TopToast.error(context, message: '無法開啟相機：$e');
       }
     }
   }
@@ -311,24 +307,14 @@ class _AddCatPageState extends State<AddCatPage> {
                         try {
                           final name = _nameController.text.trim();
                           if (name.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('請先幫貓咪取個名字 🐱'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
+                            TopToast.error(context, message: '請先幫貓咪取個名字 🐱');
                             setState(() => _isLoading = false);
                             return;
                           }
 
                           final birthdayError = _validateBirthday();
                           if (birthdayError != null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(birthdayError),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
+                            TopToast.error(context, message: birthdayError ?? '生日資料有誤');
                             setState(() => _isLoading = false);
                             return;
                           }
@@ -359,9 +345,7 @@ class _AddCatPageState extends State<AddCatPage> {
 
                           setState(() => _isLoading = false);
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('新增失敗：$e')),
-                          );
+                          TopToast.error(context, message: '新增失敗：$e');
                         }
                       },
                 child: _isLoading
