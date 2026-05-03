@@ -3,6 +3,7 @@ import '../models/translation_result.dart';
 import '../services/audio_player_service.dart';
 import '../services/cat_speech_service.dart';
 import '../theme/kawaii_theme.dart';
+import 'top_toast.dart';
 
 /// 情緒卡片 widget - 情感陪伴版
 /// 溫暖可愛的設計，貓咪擬人化語氣
@@ -427,23 +428,11 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
     // 呼叫回調通知 HomePage
     widget.onActionTap?.call();
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.favorite, color: KawaiiTheme.primaryPink, size: 20),
-            const SizedBox(width: 12),
-            Text(_catSpeechService.getActionCompletedFeedback()),
-          ],
-        ),
-        backgroundColor: Colors.white,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
-        ),
-        duration: const Duration(milliseconds: 1500),
-        margin: const EdgeInsets.all(16),
-      ),
+    TopToast.show(
+      context,
+      message: _catSpeechService.getActionCompletedFeedback(),
+      icon: Icons.favorite,
+      backgroundColor: const Color(0xFFFF8FAB),
     );
   }
 
@@ -587,23 +576,7 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
   }
 
   void _onFeedbackCorrect() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.green),
-            const SizedBox(width: 12),
-            Expanded(child: Text(_catSpeechService.getCorrectFeedback())),
-          ],
-        ),
-        backgroundColor: Colors.white,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
-        ),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    TopToast.success(context, message: _catSpeechService.getCorrectFeedback());
     
     final feedback = UserFeedback.correct();
     widget.onFeedback(feedback);

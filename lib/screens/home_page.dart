@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import '../widgets/top_toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../debug/debug_entry_detector.dart';
@@ -390,7 +391,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         setState(() => _isPermissionDenied = true);
         _showPermissionDeniedDialog();
       } else {
-        _showSnackBar('需要麥克風權限才能錄音喔！', isError: true);
+        TopToast.error(context, message: '需要麥克風權限才能錄音喔！');
       }
       return;
     }
@@ -459,7 +460,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       await _processTranslation(realRecording.path!);
     } else if (realRecording.isTooShort) {
       // 錄音太短
-      _showSnackBar('錄音太短，再試一次 🐱', isError: true);
+      TopToast.error(context, message: '錄音太短，再試一次 🐱');
     } else {
       // 錄音失敗，使用 Mock
       await _processMockTranslation();
@@ -506,7 +507,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     } catch (e) {
       debugPrint('翻譯失敗: $e');
       setState(() => _isAnalyzing = false);
-      _showSnackBar('翻譯失敗了，再試一次吧 🐱', isError: true);
+      TopToast.error(context, message: '翻譯失敗了，再試一次吧 🐱');
     }
   }
 
@@ -598,24 +599,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         message = '+${gain}';
     }
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.favorite, color: KawaiiTheme.primaryPink, size: 20),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: Colors.white,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
-        ),
-        duration: const Duration(milliseconds: 1500),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
+    TopToast.success(context, message: message);
   }
 
   void _showNoCatSelectedDialog() {
@@ -758,23 +742,11 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   
   /// 顯示短暫提示（約 1.5 秒）
   void _showBriefToast(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.favorite, color: KawaiiTheme.primaryPink),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: Colors.white,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
-        ),
-        duration: const Duration(milliseconds: 1500),
-        margin: const EdgeInsets.all(16),
-      ),
+    TopToast.show(
+      context,
+      message: message,
+      icon: Icons.favorite,
+      backgroundColor: const Color(0xFFFF8FAB),
     );
   }
 
@@ -813,34 +785,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       message = '✅ 已記錄你的回饋';
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(
-          label: '查看報告',
-          textColor: Colors.white,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DailyReportPage(
-                  preselectedCatId: selectedCat?.id,
-                ),
-              ),
-            );
-          },
-        ),
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    TopToast.success(context, message: message);
   }
 
   void _onDailyReportViewed() {
