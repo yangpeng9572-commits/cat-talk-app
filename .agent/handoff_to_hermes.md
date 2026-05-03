@@ -9,37 +9,46 @@ Hermes 每次驗收前應先讀取本檔案。
 
 - Status: IDLE
 - Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-04 02:11:02
+- Last updated by: OpenClaw
+- Last updated at: 2026-05-04 02:16 GMT+8
 
 ---
 
-## P1-5：App 名稱與品牌統一為「喵心語 Cat Talk」
+## 本輪任務：任務狀態同步（文件更新，無 App Code 變更）
 
 ### 任務 ID
-- Task ID: P1-5
-- Task name: App 名稱與品牌統一為「喵心語 Cat Talk」
+- Task ID: DOCS-QUEUE-SYNC
+- Task name: task_queue.md 狀態同步 — P0-2/4/5 DONE，P2/P3/TOOL-1 與 hermes_review.md 同步
 
 ### 完成的修改
 
-- **Commit:** `7526e58`
+- **Commit:** `d0d5bd9`
 - **Branch:** main
 
 ### 修改內容
 
-全 App 殘留「貓語通」品牌文字已清除，統一為「喵心語 Cat Talk」：
+文件狀態同步，無 App Code 變更：
 
-- 將 `kawaii_theme.dart` 註解從「貓語通 Kawaii 風格主題」改為「喵心語 Cat Talk Kawaii 風格主題」
-- 其餘所有 UI 文字已在過往 commit 中完成統一（Android label、App 內標題、onboarding、關於頁等均已確認為「喵心語」）
+- P0-2（TODO → ✅ DONE）：Bottom sheet 貓咪列表 Flexible+ListView（Hermes PASS 2026-05-03）
+- P0-4（TODO → ✅ DONE）：isScrollControlled + 滑動支援（Hermes PASS 2026-05-03）
+- P0-5（TODO → ✅ DONE）：TopToast 完整替換全 App SnackBar（已実装並 Hermes validated）
+- P2-1/4/5（TODO → ✅ PASS）：Hermes 2026-05-03
+- P3-1/2（TODO → ✅ PASS）：Hermes 2026-05-03
+- TOOL-1（TODO → ✅ PASS）：Hermes 2026-05-03
 
 ### 修改檔案
 
-- `lib/theme/kawaii_theme.dart`（1行）
+- `.agent/task_queue.md`
 
 ### Required Hermes Actions
 
-1. `git pull --ff-only`
-2. `flutter analyze`
-3. `flutter test`
-4. 更新 `.agent/hermes_review.md` 為 PASS 或 FAIL
-5. 若 PASS，更新本檔案為 IDLE 並 push
+無需驗收（純文件更新）。請下次 `git pull --ff-only` 時一併更新本地。
+
+---
+
+## 上輪有效任務（已通過驗收）
+
+### P1-5：App 名稱與品牌統一為「喵心語 Cat Talk」
+- Commit: `7526e58`
+- Status: PASS（Hermes validated）
+- 檔案: `lib/theme/kawaii_theme.dart`（1行）
