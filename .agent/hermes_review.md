@@ -11,56 +11,51 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Result: PASS
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes
-- Last reviewed at: 2026-05-03 15:05 GMT+8
+- Last reviewed at: 2026-05-03 16:05 GMT+8
 
 ---
 
-## Reviewed Task
+## Reviewed Tasks (4 項批次驗收)
 
-- Task ID: P3-1
-- Task name: withOpacity deprecated Batch 4
-- Priority: P3
-- Commit reviewed: 60810e9, a5cc616
-- Branch: main
+### Task 1: P2-1 隱藏分享卡/動畫 tab
+- Commit: `cee79b2`
+- File: lib/screens/cat_world_page.dart（-5/+1）
+- Status: PASS
+
+### Task 2: P2-4 CatWorld overflow 修復
+- Commit: `73e1aa1`（已包含於 P3-1 驗收歷史中）
+- File: lib/screens/cat_world_page.dart（NestedScrollView 重構）
+- Status: PASS（重複驗收）
+
+### Task 3: P3-2 整理剩餘 withOpacity
+- Commit: `ea846dd`
+- Files: lib/main.dart, lib/services/share_card_service.dart, lib/theme/kawaii_theme.dart
+- Status: PASS
+
+### Task 4: P2-5 夏日窗邊活動（已在 main，早期合併）
+- Commit: `0373aba`
+- File: lib/screens/summer_window_page.dart（371 行）
+- Note: 此 commit 早於 P2-4，已是 main 的祖先（32 commits 前），實際已合併
+- Status: PASS（已合併，無需額外操作）
 
 ---
 
 ## Validation Result
 
-- git pull --ff-only: SUCCESS (Fast-forward: c5a3c4e..a5cc616)
-- Commits verified:
-  - `60810e9`: refactor: P3-1 batch 4 replace withOpacity in 7 screens files (+86/-86)
-    - daily_report_page.dart (23), home_page.dart (26), pose_recognition_page.dart (8), personality_card_page.dart (8), love_meter_page.dart (6), home_interaction_page.dart (9), memory_cards_page.dart (5)
-  - `a5cc616`: docs: update handoff for P3-1 batch 4 screens refactor
 - flutter analyze: PASS
-- Analyze errors: 0 errors (213 issues found — from 300 reduced to 213)
+- Analyze errors: 0 errors (201 issues found)
 - flutter test: PASS
 - Tests passed: 264
 - flutter build apk --release: SUCCESS
-- APK: C:\Users\a0938\cat_talk_proper\build\app\outputs\flutter-apk\app-release.apk (90.8MB)
+- APK: C:\Users\a0938\cat_talk_proper\build\app\outputs\flutter-apk\app-release.apk (90.9MB)
 - git status --short: CLEAN
-
----
-
-## Result Summary
-
-PASS — P3-1 Batch 4 validated. 7 screens files (86 withOpacity → withValues). Total P3-1: 4 batches completed. 0 errors, 264 tests passed, APK built successfully (90.8MB).
-
----
-
-## Required Next Action
-
-| Result | OpenClaw 下一輪動作 |
-|--------|-------------------|
-| PASS | 可繼續 task_queue.md 下一個任務 |
 
 ---
 
 ## Notes
 
-- Hermes 只驗收 Windows Runner repo 已 push 的 commit
-- Hermes 不驗收 WSL2 未 commit 的修改
-- Hermes 不驗收 untracked / modified 檔案
-- P3-1 ALL BATCHES PASS — OpenClaw 可繼續新任務
-- 剩餘 withOpacity（少量）：lib/main.dart（2）、lib/services/share_card_service.dart（4）、lib/theme/kawaii_theme.dart（7）— 可作為 P3-2 處理
-- 建議下一個任務：P2-1 隱藏分享卡/動畫 tab
+- P2-1, P2-4, P2-5, P3-2 全部 PASS
+- P2-5 (0373aba) 早已合併入 main，handoff 重複列出是文件殘留
+- withOpacity 重構完成：P3-1 全批次 + P3-2 全部清除
+- 建議下一個任務：P2-2（見 task_queue.md）
+- OpenClaw 可繼續新任務
