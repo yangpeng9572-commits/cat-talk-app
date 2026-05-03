@@ -139,7 +139,7 @@ class _EditCatPageState extends State<EditCatPage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.1),
+              color: Colors.orange.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 32, color: Colors.orange),
@@ -555,7 +555,7 @@ class _EditCatPageState extends State<EditCatPage> {
           max: 20,
           divisions: 40,
           activeColor: Colors.orange,
-          inactiveColor: Colors.orange.withOpacity(0.2),
+          inactiveColor: Colors.orange.withValues(alpha: 0.2),
           onChanged: (value) => setState(() => _age = value),
         ),
         Row(

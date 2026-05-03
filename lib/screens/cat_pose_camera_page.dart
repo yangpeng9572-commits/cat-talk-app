@@ -66,10 +66,10 @@ class _CatPoseCameraPageState extends State<CatPoseCameraPage> {
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8B7FBF).withOpacity(0.3),
+                    color: const Color(0xFF8B7FBF).withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       width: 2,
                     ),
                   ),
@@ -129,7 +129,7 @@ class _CatPoseCameraPageState extends State<CatPoseCameraPage> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                       elevation: 4,
-                      shadowColor: KawaiiTheme.primaryPink.withOpacity(0.4),
+                      shadowColor: KawaiiTheme.primaryPink.withValues(alpha: 0.4),
                     ),
                   ),
                 ),
