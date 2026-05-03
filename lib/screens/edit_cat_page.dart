@@ -263,6 +263,7 @@ class _EditCatPageState extends State<EditCatPage> {
     await catService.updateCat(updatedCat);
 
     if (!mounted) return;
+    TopToast.success(context, message: '儲存成功 🐾');
     Navigator.of(context).pop(updatedCat);
   }
 
@@ -421,6 +422,7 @@ class _EditCatPageState extends State<EditCatPage> {
     final deletedCatId = widget.cat.id;
     await catService.deleteCat(deletedCatId);
     if (!mounted) return;
+    TopToast.success(context, message: '已刪除 🐱');
     Navigator.pop(context, true); // 回傳 true 給上一層刷新，通知 caller 貓已被刪除
   }
 

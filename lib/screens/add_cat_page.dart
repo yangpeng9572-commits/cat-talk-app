@@ -339,6 +339,7 @@ class _AddCatPageState extends State<AddCatPage> {
 
                           if (!mounted) return;
 
+                          TopToast.success(context, message: '新增成功 🐱');
                           Navigator.of(context).pop(cat.id);
                         } catch (e) {
                           if (!mounted) return;
