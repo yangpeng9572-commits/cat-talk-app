@@ -159,9 +159,10 @@ OpenClaw 每輪回報必須包含：
 | Batch | 檔案 | Commit | Hermes 狀態 |
 |-------|------|--------|-------------|
 | Batch 1 | lib/screens/daily_task_card.dart | `685e186` | ✅ PASS |
-| Batch 2 | lib/widgets/*.dart（7 檔） | `99b8f7b` | ⏳ 待 Hermes 驗收 |
+| Batch 2 | lib/widgets/*.dart（7 檔） | `99b8f7b` | ✅ PASS |
+| Batch 3 | lib/screens/ 其餘 10 檔（~28 處） | `45d6b5d` | ⏳ 待 Hermes 驗收 |
 
 ### 待處理
 
-- Batch 3: lib/screens/ 其餘檔案（~15 個檔案，約 120+ 處 withOpacity）
+- Batch 4: daily_report_page.dart、personality_card_page.dart、pose_recognition_page.dart、love_meter_page.dart、home_page.dart、memory_cards_page.dart、home_interaction_page.dart（~58 處）
 
