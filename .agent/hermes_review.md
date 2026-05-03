@@ -11,13 +11,31 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Result: PASS
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes
-- Last reviewed at: 2026-05-03 19:15 GMT+8
+- Last reviewed at: 2026-05-03 19:47 GMT+8
 
 ---
 
 ## Reviewed Tasks
 
-### 本輪驗收：P0-1 + P0-3（Windows Runner 執行）
+### 本輪驗收：P0-4（Windows Runner 執行）
+- Commit: `bce2395`
+- Task ID: P0-4（全 App 超出螢幕都必須能滑動）
+- Files: `lib/screens/home_page.dart`
+- Status: **PASS**
+
+**驗收結果：**
+- ✅ Flutter analyze：0 errors（201 issues — 全部為 warnings/info）
+- ✅ Flutter test：264 passed
+- ✅ Flutter build apk --release：SUCCESS（90.9MB）
+- ✅ git status：CLEAN
+
+**變更摘要：**
+- `_showCatSwitcher()` 新增 `isScrollControlled: true`
+- 貓咪列表從 `..._cats.map(...)` 改為 `Flexible(child: ListView(shrinkWrap: true))`
+- 支援 5 隻以上貓咪時可滾動
+- 移除了部分冗餘的中文註解
+
+### 上輪驗收：P0-1 + P0-3（Windows Runner 執行）
 - Commit: `4db847c`
 - Task IDs: P0-1（刪除貓咪後卡住）+ P0-3（選擇貓咪點空白處可返回）
 - Files: `lib/screens/edit_cat_page.dart`, `lib/screens/home_page.dart`
@@ -48,6 +66,7 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 | Task | Commit | Status | Date |
 |------|--------|--------|------|
+| P0-4 | `bce2395` | PASS | 2026-05-03 |
 | P0-1+P0-3 | `4db847c` | PASS | 2026-05-03 |
 | P3-1 Batch 1-4 | multiple | PASS | 2026-05-03 |
 | P3-2 | `ea846dd` | PASS | 2026-05-03 |
@@ -61,4 +80,4 @@ OpenClaw 每輪開始前應讀取本檔案。
 ## Notes
 
 - P0 系列需手機實測（CLI 無法驗證真實 UX bug）
-- OpenClaw 下一個建議任務：P0-4（選擇貓咪 bottom sheet 可滑動，commit `bce2395`，已在 WAITING_FOR_HERMES 狀態）
+- OpenClaw 下一個建議任務：P0-5（完成提示改到上方）
