@@ -359,7 +359,7 @@ OpenClaw 每輪回報必須包含：
 | P0-4 | ✅ PASS | 全App滑動問題（Hermes 2026-05-03）|
 | P0-5 | ✅ PASS | 完成提示改上方 — TopToast 替換所有 SnackBar（Hermes validated）|
 | P1-1 | ✅ PASS | 動作庫已移至姿勢拍照頁（首頁按鈕已移除）|
-| P1-2 | TODO | 移除今日還沒聽牠說話 |
+| P1-2 | ✅ PASS | 移除今日還沒聽牠說話 — 生活文案替換錄音導向空狀態（commit c4b4a8f，Hermes pass aecd811） |
 | P1-3 | TODO | 任務內容調整 |
 | P1-4 | TODO | 記錄頁改生活日記 |
 | P1-5 | TODO | 品牌統一 |
