@@ -360,7 +360,7 @@ OpenClaw 每輪回報必須包含：
 | P0-5 | ✅ PASS | 完成提示改上方 — TopToast 替換所有 SnackBar（Hermes validated）|
 | P1-1 | ✅ PASS | 動作庫已移至姿勢拍照頁（首頁按鈕已移除）|
 | P1-2 | ✅ PASS | 移除今日還沒聽牠說話 — 生活文案替換錄音導向空狀態（commit c4b4a8f，Hermes pass aecd811） |
-| P1-3 | TODO | 任務內容調整 |
+| P1-3 | ✅ PASS | 任務內容調整 — 已替換 translate/feedback → pose_photo + cat_world_interact（commit 64d3843，Hermes pass b89bd28） |
 | P1-4 | TODO | 記錄頁改生活日記 |
 | P1-5 | TODO | 品牌統一 |
 | P1-6 | TODO | Logo整合 |
