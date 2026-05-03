@@ -46,6 +46,25 @@ class _AchievementPageState extends State<AchievementPage> {
     return AchievementSystem.getLevelProgress(_totalActions) / 100.0;
   }
 
+  String _getNextLevelHint() {
+    final levels = [
+      (5, '新手貓奴 🐱🐱'),
+      (15, '中級貓奴 🐱🐱🐱'),
+      (30, '高級貓奴 🐱🐱🐱🐱'),
+      (50, '貓語專家 🐱⬆️'),
+      (100, '貓語大師 🐱🔥'),
+      (150, '傳說鏟屎官 🐱✨'),
+      (200, '喵星使者 🌟'),
+    ];
+    for (final (threshold, name) in levels) {
+      if (_totalActions < threshold) {
+        final remaining = threshold - _totalActions;
+        return '距離下一級「$name」還差 $remaining 次動作';
+      }
+    }
+    return '已達最高等級！🌟';
+  }
+
   @override
   Widget build(BuildContext context) {
     final unlockedCount = _achievements.where((a) => a.isUnlocked).length;
@@ -126,6 +145,14 @@ class _AchievementPageState extends State<AchievementPage> {
                           fontSize: 12,
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _getNextLevelHint(),
+                        style: const TextStyle(
+                          color: Colors.white60,
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -146,9 +173,33 @@ class _AchievementPageState extends State<AchievementPage> {
     );
   }
 
+  /// 根據成就 ID 取得動作類型標籤
+  String _getActionLabel(String id) {
+    if (id.startsWith('translation')) return '翻譯';
+    if (id.startsWith('pose')) return '姿勢分析';
+    if (id.startsWith('quiz')) return '答題';
+    if (id.startsWith('streak')) return '連續使用';
+    if (id == 'multi_cat') return '添加貓咪';
+    if (id == 'feedback_master') return '回饋';
+    if (id == 'night_owl') return '半夜翻譯';
+    if (id == 'early_bird') return '早起翻譯';
+    return '動作';
+  }
+
+  /// 根據成就 ID 取得解鎖條件文字
+  String _getUnlockHint(String id, int required) {
+    if (id == 'night_owl') return '在半夜使用翻譯功能';
+    if (id == 'early_bird') return '在早上使用翻譯功能';
+    if (id == 'multi_cat') return '添加 ${required} 隻以上的貓';
+    final label = _getActionLabel(id);
+    return '完成 $label × $required 次';
+  }
+
   Widget _buildAchievementCard(Achievement achievement) {
     final isUnlocked = achievement.isUnlocked;
     final hasProgress = achievement.currentCount > 0 && !isUnlocked;
+    final actionLabel = _getActionLabel(achievement.id);
+    final unlockHint = _getUnlockHint(achievement.id, achievement.requiredCount);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -192,15 +243,42 @@ class _AchievementPageState extends State<AchievementPage> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  achievement.description,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: isUnlocked ? Colors.orange : Colors.grey,
+                // 說明 / 解鎖條件
+                if (!isUnlocked && !hasProgress)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '💡 $unlockHint',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue.shade700,
+                      ),
+                    ),
+                  )
+                else
+                  Text(
+                    achievement.description,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isUnlocked ? Colors.orange : Colors.grey,
+                    ),
                   ),
-                ),
                 if (hasProgress) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
+                  // 明確的進度計數
+                  Text(
+                    '$actionLabel ${achievement.currentCount} / ${achievement.requiredCount} 次',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
                   // 進度條
                   Row(
                     children: [
