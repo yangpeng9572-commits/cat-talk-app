@@ -39,7 +39,7 @@ void main() {
     });
 
     test('翻譯任務的陪伴文案內容正確', () {
-      expect(companion.getTitle(TaskType.translate_meow), '今天聽她說一次話');
+      expect(companion.getTitle(TaskType.translate_meow), '今天聽她說一次話（待調整）');
       expect(companion.getDescription(TaskType.translate_meow), contains('錄下'));
       expect(companion.getCompletionMessage(TaskType.translate_meow), contains('聽見'));
     });
@@ -51,7 +51,7 @@ void main() {
     });
 
     test('回饋任務的陪伴文案內容正確', () {
-      expect(companion.getTitle(TaskType.give_feedback), '回應她一次小情緒');
+      expect(companion.getTitle(TaskType.give_feedback), '回應她一次小情緒（待調整）');
       expect(companion.getDescription(TaskType.give_feedback), contains('記住'));
       expect(companion.getCompletionMessage(TaskType.give_feedback), contains('習慣'));
     });
