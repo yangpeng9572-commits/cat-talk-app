@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/cat_service.dart';
 import '../services/seasonal_event_service.dart';
 import '../services/bond_service.dart';
-import '../theme/kawaii_theme.dart';
 
 /// 夏日窗邊活動頁 ☀️
 class SummerWindowPage extends StatefulWidget {
@@ -18,7 +17,6 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
   final BondService _bondService = BondService();
 
   String? _currentCatId;
-  int _currentBondScore = 0;
   bool _isLoading = true;
   int _interactionCount = 0;
   static const int _maxInteractions = 3;
@@ -35,7 +33,6 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
     final cats = catService.getAllCats();
     if (cats.isNotEmpty) {
       _currentCatId = cats.first.id;
-      _currentBondScore = _bondService.getBond(_currentCatId!).currentBond;
     }
     setState(() => _isLoading = false);
   }
@@ -46,8 +43,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
 
     // 模擬互動增加好感度
     if (_currentCatId != null) {
-      _bondService.addBond(_currentCatId!, 1);
-      _currentBondScore = _bondService.getBond(_currentCatId!).currentBond;
+      _bondService.addBond(_currentCatId!, 'summer_window');
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
