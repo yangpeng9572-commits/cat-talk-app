@@ -16,14 +16,16 @@ function Write-Log {
     Write-Host "[$stamp] $m"
 }
 
-# Run a command in the correct Windows directory via cmd /c cd
-# This avoids WSL UNC path inheritance issue in PowerShell's WorkingDirectory
+# Run a command in the correct Windows directory.
+# Key fix: psi.WorkingDirectory = $RepoPath ensures CMD starts in the right place,
+# avoiding WSL UNC path inheritance that causes "CMD.EXE cannot access UNC path" errors.
 function Run-InRepo {
     param([string]$exe, [string]$args, [string]$desc)
-    $cmd = "cd /d `"$RepoPath`" && $exe $args"
+    $cmd = "$exe $args"
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = "cmd.exe"
     $psi.Arguments = "/c " + $cmd
+    $psi.WorkingDirectory = $RepoPath          # <-- critical: sets startup directory
     $psi.RedirectStandardOutput = $true
     $psi.RedirectStandardError = $true
     $psi.UseShellExecute = $false
@@ -56,7 +58,7 @@ if (-not (Test-Path $RepoPath)) {
     exit 1
 }
 
-# --- A. Flutter PATH check via cmd ---
+# --- A. Flutter PATH check ---
 Write-Log "Checking Flutter PATH..."
 $whereResult = Run-InRepo "where.exe" "flutter" "where flutter"
 if ($whereResult.ExitCode -ne 0) {
@@ -77,7 +79,6 @@ Write-Log "Flutter found: $flutterExe"
 $verResult = Run-InRepo "flutter" "--version" "flutter --version"
 if ($verResult.ExitCode -ne 0) {
     Write-Log "FAIL: flutter --version failed (exit $($verResult.ExitCode))"
-    Write-Log "STDERR: $($verResult.Stderr)"
     exit 1
 }
 $verLine = ($verResult.Stdout -split "`r`n")[0]
@@ -144,7 +145,6 @@ if ($arResult.ExitCode -ne 0) {
     exit 1
 }
 
-# Verify analyze output is real Flutter output
 $validOutput = $ac -match "No issues found" -or $ac -match "issues found" -or $ac -match "\d+\s+error" -or $ac -match "Analyzing" -or $ac -match "warning"
 if (-not $validOutput) {
     Write-Log "FAIL: flutter analyze output not recognized"
@@ -176,8 +176,7 @@ if ($teResult.ExitCode -ne 0) {
     exit 1
 }
 
-# Verify test output is real Flutter test output
-$validTest = $tc -match "All tests passed" -or $tc -match "\d+\s+tests?\s+passed" -or $tc -match "tests passed" -or $tc -match "test.*passed" -or $tc -match "flutter test"
+$validTest = $tc -match "All tests passed" -or $tc -match "\d+\s+tests?\s+passed" -or $tc -match "tests passed" -or $tc -match "test.*passed"
 if (-not $validTest) {
     Write-Log "FAIL: flutter test output not recognized"
     Write-Log "Output: $($tc.Substring(0, [Math]::Min(500, $tc.Length)))"
@@ -204,7 +203,6 @@ if ($blResult.ExitCode -ne 0) {
     exit 1
 }
 
-# Verify APK exists and size > 0
 $bn = "N/A"; $bp = "N/A"
 if ($bc -match "Built .+\\app\\outputs\\flutter-apk\\(.+\.apk)") {
     $bn = $Matches[1]
@@ -243,20 +241,11 @@ Write-Log "Python: $($resResult.Stdout)"
 
 # --- git add + commit + push ---
 $gaResult = Run-InRepo "git" "-C `"$RepoPath`" add .agent\hermes_review.md .agent\handoff_to_hermes.md" "git add"
-if ($gaResult.ExitCode -ne 0) {
-    Write-Log "ERROR: git add failed"
-    exit 1
-}
+if ($gaResult.ExitCode -ne 0) { Write-Log "ERROR: git add failed"; exit 1 }
 $gcResult = Run-InRepo "git" "-C `"$RepoPath`" commit -m `"docs: auto mark hermes validation pass`"" "git commit"
-if ($gcResult.ExitCode -ne 0) {
-    Write-Log "ERROR: git commit failed"
-    exit 1
-}
+if ($gcResult.ExitCode -ne 0) { Write-Log "ERROR: git commit failed"; exit 1 }
 $gpResult = Run-InRepo "git" "-C `"$RepoPath`" push" "git push"
-if ($gpResult.ExitCode -ne 0) {
-    Write-Log "ERROR: git push failed"
-    exit 1
-}
+if ($gpResult.ExitCode -ne 0) { Write-Log "ERROR: git push failed"; exit 1 }
 Write-Log "git push: success"
 Write-Log "Hermes Windows Auto Review END (PASS)"
 Write-Log "========================================"
