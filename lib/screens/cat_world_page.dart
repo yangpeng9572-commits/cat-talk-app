@@ -51,13 +51,11 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
   static const int _maxDailyBondFromRoom = 3;
   static const int _bondPerInteraction = 1;
 
-  // 分類標籤
+  // 分類標籤（已隱藏 分享卡/動畫 tab — P2-1）
   static const List<String> _tabLabels = [
     '房間',
     '家具',
     '配件',
-    '動畫',
-    '分享卡',
     '限定',
   ];
 
@@ -66,8 +64,6 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
     ShopItemCategory.roomTheme,
     ShopItemCategory.furniture,
     ShopItemCategory.accessory,
-    ShopItemCategory.emotionAnimation,
-    ShopItemCategory.shareTemplate,
     ShopItemCategory.seasonalBundle,
   ];
 
