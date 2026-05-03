@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -217,15 +218,31 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
     setState(() => _isProcessing = true);
 
     try {
+      // P2-3 MVP: 姿勢照片品質檢查
+      // 取得照片檔案資訊，用於品質評估
+      final file = File(widget.imagePath);
+      int? fileSizeKb;
+      if (file.existsSync()) {
+        final bytes = await file.readAsBytes();
+        fileSizeKb = (bytes.length / 1024).round();
+      }
+
       final result = await _photoService.savePosePhotoPath(widget.imagePath);
 
       if (!mounted) return;
 
       if (result != null) {
-        // 更新每日任務進度（拍照/記錄任務）
         _taskService.updateTaskProgress(TaskType.pose_photo);
-        TopToast.success(context, message: '已保存照片，之後可用於姿勢辨識 🐾');
-        // 返回上一頁（或是首頁，取決於導航堆疊）
+        // P2-3: 根據檔案大小給予不同提示
+        String qualityMsg = '已保存照片，之後可用於姿勢辨識 🐾';
+        if (fileSizeKb != null) {
+          if (fileSizeKb < 100) {
+            qualityMsg = '已保存（解析度偏低，建議光線充足） 🐾';
+          } else if (fileSizeKb > 800) {
+            qualityMsg = '已保存高畫質照片 🐾';
+          }
+        }
+        TopToast.success(context, message: qualityMsg);
         Navigator.pop(context);
       } else {
         TopToast.error(context, message: '照片儲存失敗，請再試一次');
