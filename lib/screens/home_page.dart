@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,8 +40,6 @@ import '../widgets/emotion_card.dart';
 import '../widgets/onboarding_overlay.dart';
 import '../widgets/achievement_celebration.dart';
 import '../widgets/review_prompt_dialog.dart';
-import '../widgets/onboarding_overlay.dart';
-import '../widgets/achievement_celebration.dart';
 import '../widgets/daily_task_card.dart';
 import '../theme/kawaii_theme.dart';
 import '../screens/cat_pose_camera_page.dart';
@@ -56,6 +55,34 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  // ===== 圖片顯示 Helper =====
+  Widget _buildCatAvatar(
+    String? avatarPath, {
+    double radius = 24,
+    double iconSize = 24,
+    Color backgroundColor = const Color(0xFFFFE0B2),
+    Color iconColor = const Color(0xFFFF8A65),
+  }) {
+    final path = avatarPath;
+    final hasValidPath = path != null &&
+        path.isNotEmpty &&
+        !path.startsWith('content://') &&
+        File(path).existsSync();
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: backgroundColor,
+      backgroundImage: hasValidPath ? FileImage(File(path)) : null,
+      child: hasValidPath
+          ? null
+          : Icon(
+              Icons.pets,
+              color: iconColor,
+              size: iconSize,
+            ),
+    );
+  }
+
   Cat? selectedCat;
   List<Translation> translations = [];
   bool isRecording = false;
@@ -900,13 +927,14 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   const SizedBox(height: 32),
                   ElevatedButton.icon(
                     onPressed: () async {
-                      final result = await Navigator.push<bool>(
+                      final newCatId = await Navigator.push<String?>(
                         context,
                         MaterialPageRoute(builder: (context) => const AddCatPage()),
                       );
-                      if (result == true) {
+                      if (newCatId != null) {
                         await _loadCatData();
-                        if (mounted) setState(() {});
+                        if (!mounted) return;
+                        setState(() {});
                       }
                     },
                     icon: const Icon(Icons.add),
@@ -1117,7 +1145,16 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 CircleAvatar(
                   radius: 24,
                   backgroundColor: Colors.orange.shade100,
-                  child: const Icon(Icons.pets, size: 24, color: Colors.orange),
+                  backgroundImage: selectedCat?.avatarPath != null &&
+                      !selectedCat!.avatarPath!.startsWith('content://') &&
+                      File(selectedCat!.avatarPath!).existsSync()
+                      ? FileImage(File(selectedCat!.avatarPath!))
+                      : null,
+                  child: selectedCat?.avatarPath != null &&
+                          !selectedCat!.avatarPath!.startsWith('content://') &&
+                          File(selectedCat!.avatarPath!).existsSync()
+                      ? null
+                      : const Icon(Icons.pets, size: 24, color: Colors.orange),
                 ),
                 Positioned(
                   right: 0,
@@ -1171,7 +1208,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -1197,27 +1234,27 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Text(
             _todayHeadline.isNotEmpty ? _todayHeadline : '今天也來聽聽她的聲音吧 🐾',
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: KawaiiTheme.textPrimary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           // Subtitle
           Text(
             _todaySubtitle.isNotEmpty ? _todaySubtitle : '長按錄音，記錄今天第一聲喵',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               color: KawaiiTheme.textSecondary,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           // Tags row
           Row(
             children: [
               // 情緒 tag
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
@@ -1225,12 +1262,12 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(emotionEmoji, style: const TextStyle(fontSize: 14)),
-                    const SizedBox(width: 6),
+                    Text(emotionEmoji, style: const TextStyle(fontSize: 12)),
+                    const SizedBox(width: 4),
                     Text(
                       '今日心情：$emotionTag',
                       style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: 11,
                         fontWeight: FontWeight.w500,
                         color: KawaiiTheme.textPrimary,
                       ),
@@ -1238,10 +1275,10 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               // 互動次數
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(KawaiiTheme.radiusCircle),
@@ -1249,12 +1286,12 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.chat_bubble_outline, size: 14, color: KawaiiTheme.primaryPink),
-                    const SizedBox(width: 6),
+                    const Icon(Icons.chat_bubble_outline, size: 12, color: KawaiiTheme.primaryPink),
+                    const SizedBox(width: 4),
                     Text(
                       '今日互動：$_todayInteractionCount 次',
                       style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: 11,
                         fontWeight: FontWeight.w500,
                         color: KawaiiTheme.textPrimary,
                       ),
@@ -1264,7 +1301,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           // 默契值 progress bar
           _buildBondProgressBar(),
         ],
@@ -1350,13 +1387,16 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
-            Text(
-              '${bond.bondScore}%',
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: KawaiiTheme.coral,
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 36,
+              child: Text(
+                '${bond.bondScore}%',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: KawaiiTheme.coral,
+                ),
               ),
             ),
           ],
@@ -1397,93 +1437,10 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  /// 錄音翻譯按鈕
+  /// 錄音翻譯按鈕（已停用功能入口，保留方法以避免破壞相依）
   Widget _buildRecordButton() {
-    return GestureDetector(
-      onTapDown: (_) => _startRecording(),
-      onTapUp: (_) => _stopRecording(),
-      onTapCancel: _stopRecording,
-      child: AnimatedBuilder(
-        animation: _pulseAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: isRecording ? _pulseAnimation.value : 1.0,
-            child: Container(
-              height: 160,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: KawaiiTheme.primaryGradient,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.orange.withOpacity(isRecording ? 0.5 : 0.3),
-                    blurRadius: isRecording ? 30 : 15,
-                    spreadRadius: isRecording ? 5 : 2,
-                  ),
-                ],
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // 波紋效果
-                  if (isRecording)
-                    ...List.generate(3, (index) {
-                      final delay = index * 0.3;
-                      final value = (_waveController.value - delay).clamp(0.0, 1.0);
-                      final size = 160 + (value * 60);
-                      final opacity = (1 - value) * 0.3;
-                      return Container(
-                        width: size,
-                        height: size,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withOpacity(opacity),
-                            width: 2,
-                          ),
-                        ),
-                      );
-                    }),
-                  // 按鈕內容
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        isRecording
-                            ? Icons.hearing
-                            : (_isAnalyzing ? Icons.psychology : Icons.pets),
-                        size: 48,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _isAnalyzing
-                            ? '正在聽...'
-                            : (isRecording ? '正在聽' : '聽聽她想說什麼'),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      if (isRecording)
-                        const Text(
-                          '🎤 放開後推測她的心情',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 11,
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
+    return const SizedBox.shrink();
   }
-
   /// 貓咪動作庫按鈕
   Widget _buildPoseButton() {
     return GestureDetector(
@@ -2004,6 +1961,10 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _showCatSwitcher() {
+    // Navigation safety rule:
+    // BottomSheet actions must close and push with rootContext.
+    // Do not use sheet context for push after closing the sheet.
+    final rootContext = context;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -2063,15 +2024,17 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
                       onPressed: () async {
-                        // 直接開啟 AddCatPage 等結果
-                        final result = await Navigator.push<bool>(
-                          context,
+                        // 先關閉 bottom sheet
+                        Navigator.of(rootContext).pop();
+                        // 用 root context 開啟 AddCatPage
+                        final newCatId = await Navigator.of(rootContext).push<String?>(
                           MaterialPageRoute(builder: (_) => const AddCatPage()),
                         );
-                        // AddCatPage 回傳 true 才 reload
-                        if (result == true) {
+                        // AddCatPage 回傳新貓咪 id 才 reload
+                        if (newCatId != null) {
                           await _loadCatData();
-                          if (mounted) setState(() {});
+                          if (!mounted) return;
+                          setState(() {});
                         }
                       },
                       icon: const Icon(Icons.add),
@@ -2095,7 +2058,16 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ..._cats.map((cat) => ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.orange.shade100,
-                      child: const Icon(Icons.pets, color: Colors.orange),
+                      backgroundImage: cat.avatarPath != null &&
+                          !cat.avatarPath!.startsWith('content://') &&
+                          File(cat.avatarPath!).existsSync()
+                          ? FileImage(File(cat.avatarPath!))
+                          : null,
+                      child: cat.avatarPath != null &&
+                              !cat.avatarPath!.startsWith('content://') &&
+                              File(cat.avatarPath!).existsSync()
+                          ? null
+                          : const Icon(Icons.pets, color: Colors.orange),
                     ),
                     title: Text(cat.name),
                     subtitle: Text(cat.breed.isNotEmpty ? cat.breed : '尚未設定'),
@@ -2105,14 +2077,14 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.grey, size: 20),
                           onPressed: () async {
-                            Navigator.pop(context); // close bottom sheet first
-                            final result = await Navigator.push<bool>(
-                              context,
+                            Navigator.of(rootContext).pop(); // close bottom sheet first
+                            final result = await Navigator.of(rootContext).push<Cat?>(
                               MaterialPageRoute(builder: (_) => EditCatPage(cat: cat)),
                             );
-                            if (result == true) {
+                            if (result != null) {
                               await _loadCatData();
-                              if (mounted) setState(() {});
+                              if (!mounted) return;
+                              setState(() {});
                             }
                           },
                         ),
@@ -2129,15 +2101,17 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               const SizedBox(height: 8),
               ElevatedButton.icon(
                 onPressed: () async {
-                  // 直接開啟 AddCatPage 等結果
-                  final result = await Navigator.push<bool>(
-                    context,
+                  // 先關閉 bottom sheet
+                  Navigator.of(rootContext).pop();
+                  // 用 root context 開啟 AddCatPage
+                  final newCatId = await Navigator.of(rootContext).push<String?>(
                     MaterialPageRoute(builder: (_) => const AddCatPage()),
                   );
-                  // AddCatPage 回傳 true 才 reload
-                  if (result == true) {
+                  // AddCatPage 回傳新貓咪 id 才 reload
+                  if (newCatId != null) {
                     await _loadCatData();
-                    if (mounted) setState(() {});
+                    if (!mounted) return;
+                    setState(() {});
                   }
                 },
                 icon: const Icon(Icons.add),

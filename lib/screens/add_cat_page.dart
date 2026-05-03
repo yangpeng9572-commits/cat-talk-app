@@ -27,6 +27,8 @@ class _AddCatPageState extends State<AddCatPage> {
   String _birthdayType = 'unknown'; // 'exact', 'monthDayOnly', 'adoptionDay', 'unknown'
   bool _isUnknownBirthday = false;
   bool _isAdoptionDay = false;
+  String _dateType = 'birthday'; // 'birthday' or 'adoption'
+  bool _isLoading = false;
 
   final List<String> _breeds = [
     '英國短毛貓',
@@ -73,16 +75,6 @@ class _AddCatPageState extends State<AddCatPage> {
   }
 
   Future<void> _pickImage() async {
-    if (_isUnknownBirthday || _isAdoptionDay) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('請先取消「不知道生日」或「領養日」的勾選'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
     final source = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.white,
@@ -308,58 +300,83 @@ class _AddCatPageState extends State<AddCatPage> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                onPressed: () async {
-                  final name = _nameController.text.trim();
-                  if (name.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('請先幫貓咪取個名字 🐱'),
-                        backgroundColor: Colors.red,
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        FocusScope.of(context).unfocus();
+
+                        if (_isLoading) return;
+                        setState(() => _isLoading = true);
+
+                        try {
+                          final name = _nameController.text.trim();
+                          if (name.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('請先幫貓咪取個名字 🐱'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            setState(() => _isLoading = false);
+                            return;
+                          }
+
+                          final birthdayError = _validateBirthday();
+                          if (birthdayError != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(birthdayError),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            setState(() => _isLoading = false);
+                            return;
+                          }
+
+                          final cat = Cat(
+                            id: DateTime.now().millisecondsSinceEpoch.toString(),
+                            name: name,
+                            breed: _breed.isNotEmpty ? _breed : '混種貓',
+                            gender: _isMale ? 'male' : 'female',
+                            age: _age,
+                            ageStage: _getAgeStage(_age),
+                            avatarPath: _avatarPath,
+                            birthMonth: _birthMonth,
+                            birthDay: _birthDay,
+                            birthYear: _birthYear,
+                            birthdayType: _birthdayType,
+                          );
+
+                          final prefs = await SharedPreferences.getInstance();
+                          final catService = CatService(prefs);
+                          await catService.addCat(cat);
+
+                          if (!mounted) return;
+
+                          Navigator.of(context).pop(cat.id);
+                        } catch (e) {
+                          if (!mounted) return;
+
+                          setState(() => _isLoading = false);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('新增失敗：$e')),
+                          );
+                        }
+                      },
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        '添加',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                    );
-                    return;
-                  }
-                  
-                  final birthdayError = _validateBirthday();
-                  if (birthdayError != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(birthdayError),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-                  
-                  final cat = Cat(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    name: name,
-                    breed: _breed.isNotEmpty ? _breed : '混種貓',
-                    gender: _isMale ? 'male' : 'female',
-                    age: _age,
-                    ageStage: _getAgeStage(_age),
-                    avatarPath: _avatarPath,
-                    birthMonth: _birthMonth,
-                    birthDay: _birthDay,
-                    birthYear: _birthYear,
-                    birthdayType: _birthdayType,
-                  );
-                  
-                  final prefs = await SharedPreferences.getInstance();
-                  final catService = CatService(prefs);
-                  await catService.addCat(cat);
-                  
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('已新增她的小檔案 💕'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                    Navigator.pop(context, cat.id);
-                  }
-                },
-                child: const Text('添加', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -542,7 +559,7 @@ class _AddCatPageState extends State<AddCatPage> {
           children: [
             Text('🎂', style: TextStyle(fontSize: 20)),
             SizedBox(width: 8),
-            Text('她的生日', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+            Text('生日 / 領養日', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
           ],
         ),
         const SizedBox(height: 8),
@@ -552,31 +569,70 @@ class _AddCatPageState extends State<AddCatPage> {
         ),
         const SizedBox(height: 16),
 
-        // 我不知道生日
-        CheckboxListTile(
-          value: _isUnknownBirthday,
-          onChanged: (v) {
-            setState(() => _isUnknownBirthday = v ?? false);
-            _onBirthdayTypeChanged();
-          },
-          title: const Text('我不知道生日'),
-          controlAffinity: ListTileControlAffinity.leading,
-          contentPadding: EdgeInsets.zero,
+        // 日期類型：生日 / 領養日
+        Row(
+          children: [
+            Expanded(
+              child: RadioListTile<String>(
+                value: 'birthday',
+                groupValue: _dateType,
+                onChanged: _dateType == 'birthday'
+                    ? null
+                    : (v) {
+                        setState(() {
+                          _dateType = v!;
+                          if (_dateType == 'adoption') {
+                            _birthMonth = null;
+                            _birthDay = null;
+                            _birthYear = null;
+                            _birthdayType = 'adoptionDay';
+                          } else {
+                            _birthdayType = (_birthMonth != null && _birthDay != null && _birthYear != null)
+                                ? 'exact'
+                                : (_birthMonth != null && _birthDay != null)
+                                    ? 'monthDayOnly'
+                                    : 'unknown';
+                          }
+                        });
+                      },
+                title: const Text('生日'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            Expanded(
+              child: RadioListTile<String>(
+                value: 'adoption',
+                groupValue: _dateType,
+                onChanged: _dateType == 'adoption'
+                    ? null
+                    : (v) {
+                        setState(() {
+                          _dateType = v!;
+                          if (_dateType == 'adoption') {
+                            _birthMonth = null;
+                            _birthDay = null;
+                            _birthYear = null;
+                            _birthdayType = 'adoptionDay';
+                          }
+                        });
+                      },
+                title: const Text('領養日'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ],
         ),
+        const SizedBox(height: 8),
 
-        // 用領養日當生日
-        CheckboxListTile(
-          value: _isAdoptionDay,
-          onChanged: _isUnknownBirthday ? null : (v) {
-            setState(() => _isAdoptionDay = v ?? false);
-            _onBirthdayTypeChanged();
-          },
-          title: const Text('用領養日當生日'),
-          controlAffinity: ListTileControlAffinity.leading,
-          contentPadding: EdgeInsets.zero,
-        ),
+        // 領養日提示
+        if (_dateType == 'adoption')
+          Text(
+            '我們會記錄這天為你們相遇的日子 🏠',
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          ),
 
-        if (!_isUnknownBirthday && !_isAdoptionDay) ...[
+        // 生日日期選擇（只有選「生日」時顯示）
+        if (_dateType == 'birthday') ...[
           const SizedBox(height: 16),
           // 月份
           Row(

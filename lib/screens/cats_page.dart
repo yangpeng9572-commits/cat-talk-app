@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cat.dart';
@@ -15,6 +16,32 @@ class CatsPage extends StatefulWidget {
 
 class _CatsPageState extends State<CatsPage> {
   List<Cat> _cats = [];
+
+  // ===== 圖片顯示 Helper =====
+  Widget _buildCatAvatar(
+    String? avatarPath, {
+    double radius = 40,
+    double iconSize = 40,
+  }) {
+    final path = avatarPath;
+    final hasValidPath = path != null &&
+        path.isNotEmpty &&
+        !path.startsWith('content://') &&
+        File(path).existsSync();
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: const Color(0xFFFFE0B2),
+      backgroundImage: hasValidPath ? FileImage(File(path)) : null,
+      child: hasValidPath
+          ? null
+          : Icon(
+              Icons.pets,
+              color: const Color(0xFFFF8A65),
+              size: iconSize,
+            ),
+    );
+  }
 
   @override
   void initState() {
@@ -103,15 +130,18 @@ class _CatsPageState extends State<CatsPage> {
     return GestureDetector(
       onTap: () async {
         // 編輯這隻貓咪
-        final result = await Navigator.push<Cat>(
+        final updatedCat = await Navigator.push<Cat?>(
           context,
           MaterialPageRoute(builder: (context) => EditCatPage(cat: cat)),
         );
-        if (result != null) {
+        if (updatedCat != null) {
           _loadCats(); // 重新載入貓咪列表
+          if (!mounted) return;
+          setState(() {});
         }
       },
       child: Container(
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
@@ -121,12 +151,8 @@ class _CatsPageState extends State<CatsPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // 頭像
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: KawaiiTheme.softPink,
-              child: const Icon(Icons.pets, size: 40, color: Colors.orange),
-            ),
-            const SizedBox(height: 12),
+            _buildCatAvatar(cat.avatarPath),
+            const SizedBox(height: 8),
             // 名字
             Text(
               cat.name,
@@ -135,7 +161,7 @@ class _CatsPageState extends State<CatsPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             // 品種
             Text(
               cat.breed,
@@ -163,12 +189,14 @@ class _CatsPageState extends State<CatsPage> {
     return GestureDetector(
       onTap: () async {
         // 添加新貓咪
-        final result = await Navigator.push<Cat>(
+        final newCatId = await Navigator.push<String?>(
           context,
           MaterialPageRoute(builder: (context) => const AddCatPage()),
         );
-        if (result != null) {
+        if (newCatId != null) {
           _loadCats(); // 重新載入貓咪列表
+          if (!mounted) return;
+          setState(() {});
         }
       },
       child: Container(
