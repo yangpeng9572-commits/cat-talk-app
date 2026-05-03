@@ -7,72 +7,72 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
 - Last updated by: OpenClaw
-- Last updated at: 2026-05-03 21:16 GMT+8
+- Last updated at: 2026-05-03 21:20 GMT+8
+
+---
+
+## P1-1：貓咪動作庫移到姿勢拍照內
+
+### 任務 ID
+- Task ID: P1-1
+- Task name: 貓咪動作庫移到姿勢拍照裡
+
+### 完成的修改
+
+- **Commit:** `1b078f6`
+- **Branch:** main
+
+### 修改內容
+
+**home_page.dart:**
+- 移除 `_buildPoseButton()` 方法（本體 93 行 + `_buildRecordButton()` 4 行）
+- 簡化 `_buildMainButton()` 回傳 `SizedBox.shrink()`（避免破壞相依）
+
+**cat_pose_camera_page.dart:**
+- 新增 `import 'pose_recognition_page.dart'`
+- 在「開始拍照」按鈕下方新增 `TextButton.icon`：「看動作庫當參考」
+- 點選後進入 `PoseRecognitionPage`（貓咪動作庫）
+
+**變更統計：2 個檔案，+19 行，-96 行（淨減少 77 行）**
+
+### 修改檔案
+
+- `lib/screens/home_page.dart`
+- `lib/screens/cat_pose_camera_page.dart`
+
+### 驗收要求
+
+- flutter analyze: 0 errors
+- flutter test: 264 tests passed
+- 驗收方式：
+  1. 確認首頁不再有大型「🐱 貓咪動作庫」按鈕
+  2. 進入住咪姿勢拍照頁，確認有「看動作庫當參考」按鈕
+  3. 點選「看動作庫當參考」，確認可正常進入動作庫頁面
+  4. 動作庫功能正常（可瀏覽姿勢分類、搜尋、查看姿勢詳情）
+
+### Required Hermes Actions
+
+1. `git pull --ff-only`
+2. `flutter analyze`
+3. `flutter test`
+4. `flutter build apk --release`（必要時）
+5. 更新 `.agent/hermes_review.md` 為 PASS 或 FAIL
+6. 若 PASS，更新本檔案為 IDLE 並 push
 
 ---
 
 ## 上輪完成：P0-5 Cleanup（小整理）
 
 - **Commit:** `140a639`
-- **Branch:** main
-
-### 修改內容
-
-- 移除 `home_page.dart` 中已無效的 `_showSnackBar` 方法（20行 dead code）
-
-### 修改檔案
-
-- `lib/screens/home_page.dart`
-
----
-
-## 等待 Hermes 驗收
-
-### P0-5 主要實作（已於上輪 push）
-- **Commit:** `f7431bd`
-- **內容：** home_page.dart + emotion_card.dart 的 SnackBar 全部改為 TopToast（上方面告提示）
-- **檔案：** `lib/screens/home_page.dart`、`lib/widgets/emotion_card.dart`
-
-### Hermes 驗收提醒
-
-請依序驗收：
-1. `git pull --ff-only`
-2. 確認 `f7431bd` + `140a639` 為最新
-3. `flutter analyze`
-4. `flutter test`
-5. 更新 `.agent/hermes_review.md`
-
----
-
-## P0-2：選擇貓咪第 5 隻以上無法滑動（已驗收 PASS，commit d6619a3）
-
-### 任務 ID
-- Task ID: P0-2
-- Task name: 選擇貓咪第 5 隻以上無法滑動
-
-### 完成的修改
-
-- **Commit:** `d6619a3`
-- **Branch:** main
-
-### 修改內容
-
-- `_showCatSwitcher()` bottom sheet 內的 `Flexible(child: ListView(shrinkWrap: true))` 改為 `Container(constraints: const BoxConstraints(maxHeight: 400), child: ListView(shrinkWrap: true))`
-- 固定最大高度 400px，內容超出時可自然滾動
-- 5 隻以上貓咪時選擇清單可正常滑動
-
-### 修改檔案
-
-- `lib/screens/home_page.dart`（1 行變更）
+- **內容：** 移除 `home_page.dart` 中已無效的 `_showSnackBar` 方法（20行 dead code）
 
 ---
 
 ## Notes
 
-- P0-5 TopToast 上方提示實作完成（commit f7431bd + cleanup 140a639）
-- TopToast 使用 overlay 顯示在螢幕上方，不被 bottom navigation 遮住
-- P0-2 已驗收 PASS（Hermes 2026-05-03 19:47）
-- 下一個建議任務：P1-1（貓咪動作庫移到姿勢拍照內）
+- P1-1 為 P1 首批任務之首，請優先驗收
+- 動作庫入口從首頁雙按鈕移至姿勢拍照流程內，功能不變
+- 下一個建議任務：P1-2（移除首頁「今日還沒聽牠說話」）
