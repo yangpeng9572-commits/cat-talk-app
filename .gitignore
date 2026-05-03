@@ -43,3 +43,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Agent coordination runtime files
+.agent/lock.json
+.agent/tmp/
+.agent/*.local.md
+
+# Temporary git commit message file used by agents
+.git_commit_msg.txt
+
+# Local APK artifacts
+cat-talk-*.apk
+*.apk
