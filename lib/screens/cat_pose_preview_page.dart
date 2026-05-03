@@ -2,8 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/daily_task.dart';
 import '../services/cat_pose_photo_service.dart';
+import '../services/daily_task_service.dart';
 import '../theme/kawaii_theme.dart';
+import '../widgets/top_toast.dart';
 
 /// 貓咪姿勢拍照預覽頁
 /// 顯示拍攝的照片，提供重新拍攝或使用此照片的選項
@@ -22,7 +26,19 @@ class CatPosePreviewPage extends StatefulWidget {
 class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
   final ImagePicker _imagePicker = ImagePicker();
   final CatPosePhotoService _photoService = CatPosePhotoService();
+  late DailyTaskService _taskService;
   bool _isProcessing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initTaskService();
+  }
+
+  Future<void> _initTaskService() async {
+    final prefs = await SharedPreferences.getInstance();
+    _taskService = DailyTaskService(prefs);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -206,6 +222,8 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
       if (!mounted) return;
 
       if (result != null) {
+        // 更新每日任務進度（拍照/記錄任務）
+        _taskService.updateTaskProgress(TaskType.pose_photo);
         TopToast.success(context, message: '已保存照片，之後可用於姿勢辨識 🐾');
         // 返回上一頁（或是首頁，取決於導航堆疊）
         Navigator.pop(context);
@@ -268,7 +286,6 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
     } catch (e) {
       if (mounted) {
         TopToast.error(context, message: '相機開啟失敗，請確認權限後再試一次。');
-        );
       }
     }
   }

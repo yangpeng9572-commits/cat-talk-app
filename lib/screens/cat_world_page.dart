@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/cat_world_items.dart';
 import '../models/cat.dart';
+import '../models/daily_task.dart';
 import '../models/shop_item.dart';
 import '../services/cat_world_service.dart';
 import '../services/cat_service.dart';
@@ -10,6 +11,7 @@ import '../services/streak_service.dart';
 import '../services/memory_card_service.dart';
 import '../services/seasonal_event_service.dart';
 import '../services/cat_birthday_service.dart';
+import '../services/daily_task_service.dart';
 import '../theme/kawaii_theme.dart';
 import '../widgets/top_toast.dart';
 import 'memory_cards_page.dart';
@@ -73,8 +75,16 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
     super.initState();
     _tabController = TabController(length: _tabLabels.length, vsync: this);
     _tabController.addListener(_onTabChanged);
+    _initTaskService();
     _loadData();
   }
+
+  Future<void> _initTaskService() async {
+    final prefs = await SharedPreferences.getInstance();
+    _taskService = DailyTaskService(prefs);
+  }
+
+  late DailyTaskService _taskService;
 
   @override
   void dispose() {
@@ -197,6 +207,8 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
 
     if (result == UnlockResult.success) {
       _showToast('她的小世界變溫暖了一點 🐾');
+      // 更新每日任務進度（小世界互動）
+      _taskService.updateTaskProgress(TaskType.cat_world_interact);
       _loadItemsByTab(_tabController.index);
     } else if (result == UnlockResult.alreadyUnlocked) {
       // 已解鎖，直接裝備
@@ -212,6 +224,8 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
 
     if (result == EquipResult.success) {
       _showToast('她好像很喜歡這個新角落 💕');
+      // 更新每日任務進度（小世界互動）
+      _taskService.updateTaskProgress(TaskType.cat_world_interact);
       _loadItemsByTab(_tabController.index);
     }
   }

@@ -37,18 +37,9 @@ class DailyTaskService {
     final today = DateTime.now();
     final todayStr = _getTodayStr();
 
-    // 只生成翻譯、報告、回饋三個核心任務
-    // play_with_cat 和 add_cat_note 在應用層單獨觸發
+    // 生成新版的每日任務：報告、拍照、小世界互動
+    // translate_meow 和 give_feedback 已停用，等待產品調整
     final tasks = [
-      DailyTask(
-        id: '${todayStr}_translate',
-        title: _companion.getTitle(TaskType.translate_meow),
-        description: _companion.getDescription(TaskType.translate_meow),
-        type: TaskType.translate_meow,
-        targetCount: 1,
-        rewardExp: 5, // 默契值用，不是 exp
-        date: today,
-      ),
       DailyTask(
         id: '${todayStr}_report',
         title: _companion.getTitle(TaskType.view_daily_report),
@@ -59,10 +50,19 @@ class DailyTaskService {
         date: today,
       ),
       DailyTask(
-        id: '${todayStr}_feedback',
-        title: _companion.getTitle(TaskType.give_feedback),
-        description: _companion.getDescription(TaskType.give_feedback),
-        type: TaskType.give_feedback,
+        id: '${todayStr}_pose_photo',
+        title: _companion.getTitle(TaskType.pose_photo),
+        description: _companion.getDescription(TaskType.pose_photo),
+        type: TaskType.pose_photo,
+        targetCount: 1,
+        rewardExp: 5,
+        date: today,
+      ),
+      DailyTask(
+        id: '${todayStr}_cat_world',
+        title: _companion.getTitle(TaskType.cat_world_interact),
+        description: _companion.getDescription(TaskType.cat_world_interact),
+        type: TaskType.cat_world_interact,
         targetCount: 1,
         rewardExp: 5,
         date: today,

@@ -102,11 +102,13 @@ class DailyTask {
 
 /// 任務類型
 enum TaskType {
-  translate_meow,    // 翻譯貓叫聲
+  translate_meow,    // 翻譯貓叫聲（已停用，等待產品調整）
   view_daily_report, // 查看每日報告
-  give_feedback,     // 回饋翻譯
+  give_feedback,     // 回饋翻譯（已停用，等待產品調整）
   add_cat_note,      // 新增貓咪備註
   play_with_cat,     // 陪貓玩耍
+  pose_photo,        // 拍照記錄（新增）
+  cat_world_interact, // 小世界互動（新增）
 }
 
 extension TaskTypeExtension on TaskType {
@@ -123,6 +125,10 @@ extension TaskTypeExtension on TaskType {
         return '📝';
       case TaskType.play_with_cat:
         return '🎾';
+      case TaskType.pose_photo:
+        return '📷';
+      case TaskType.cat_world_interact:
+        return '🏡';
     }
   }
 
@@ -139,6 +145,10 @@ extension TaskTypeExtension on TaskType {
         return '備註';
       case TaskType.play_with_cat:
         return '玩耍';
+      case TaskType.pose_photo:
+        return '拍照';
+      case TaskType.cat_world_interact:
+        return '小世界';
     }
   }
 }
