@@ -1968,8 +1968,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      isDismissible: false,
-      enableDrag: false,
+      isDismissible: true,
+      enableDrag: true,
       builder: (context) => Container(
         padding: const EdgeInsets.all(16),
         decoration: const BoxDecoration(
@@ -2078,10 +2078,18 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           icon: const Icon(Icons.edit, color: Colors.grey, size: 20),
                           onPressed: () async {
                             Navigator.of(rootContext).pop(); // close bottom sheet first
+                            // Reload cats before opening edit to ensure list is fresh
+                            _cats = _catService!.getAllCats();
                             final result = await Navigator.of(rootContext).push<Cat?>(
                               MaterialPageRoute(builder: (_) => EditCatPage(cat: cat)),
                             );
                             if (result != null) {
+                              // Reload cats and selectedCat after edit
+                              _cats = _catService!.getAllCats();
+                              // If deleted cat was selected, select another
+                              if (selectedCat == null || !_cats.any((c) => c.id == selectedCat!.id)) {
+                                selectedCat = _cats.isNotEmpty ? _cats.first : null;
+                              }
                               await _loadCatData();
                               if (!mounted) return;
                               setState(() {});

@@ -432,9 +432,10 @@ class _EditCatPageState extends State<EditCatPage> {
   Future<void> _deleteCat() async {
     final prefs = await SharedPreferences.getInstance();
     final catService = CatService(prefs);
-    await catService.deleteCat(widget.cat.id);
+    final deletedCatId = widget.cat.id;
+    await catService.deleteCat(deletedCatId);
     if (!mounted) return;
-    Navigator.pop(context, true); // 回傳 true 給上一層刷新
+    Navigator.pop(context, true); // 回傳 true 給上一層刷新，通知 caller 貓已被刪除
   }
 
   Widget _buildNameField() {
