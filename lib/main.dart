@@ -51,15 +51,18 @@ class _MainScreenState extends State<MainScreen> {
 
   // callback 供 ProfilePage 使用：切回首頁並重播 onboarding
   void _handleReplayOnboarding() {
-    // 切回首頁 tab
+    // 切回首頁 tab（若已在首頁仍需觸發 setState 以確保 rebuild）
     if (_currentIndex != 0) {
       setState(() => _currentIndex = 0);
-    }
-    // 等下一幀再通知 HomePage 顯示 onboarding（確保 IndexedStack 已切換完成）
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      // 等下一幀再通知 HomePage 顯示 onboarding（確保 IndexedStack 已切換完成）
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _homePageKey.currentState?.replayOnboarding();
+      });
+    } else {
+      // 已在首頁，直接呼叫（不需要 addPostFrameCallback）
       _homePageKey.currentState?.replayOnboarding();
-    });
+    }
   }
 
   late final List<Widget> _pages = [
