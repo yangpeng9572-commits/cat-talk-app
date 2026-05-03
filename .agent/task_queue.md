@@ -102,12 +102,14 @@ OpenClaw 每輪選任務時，依照以下順序：
 ---
 
 ### P2-4：小房間滑到底 / overflow 問題
-狀態：待處理
+狀態：✅ WSL2 已 commit + push，Hermes 驗收中
 
 需求：
 - Cat World 小房間頁面不 overflow
 - 小螢幕可完整滑動
 - 不出現黃黑警告線
+
+目前 commit：`73e1aa1` — 使用 NestedScrollView 重構佈局，TabBarView 填滿剩餘空間
 
 ---
 
