@@ -11,51 +11,42 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Result: PASS
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes
-- Last reviewed at: 2026-05-03 16:05 GMT+8
+- Last reviewed at: 2026-05-03 17:05 GMT+8
 
 ---
 
-## Reviewed Tasks (4 項批次驗收)
+## 本次驗收摘要
 
-### Task 1: P2-1 隱藏分享卡/動畫 tab
-- Commit: `cee79b2`
-- File: lib/screens/cat_world_page.dart（-5/+1）
-- Status: PASS
-
-### Task 2: P2-4 CatWorld overflow 修復
-- Commit: `73e1aa1`（已包含於 P3-1 驗收歷史中）
-- File: lib/screens/cat_world_page.dart（NestedScrollView 重構）
-- Status: PASS（重複驗收）
-
-### Task 3: P3-2 整理剩餘 withOpacity
-- Commit: `ea846dd`
-- Files: lib/main.dart, lib/services/share_card_service.dart, lib/theme/kawaii_theme.dart
-- Status: PASS
-
-### Task 4: P2-5 夏日窗邊活動（已在 main，早期合併）
-- Commit: `0373aba`
-- File: lib/screens/summer_window_page.dart（371 行）
-- Note: 此 commit 早於 P2-4，已是 main 的祖先（32 commits 前），實際已合併
-- Status: PASS（已合併，無需額外操作）
+- Origin main tip: `569263f` (OpenClaw 16:54 push)
+- Local pull: ✅ Fast-forward succeeded
+- WSL2 git status: CLEAN
+- Windows git status: CLEAN（CMD 的 ?? 為 WSL2 interop 顯示問題，無實際影響）
 
 ---
 
-## Validation Result
+## 驗收項目：OpenClaw 定期更新（handoff only，無新 code commit）
 
-- flutter analyze: PASS
-- Analyze errors: 0 errors (201 issues found)
-- flutter test: PASS
-- Tests passed: 264
-- flutter build apk --release: SUCCESS
-- APK: C:\Users\a0938\cat_talk_proper\build\app\outputs\flutter-apk\app-release.apk (90.9MB)
-- git status --short: CLEAN
+| 檢查項 | 結果 |
+|--------|------|
+| flutter analyze | ✅ 0 errors（201 issues） |
+| flutter test | ✅ 264 passed |
+| APK 存在 | ✅ 95.3MB（2026-05-03 16:31） |
+| git status | ✅ CLEAN |
+
+---
+
+## 目前整體狀態
+
+- **所有 P2/P3 任務已完成**（withOpacity 重構全部清除）
+- **P2-1, P2-4, P2-5, P3-2**：全部 PASS（已在 hermes_review 歷史中）
+- **P2-2**：task_queue.md 無描述，無法執行
+- **P0 系列**（P0-1, P0-2, P1-1, P1-2）：af17dce 已整合，需 Hermes **手機實測回歸確認**
+- **無新 code commit 需要驗收**，僅文件同步
 
 ---
 
 ## Notes
 
-- P2-1, P2-4, P2-5, P3-2 全部 PASS
-- P2-5 (0373aba) 早已合併入 main，handoff 重複列出是文件殘留
-- withOpacity 重構完成：P3-1 全批次 + P3-2 全部清除
-- 建議下一個任務：P2-2（見 task_queue.md）
-- OpenClaw 可繼續新任務
+- OpenClaw push → Hermes pull → 驗收流程正常運作
+- 建議 Andy 安排時間對 P0 系列整合功能做**手機實測**（翻譯流程、貓咪房間互動、情緒報告推送等）
+- 無需每次都建 APK，本輪僅驗證到 analyze + test
