@@ -402,34 +402,36 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
   }
 
   Widget _buildContent() {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        children: [
-          // 房間展示區
-          _buildRoomSection(),
-          // 活動卡片
-          if (_birthdayCatToday != null) _buildBirthdayEventCard(),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SummerWindowPage()),
-              );
-            },
-            child: _buildEventCard(),
-          ),
-          // Plus 入口卡片
-          _buildPlusCard(),
-          // 分類 Tabs
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.45,
-            child: TabBarView(
-              controller: _tabController,
-              children: _categories.map((category) => _buildItemList()).toList(),
+    return NestedScrollView(
+      headerSliverBuilder: (context, innerBoxIsScrolled) {
+        return <Widget>[
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                // 房間展示區
+                _buildRoomSection(),
+                // 活動卡片
+                if (_birthdayCatToday != null) _buildBirthdayEventCard(),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SummerWindowPage()),
+                    );
+                  },
+                  child: _buildEventCard(),
+                ),
+                // Plus 入口卡片
+                _buildPlusCard(),
+                const SizedBox(height: 8),
+              ],
             ),
           ),
-        ],
+        ];
+      },
+      body: TabBarView(
+        controller: _tabController,
+        children: _categories.map((category) => _buildItemList()).toList(),
       ),
     );
   }
