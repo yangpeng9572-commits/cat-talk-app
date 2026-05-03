@@ -24,7 +24,7 @@ function Run-InRepo {
     $cmd = "$exe $args"
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = "cmd.exe"
-    $psi.Arguments = "/c " + $cmd
+    $psi.Arguments = '/c ' + $cmd
     $psi.WorkingDirectory = $RepoPath          # <-- critical: sets startup directory
     $psi.RedirectStandardOutput = $true
     $psi.RedirectStandardError = $true
