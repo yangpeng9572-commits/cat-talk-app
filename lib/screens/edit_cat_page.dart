@@ -601,7 +601,7 @@ class _EditCatPageState extends State<EditCatPage> {
           children: [
             Text('🎂', style: TextStyle(fontSize: 20)),
             SizedBox(width: 8),
-            Text('她的生日', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+            Text('生日 / 領養日', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
           ],
         ),
         const SizedBox(height: 8),
