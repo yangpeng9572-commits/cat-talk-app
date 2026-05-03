@@ -1,6 +1,7 @@
 param(
     [string]$RepoPath = "C:\Users\a0938\cat_talk_proper",
-    [string]$LogFile  = "C:\Users\a0938\cat_talk_proper\logs\hermes_windows_auto_review.log"
+    [string]$LogFile  = "C:\Users\a0938\cat_talk_proper\logs\hermes_windows_auto_review.log",
+    [switch]$SkipBuild  # Skip APK build (for frequent checks, build is expensive)
 )
 
 $logsDir = Join-Path $RepoPath "logs"
@@ -178,43 +179,50 @@ if ($tc -match "All tests passed") { $tp = "All passed" }
 elseif ($tc -match "(\d+)\s+tests?\s+passed") { $tp = "$($matches[1]) passed" }
 Write-Log "flutter test: PASS ($tp, $($sw.Elapsed.TotalSeconds)s)"
 
-# --- B. flutter build ---
-$bo = Join-Path $logsDir "flutter_build_auto.txt"
-Write-Log "Running flutter build apk --release..."
-$sw = [Diagnostics.Stopwatch]::StartNew()
-$bl = Run-InRepo "flutter" "build apk --release" "flutter build"
-$sw.Stop()
-$bc = $bl.Stdout
-$bc | Out-File -FilePath $bo -Encoding UTF8 -Force
+if (-not $SkipBuild) {
+    # --- B. flutter build ---
+    $bo = Join-Path $logsDir "flutter_build_auto.txt"
+    Write-Log "Running flutter build apk --release..."
+    $sw = [Diagnostics.Stopwatch]::StartNew()
+    $bl = Run-InRepo "flutter" "build apk --release" "flutter build"
+    $sw.Stop()
+    $bc = $bl.Stdout
+    $bc | Out-File -FilePath $bo -Encoding UTF8 -Force
 
-if ($bl.ExitCode -ne 0) {
-    Write-Log "FAIL: flutter build (exit $($bl.ExitCode))"
-    if ($bl.Stderr) { Write-Log "STDERR: $($bl.Stderr)" }
-    exit 1
-}
-$bn = "N/A"; $bp = "N/A"
-if ($bc -match "Built .+\\app\\outputs\\flutter-apk\\(.+\.apk)") {
-    $bn = $Matches[1]
-    $bp = Join-Path $RepoPath "build\app\outputs\flutter-apk\$bn"
-}
-elseif ($bc -match "Built (.+\.apk)") {
-    $bn = [IO.Path]::GetFileName($Matches[1])
-    $bp = Join-Path $RepoPath "build\app\outputs\flutter-apk\$bn"
-}
-if ($bp -ne "N/A" -and (Test-Path $bp)) {
-    $apkSize = (Get-Item $bp).Length
-    if ($apkSize -gt 0) {
-        Write-Log "flutter build: PASS ($bn, $($sw.Elapsed.TotalSeconds)s, $([Math]::Round($apkSize/1MB, 1))MB)"
+    if ($bl.ExitCode -ne 0) {
+        Write-Log "FAIL: flutter build (exit $($bl.ExitCode))"
+        if ($bl.Stderr) { Write-Log "STDERR: $($bl.Stderr)" }
+        exit 1
+    }
+    $bn = "N/A"; $bp = "N/A"
+    if ($bc -match "Built .+\\app\\outputs\\flutter-apk\\(.+\.apk)") {
+        $bn = $Matches[1]
+        $bp = Join-Path $RepoPath "build\app\outputs\flutter-apk\$bn"
+    }
+    elseif ($bc -match "Built (.+\.apk)") {
+        $bn = [IO.Path]::GetFileName($Matches[1])
+        $bp = Join-Path $RepoPath "build\app\outputs\flutter-apk\$bn"
+    }
+    if ($bp -ne "N/A" -and (Test-Path $bp)) {
+        $apkSize = (Get-Item $bp).Length
+        if ($apkSize -gt 0) {
+            Write-Log "flutter build: PASS ($bn, $($sw.Elapsed.TotalSeconds)s, $([Math]::Round($apkSize/1MB, 1))MB)"
+        }
+        else {
+            Write-Log "FAIL: APK exists but size is 0"
+            exit 1
+        }
     }
     else {
-        Write-Log "FAIL: APK exists but size is 0"
+        Write-Log "FAIL: APK file not found at: $bp"
+        Write-Log "Build output: $($bc.Substring(0, [Math]::Min(300, $bc.Length)))"
         exit 1
     }
 }
 else {
-    Write-Log "FAIL: APK file not found at: $bp"
-    Write-Log "Build output: $($bc.Substring(0, [Math]::Min(300, $bc.Length)))"
-    exit 1
+    $bn = "SKIPPED"
+    $bp = "SKIPPED"
+    Write-Log "flutter build: SKIPPED (use without -SkipBuild for full build)"
 }
 
 # --- All PASS - update via Python ---
