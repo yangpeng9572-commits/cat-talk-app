@@ -6,6 +6,7 @@ import '../theme/kawaii_theme.dart';
 import '../widgets/top_toast.dart';
 import '../widgets/cat_pose_camera_frame.dart';
 import 'cat_pose_preview_page.dart';
+import 'pose_recognition_page.dart';
 
 /// 貓咪姿勢拍照頁
 /// v1：使用 image_picker 拍照，提供引導框提示使用者將貓咪置於框內
@@ -135,7 +136,22 @@ class _CatPoseCameraPageState extends State<CatPoseCameraPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 12),
+              // 動作庫入口（已從首頁移至姿勢拍照流程內）
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PoseRecognitionPage()),
+                  );
+                },
+                icon: const Icon(Icons.collections_bookmark, size: 18),
+                label: const Text('看動作庫當參考'),
+                style: TextButton.styleFrom(
+                  foregroundColor: KawaiiTheme.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
