@@ -1970,6 +1970,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       backgroundColor: Colors.transparent,
       isDismissible: true,
       enableDrag: true,
+      isScrollControlled: true,
       builder: (context) => Container(
         padding: const EdgeInsets.all(16),
         decoration: const BoxDecoration(
@@ -2024,13 +2025,10 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
                       onPressed: () async {
-                        // 先關閉 bottom sheet
                         Navigator.of(rootContext).pop();
-                        // 用 root context 開啟 AddCatPage
                         final newCatId = await Navigator.of(rootContext).push<String?>(
                           MaterialPageRoute(builder: (_) => const AddCatPage()),
                         );
-                        // AddCatPage 回傳新貓咪 id 才 reload
                         if (newCatId != null) {
                           await _loadCatData();
                           if (!mounted) return;
@@ -2055,7 +2053,10 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               )
             else
-              ..._cats.map((cat) => ListTile(
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: _cats.map((cat) => ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.orange.shade100,
                       backgroundImage: cat.avatarPath != null &&
@@ -2077,16 +2078,13 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.grey, size: 20),
                           onPressed: () async {
-                            Navigator.of(rootContext).pop(); // close bottom sheet first
-                            // Reload cats before opening edit to ensure list is fresh
+                            Navigator.of(rootContext).pop();
                             _cats = _catService!.getAllCats();
                             final result = await Navigator.of(rootContext).push<Cat?>(
                               MaterialPageRoute(builder: (_) => EditCatPage(cat: cat)),
                             );
                             if (result != null) {
-                              // Reload cats and selectedCat after edit
                               _cats = _catService!.getAllCats();
-                              // If deleted cat was selected, select another
                               if (selectedCat == null || !_cats.any((c) => c.id == selectedCat!.id)) {
                                 selectedCat = _cats.isNotEmpty ? _cats.first : null;
                               }
@@ -2104,18 +2102,17 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       setState(() => selectedCat = cat);
                       Navigator.pop(context);
                     },
-                  )),
+                  )).toList(),
+                ),
+              ),
             if (_cats.isNotEmpty) ...[
               const SizedBox(height: 8),
               ElevatedButton.icon(
                 onPressed: () async {
-                  // 先關閉 bottom sheet
                   Navigator.of(rootContext).pop();
-                  // 用 root context 開啟 AddCatPage
                   final newCatId = await Navigator.of(rootContext).push<String?>(
                     MaterialPageRoute(builder: (_) => const AddCatPage()),
                   );
-                  // AddCatPage 回傳新貓咪 id 才 reload
                   if (newCatId != null) {
                     await _loadCatData();
                     if (!mounted) return;
