@@ -7,65 +7,43 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: WAITING_FOR_HERMES
-- Waiting for Hermes: YES
+- Status: IDLE
+- Waiting for Hermes: NO
 - Last updated by: OpenClaw
-- Last updated at: 2026-05-03 20:49 GMT+8
+- Last updated at: 2026-05-03 21:16 GMT+8
 
 ---
 
-## P0-5：完成提示改到上方（home_page + emotion_card）
+## 上輪完成：P0-5 Cleanup（小整理）
 
-### 任務 ID
-- Task ID: P0-5（全 App 完成提示改到上方）
-- Task name: 完成提示改到上方
-
-### 完成的修改
-
-- **Commit:** `f7431bd`
+- **Commit:** `140a639`
 - **Branch:** main
 
 ### 修改內容
 
-**home_page.dart:**
-- `_showSnackBar('需要麥克風權限才能錄音喔！', isError: true)` → `TopToast.error()`
-- `_showSnackBar('錄音太短，再試一次 🐱', isError: true)` → `TopToast.error()`
-- `_showSnackBar('翻譯失敗了，再試一次吧 🐱', isError: true)` → `TopToast.error()`
-- `_showBriefToast()` SnackBar → `TopToast.show()`（愛心圖示，上方顯示）
-- `_addBondScore()` feedback SnackBar → `TopToast.success()`
-
-**emotion_card.dart:**
-- `_onActionTapped()` SnackBar → `TopToast.show()`（愛心圖示）
-- `_onFeedbackCorrect()` SnackBar → `TopToast.success()`
-
-**刪減：100 行 SnackBar 樣板碼，新增：18 行 TopToast 呼叫**
+- 移除 `home_page.dart` 中已無效的 `_showSnackBar` 方法（20行 dead code）
 
 ### 修改檔案
 
 - `lib/screens/home_page.dart`
-- `lib/widgets/emotion_card.dart`
 
-### 驗收要求
+---
 
-- flutter analyze: 0 errors
-- flutter test: 264 tests passed
-- 驗收方式：
-  1. 錄音權限失敗 → TopToast 顯示在上方
-  2. 錄音太短 → TopToast 顯示在上方
-  3. 翻譯失敗 → TopToast 顯示在上方
-  4. 默契值增加 → TopToast.success 顯示在上方
-  5. 點擊動作完成 → TopToast 愛心顯示在上方
-  6. 翻譯回饋正確 → TopToast.success 顯示在上方
-  7. 確認提示不被底部導覽列遮住
+## 等待 Hermes 驗收
 
-### Required Hermes Actions
+### P0-5 主要實作（已於上輪 push）
+- **Commit:** `f7431bd`
+- **內容：** home_page.dart + emotion_card.dart 的 SnackBar 全部改為 TopToast（上方面告提示）
+- **檔案：** `lib/screens/home_page.dart`、`lib/widgets/emotion_card.dart`
 
+### Hermes 驗收提醒
+
+請依序驗收：
 1. `git pull --ff-only`
-2. `flutter analyze`
-3. `flutter test`
-4. `flutter build apk --release`（必要時）
-5. 更新 `.agent/hermes_review.md` 為 PASS 或 FAIL
-6. 若 PASS，更新本檔案為 IDLE 並 push
+2. 確認 `f7431bd` + `140a639` 為最新
+3. `flutter analyze`
+4. `flutter test`
+5. 更新 `.agent/hermes_review.md`
 
 ---
 
@@ -94,7 +72,7 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Notes
 
-- P0-5 共替換 home_page.dart（5處）+ emotion_card.dart（2處）殘留 SnackBar
+- P0-5 TopToast 上方提示實作完成（commit f7431bd + cleanup 140a639）
 - TopToast 使用 overlay 顯示在螢幕上方，不被 bottom navigation 遮住
 - P0-2 已驗收 PASS（Hermes 2026-05-03 19:47）
 - 下一個建議任務：P1-1（貓咪動作庫移到姿勢拍照內）
