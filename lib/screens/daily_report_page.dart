@@ -5,6 +5,7 @@ import '../models/daily_cat_report.dart';
 import '../models/cat.dart';
 import '../models/translation_result.dart';
 import '../models/bond.dart';
+import '../models/user_diary_entry.dart';
 import '../services/daily_report_service.dart';
 import '../services/cat_service.dart';
 import '../services/cat_diary_service.dart';
@@ -12,6 +13,7 @@ import '../services/bond_service.dart';
 import '../services/share_card_service.dart';
 import '../services/translation_history_service.dart';
 import '../services/personality_analysis_service.dart';
+import '../services/user_diary_service.dart';
 import '../widgets/share_card_widget.dart';
 import '../theme/kawaii_theme.dart';
 import '../widgets/top_toast.dart';
@@ -31,6 +33,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
   final DailyReportService _reportService = DailyReportService();
   final CatDiaryService _diaryService = CatDiaryService();
   final ShareCardService _shareService = ShareCardService();
+  final UserDiaryService _userDiaryService = UserDiaryService();
   
   String? _selectedCatId;
   late List<Cat> _cats;
@@ -38,6 +41,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
   Bond? _currentBond;
   CatDiary? _currentDiary;
   Cat? _currentCat;
+  List<UserDiaryEntry> _userDiaryEntries = [];
   
   // Key for share card screenshot
   final GlobalKey _shareCardKey = GlobalKey();
@@ -51,6 +55,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
   Future<void> _loadCats() async {
     final prefs = await SharedPreferences.getInstance();
     await BondService().init(prefs);
+    await _userDiaryService.init(prefs);
     final catService = CatService(prefs);
     _cats = catService.getAllCats();
     if (mounted) {
@@ -87,11 +92,15 @@ class _DailyReportPageState extends State<DailyReportPage> {
         );
       }
       
+      // Load user diary entries
+      final userEntries = _userDiaryService.getByCatId(_selectedCatId!);
+      
       setState(() {
         _report = report;
         _currentBond = bond;
         _currentDiary = diary;
         _currentCat = cat;
+        _userDiaryEntries = userEntries;
       });
     }
   }
@@ -118,7 +127,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '今日貓咪報告',
+              '記錄',
               style: TextStyle(
                 color: Colors.black87,
                 fontSize: 18,
@@ -126,7 +135,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
               ),
             ),
             Text(
-              '🐱 了解你家貓咪的情緒',
+              '🐱 記錄你與貓咪的日常',
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: 12,
@@ -165,20 +174,28 @@ class _DailyReportPageState extends State<DailyReportPage> {
       ),
       body: _report == null
           ? const Center(child: CircularProgressIndicator(color: Colors.orange))
-          : _report!.isEmpty
-              ? _buildEmptyState()
-              : _buildReportContent(_report!),
+          : _buildReportContent(_report!),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAddDiaryDialog,
+        backgroundColor: KawaiiTheme.primaryPink,
+        icon: const Icon(Icons.edit, color: Colors.white),
+        label: const Text('寫日記', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
     );
   }
 
   /// 空狀態
   Widget _buildEmptyState() {
     final cat = _cats.firstWhere((c) => c.id == _selectedCatId);
-    
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ===== 使用者日記區塊（始終顯示）=====
+          _buildUserDiarySection(cat),
+          const SizedBox(height: 24),
+          // 其餘空狀態引導內容...
           const SizedBox(height: 40),
           // 裝飾圖
           Container(
@@ -197,7 +214,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           ),
           const SizedBox(height: 32),
           Text(
-            '今天還沒有 ${cat.name} 的紀錄',
+            '今天還沒有 ${cat.name} 的翻譯紀錄',
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -215,7 +232,6 @@ class _DailyReportPageState extends State<DailyReportPage> {
             ),
           ),
           const SizedBox(height: 32),
-          // 引導按鈕
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -284,6 +300,10 @@ class _DailyReportPageState extends State<DailyReportPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ===== 使用者日記區塊（始終顯示）=====
+          _buildUserDiarySection(cat),
+          const SizedBox(height: 16),
+
           // ===== 貓咪日記卡片（情感主角）=====
           _buildDiaryCard(diary),
           const SizedBox(height: 16),
