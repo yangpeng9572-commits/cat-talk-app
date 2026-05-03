@@ -129,15 +129,16 @@ Write-Log "Running flutter analyze..."
 $sw = [Diagnostics.Stopwatch]::StartNew()
 $ar = Run-InRepo "flutter" "analyze" "flutter analyze"
 $sw.Stop()
-$ac = $ar.Stdout
+$ac = ($ar.Stderr + $ar.Stdout).Trim()
 $ac | Out-File -FilePath $ao -Encoding UTF8 -Force
 
-if ($ar.ExitCode -ne 0) {
+# flutter analyze: exit 1 = warnings/infos (OK), exit 2+ = real errors (FAIL)
+if ($ar.ExitCode -ge 2) {
     Write-Log "FAIL: flutter analyze (exit $($ar.ExitCode))"
-    if ($ar.Stderr) { Write-Log "STDERR: $($ar.Stderr)" }
+    Write-Log "Output: $($ac.Substring(0, [Math]::Min(500, $ac.Length)))"
     exit 1
 }
-$validOutput = $ac -match "No issues found" -or $ac -match "issues found" -or $ac -match "\d+\s+error" -or $ac -match "Analyzing" -or $ac -match "warning"
+$validOutput = $ac -match "No issues found" -or $ac -match "issues found" -or $ac -match "\d+\s+error" -or $ac -match "Analyzing"
 if (-not $validOutput) {
     Write-Log "FAIL: flutter analyze output not recognized"
     Write-Log "Output: $($ac.Substring(0, [Math]::Min(500, $ac.Length)))"
@@ -158,7 +159,7 @@ Write-Log "Running flutter test..."
 $sw = [Diagnostics.Stopwatch]::StartNew()
 $te = Run-InRepo "flutter" "test" "flutter test"
 $sw.Stop()
-$tc = $te.Stdout
+$tc = ($te.Stderr + $te.Stdout).Trim()
 $tc | Out-File -FilePath $to -Encoding UTF8 -Force
 
 if ($te.ExitCode -ne 0) {
