@@ -32,9 +32,9 @@ class ShareCardWidget extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            KawaiiTheme.primaryPink.withOpacity(0.15),
+            KawaiiTheme.primaryPink.withValues(alpha: 0.15),
             KawaiiTheme.creamWhite,
-            KawaiiTheme.lavender.withOpacity(0.2),
+            KawaiiTheme.lavender.withValues(alpha: 0.2),
           ],
         ),
       ),
@@ -59,14 +59,14 @@ class ShareCardWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
               decoration: BoxDecoration(
-                color: KawaiiTheme.softPink.withOpacity(0.5),
+                color: KawaiiTheme.softPink.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(30),
               ),
               child: Text(
                 emotionSentence,
                 style: TextStyle(
                   fontSize: 38,
-                  color: KawaiiTheme.coral.withOpacity(0.8),
+                  color: KawaiiTheme.coral.withValues(alpha: 0.8),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -83,7 +83,7 @@ class ShareCardWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(40),
                     boxShadow: [
                       BoxShadow(
-                        color: KawaiiTheme.primaryPink.withOpacity(0.15),
+                        color: KawaiiTheme.primaryPink.withValues(alpha: 0.15),
                         blurRadius: 30,
                         offset: const Offset(0, 15),
                       ),
@@ -126,14 +126,14 @@ class ShareCardWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   decoration: BoxDecoration(
-                    color: KawaiiTheme.lavender.withOpacity(0.5),
+                    color: KawaiiTheme.lavender.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     bondLevel,
                     style: TextStyle(
                       fontSize: 32,
-                      color: KawaiiTheme.coral.withOpacity(0.8),
+                      color: KawaiiTheme.coral.withValues(alpha: 0.8),
                     ),
                   ),
                 ),
@@ -147,7 +147,7 @@ class ShareCardWidget extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: KawaiiTheme.primaryPink.withOpacity(0.3),
+                    color: KawaiiTheme.primaryPink.withValues(alpha: 0.3),
                     width: 2,
                   ),
                   borderRadius: BorderRadius.circular(30),
@@ -156,7 +156,7 @@ class ShareCardWidget extends StatelessWidget {
                   '來自 喵心語 Cat Talk',
                   style: TextStyle(
                     fontSize: 32,
-                    color: KawaiiTheme.primaryPink.withOpacity(0.7),
+                    color: KawaiiTheme.primaryPink.withValues(alpha: 0.7),
                     letterSpacing: 3,
                   ),
                 ),
@@ -170,7 +170,7 @@ class ShareCardWidget extends StatelessWidget {
                 '#CatTalk #CatDiary #MyCatIsCute',
                 style: TextStyle(
                   fontSize: 28,
-                  color: KawaiiTheme.primaryPink.withOpacity(0.5),
+                  color: KawaiiTheme.primaryPink.withValues(alpha: 0.5),
                   letterSpacing: 2,
                 ),
               ),
