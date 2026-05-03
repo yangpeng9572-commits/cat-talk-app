@@ -11,37 +11,36 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Result: PASS
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes
-- Last reviewed at: 2026-05-03 18:25 GMT+8
+- Last reviewed at: 2026-05-03 19:15 GMT+8
 
 ---
 
 ## Reviewed Tasks
 
-### 本輪驗收：OpenClaw 任務佇列同步
-- origin/main 已更新：`6f90028`（fast-forward from `2d5ec25`）
-- Pull 結果：fast-forward，無 conflict
-- 任務佇列：`.agent/task_queue.md` 已更新，共 33 個任務（P0-P4）
-- Status：**PASS**（無新 code commit，純文件同步）
-
-### 上輪任務：TOOL-1 Agent Monitor Dashboard
-- Commit: `e6011de`（5 個新檔案，tools/ 目錄）
-- Handoff: `7135977`
-- Type: Python Flask 工具（非 Flutter App）
+### 本輪驗收：P0-1 + P0-3（Windows Runner 執行）
+- Commit: `4db847c`
+- Task IDs: P0-1（刪除貓咪後卡住）+ P0-3（選擇貓咪點空白處可返回）
+- Files: `lib/screens/edit_cat_page.dart`, `lib/screens/home_page.dart`
 - Status: **PASS**
 
 **驗收結果：**
-- ✅ Flutter analyze：0 errors（201 issues）
+- ✅ Flutter analyze：0 errors（201 issues — 全部為 warnings/info）
 - ✅ Flutter test：264 passed
-- ✅ APK：90.9MB（已上傳 Google Drive）
+- ✅ Flutter build apk --release：SUCCESS（90.9MB）
 - ✅ git status：CLEAN
 
-**工具本身（Flask Dashboard）：**
-- ✅ py_compile：PASS
-- ✅ /api/status：正確 JSON 回應
-- ✅ Dashboard：http://127.0.0.1:8787/ 可渲染
-- ✅ 8 種 CSS 角色動畫
-- ✅ 每 5 秒自動刷新（fetch API）
-- ✅ 響應式手機版
+**變更摘要：**
+- P0-1：編輯/刪除後重新載入 _cats，selectedCat 被刪除時自動切換至第一個
+- P0-3：Bottom sheet `isDismissible=true`、`enableDrag=true`，可點外圍或下滑關閉
+
+### 上輪驗收：任務佇列同步
+- Commit range: `fc1a0d6`（同步）
+- Status: **PASS**（純文件同步，無 code 變更）
+
+### 上上輪驗收：TOOL-1 Agent Monitor Dashboard
+- Commit: `e6011de`
+- Type: Python Flask 工具（非 Flutter App）
+- Status: **PASS**
 
 ---
 
@@ -49,17 +48,17 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 | Task | Commit | Status | Date |
 |------|--------|--------|------|
+| P0-1+P0-3 | `4db847c` | PASS | 2026-05-03 |
 | P3-1 Batch 1-4 | multiple | PASS | 2026-05-03 |
 | P3-2 | `ea846dd` | PASS | 2026-05-03 |
 | P2-1 | `cee79b2` | PASS | 2026-05-03 |
 | P2-4 | `73e1aa1` | PASS | 2026-05-03 |
-| P2-5 | `0373aba` | PASS（已合併） | 2026-05-03 |
+| P2-5 | `0373aba` | PASS | 2026-05-03 |
 | TOOL-1 Dashboard | `e6011de` | PASS | 2026-05-03 |
 
 ---
 
 ## Notes
 
-- OpenClaw task_queue.md 已更新 33 個任務（P0-P4），建議下一個任務：P0-1（刪除貓咪後卡住問題）
 - P0 系列需手機實測（CLI 無法驗證真實 UX bug）
-- 所有已驗收任務保持 PASS 狀態
+- OpenClaw 下一個建議任務：P0-4（選擇貓咪 bottom sheet 可滑動，commit `bce2395`，已在 WAITING_FOR_HERMES 狀態）
