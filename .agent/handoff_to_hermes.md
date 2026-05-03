@@ -7,72 +7,66 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-03 21:30:10
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw
+- Last updated at: 2026-05-03 21:35 UTC
 
 ---
 
-## P1-1：貓咪動作庫移到姿勢拍照內
+## P0-5：完成提示改到上方
 
 ### 任務 ID
-- Task ID: P1-1
-- Task name: 貓咪動作庫移到姿勢拍照裡
+- Task ID: P0-5
+- Task name: 完成提示改到上方
 
 ### 完成的修改
 
-- **Commit:** `1b078f6`
+- **Commit:** `68a18bd`
 - **Branch:** main
 
 ### 修改內容
 
-**home_page.dart:**
-- 移除 `_buildPoseButton()` 方法（本體 93 行 + `_buildRecordButton()` 4 行）
-- 簡化 `_buildMainButton()` 回傳 `SizedBox.shrink()`（避免破壞相依）
+**home_page.dart (debug panel):**
+- 將 `_resetOnboarding` 按鈕中的 `ScaffoldMessenger.of(context).showSnackBar(SnackBar(...))` 替換為 `TopToast.info(context, message: '已重置新手教學，請重啟App 🐾')`
+- 說明：這是全 App 最後一個 `ScaffoldMessenger.showSnackBar` call site，替換完成後，全 App 所有完成/成功提示都已统一使用 TopToast（顯示於上方）
 
-**cat_pose_camera_page.dart:**
-- 新增 `import 'pose_recognition_page.dart'`
-- 在「開始拍照」按鈕下方新增 `TextButton.icon`：「看動作庫當參考」
-- 點選後進入 `PoseRecognitionPage`（貓咪動作庫）
-
-**變更統計：2 個檔案，+19 行，-96 行（淨減少 77 行）**
+**變更統計：** 1 個檔案，+1 行，-3 行（淨減少 2 行）
 
 ### 修改檔案
 
 - `lib/screens/home_page.dart`
-- `lib/screens/cat_pose_camera_page.dart`
 
 ### 驗收要求
 
-- flutter analyze: 0 errors
+- flutter analyze: 0 errors（home_page.dart 無新增 error）
 - flutter test: 264 tests passed
 - 驗收方式：
-  1. 確認首頁不再有大型「🐱 貓咪動作庫」按鈕
-  2. 進入住咪姿勢拍照頁，確認有「看動作庫當參考」按鈕
-  3. 點選「看動作庫當參考」，確認可正常進入動作庫頁面
-  4. 動作庫功能正常（可瀏覽姿勢分類、搜尋、查看姿勢詳情）
+  1. 進入住頁 debug panel，點擊「重置新手教學」按鈕
+  2. 確認提示顯示在**畫面上方**（不受底部導覽列遮擋）
+  3. 確認提示樣式與其他 TopToast 一致（粉色背景、白字）
+  4. 確認 2 秒後自動消失
 
 ### Required Hermes Actions
 
 1. `git pull --ff-only`
-2. `flutter analyze`
-3. `flutter test`
+2. `flutter analyze lib/screens/home_page.dart`（確認無新 error）
+3. `flutter test`（確認全部通過）
 4. `flutter build apk --release`（必要時）
 5. 更新 `.agent/hermes_review.md` 為 PASS 或 FAIL
 6. 若 PASS，更新本檔案為 IDLE 並 push
 
 ---
 
-## 上輪完成：P0-5 Cleanup（小整理）
+## 上輪完成：P1-1（貓咪動作庫移到姿勢拍照內）
 
-- **Commit:** `140a639`
-- **內容：** 移除 `home_page.dart` 中已無效的 `_showSnackBar` 方法（20行 dead code）
+- **Commit:** `1b078f6`
+- **內容：** 首頁移除大型動作庫按鈕，姿勢拍照頁新增「看動作庫當參考」入口
 
 ---
 
 ## Notes
 
-- P1-1 為 P1 首批任務之首，請優先驗收
-- 動作庫入口從首頁雙按鈕移至姿勢拍照流程內，功能不變
-- 下一個建議任務：P1-2（移除首頁「今日還沒聽牠說話」）
+- P0-5 為 P0 系列倒數第二個任務（僅剩 P0-2 未完成，P0-2 需要 Hermes 手機實測）
+- 全 App 已無 `ScaffoldMessenger.showSnackBar` 用於成功/完成提示，全部統一為 TopToast
+- 下一個建議任務：P0-2（第 5 隻以上貓咪無法滑動，需 Hermes 手機實測確認）
