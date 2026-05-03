@@ -260,6 +260,13 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     // 自動選擇第一隻貓
     if (_cats.isNotEmpty && selectedCat == null) {
       selectedCat = _cats.first;
+    } else if (selectedCat != null) {
+      // 同步 selectedCat 為最新資料（包含頭像更新）
+      final updated = _cats.firstWhere(
+        (c) => c.id == selectedCat!.id,
+        orElse: () => _cats.first,
+      );
+      selectedCat = updated;
     }
   }
 
