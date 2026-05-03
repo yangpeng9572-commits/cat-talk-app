@@ -62,7 +62,7 @@ if ($r.ExitCode -ne 0) {
     exit 1
 }
 $flutterOut = $r.Stdout.Trim()
-$flutterPaths = ($flutterOut -split "`r`n") | Where-Object { $_ -match "flutter\.exe" } | ForEach-Object { $_.Trim() }
+$flutterPaths = ($flutterOut -split "`r`n") | Where-Object { $_ -match "flutter" } | ForEach-Object { $_.Trim() }
 if (-not $flutterPaths) {
     Write-Log "FAIL: Flutter not found in Windows PATH"
     Write-Log "where flutter output: $flutterOut"
