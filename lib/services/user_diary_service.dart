@@ -3,9 +3,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_diary_entry.dart';
 
 /// 使用者日記服務
-/// 
+///
 /// 使用 SharedPreferences 持久化儲存使用者撰寫的貓咪生活日記
-/// 第一階段：純文字記錄，日期 + 貓咪名稱 + 內容
+/// - 第一階段（v1）：純文字記錄，日期 + 貓咪名稱 + 內容
+/// - 第二階段（P3-4）：加入照片儲存（從 image_picker 取得路徑）
 class UserDiaryService {
   static final UserDiaryService _instance = UserDiaryService._internal();
   factory UserDiaryService() => _instance;
@@ -49,12 +50,13 @@ class UserDiaryService {
         e.date.day == date.day).toList();
   }
 
-  /// 新增日記
+  /// 新增日記（支援 P3-4 照片）
   Future<void> addEntry({
     required String catId,
     required String catName,
     required DateTime date,
     required String content,
+    String? photoPath, // P3-4: 可選照片路徑
   }) async {
     if (_prefs == null) return;
     final entry = UserDiaryEntry(
@@ -63,6 +65,7 @@ class UserDiaryService {
       catName: catName,
       date: date,
       content: content,
+      photoPath: photoPath, // P3-4: 照片路徑
       createdAt: DateTime.now(),
     );
     final all = getAll();

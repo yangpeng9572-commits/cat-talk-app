@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart'; // P3-4: 照片功能
+import 'dart:io'; // P3-4: 照片檔案路徑
 import '../models/translation_result.dart';
 import '../models/cat.dart';
 import '../models/user_diary_entry.dart';
@@ -32,6 +34,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
   final UserDiaryService _diaryService = UserDiaryService();
   late CatService _catService;
   late TabController _tabController;
+  final ImagePicker _imagePicker = ImagePicker(); // P3-4: 照片選擇器
 
   // 貓咪資料快取
   Map<String, Cat> _catsMap = {};
@@ -523,6 +526,32 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
               ],
             ),
 
+            // P3-4: 照片顯示
+            if (entry.photoPath != null && entry.photoPath!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  File(entry.photoPath!),
+                  width: double.infinity,
+                  height: 180,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: double.infinity,
+                      height: 180,
+                      color: KawaiiTheme.softPink.withValues(alpha: 0.3),
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        color: KawaiiTheme.textSecondary,
+                        size: 48,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+
             const SizedBox(height: 16),
 
             // 日記內容
@@ -539,7 +568,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
     );
   }
 
-  /// 新增日記對話框
+  /// 新增日記對話框（P3-4: 支援照片）
   Future<void> _showAddDiaryDialog() async {
     final cats = _catService.getAllCats();
     if (cats.isEmpty) {
@@ -550,6 +579,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
     final selectedCat = cats.first;
     final controller = TextEditingController();
     DateTime selectedDate = DateTime.now();
+    String? selectedPhotoPath; // P3-4: 選中的照片路徑
 
     await showModalBottomSheet(
       context: context,
@@ -565,169 +595,287 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 標題列
-                  Row(
-                    children: [
-                      const Text(
-                        '寫日記',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 標題列
+                    Row(
+                      children: [
+                        const Text(
+                          '寫日記',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 選擇貓咪
+                    const Text(
+                      '選擇貓咪',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: KawaiiTheme.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: cats.map((cat) {
+                        final isSelected = cat.id == selectedCat.id;
+                        return ChoiceChip(
+                          label: Text(cat.name),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setSheetState(() {});
+                            }
+                          },
+                          selectedColor: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
+                          labelStyle: TextStyle(
+                            color: isSelected ? KawaiiTheme.primaryPink : KawaiiTheme.textPrimary,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 選擇日期
+                    const Text(
+                      '日期',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: KawaiiTheme.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                        );
+                        if (date != null) {
+                          setSheetState(() => selectedDate = date);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: KawaiiTheme.divider),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.calendar_today, size: 18),
+                            const SizedBox(width: 8),
+                            Text(_formatDate(selectedDate)),
+                          ],
                         ),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 選擇貓咪
-                  const Text(
-                    '選擇貓咪',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: KawaiiTheme.textSecondary,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: cats.map((cat) {
-                      final isSelected = cat.id == selectedCat.id;
-                      return ChoiceChip(
-                        label: Text(cat.name),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setSheetState(() {});
-                          }
-                        },
-                        selectedColor: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
-                        labelStyle: TextStyle(
-                          color: isSelected ? KawaiiTheme.primaryPink : KawaiiTheme.textPrimary,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  // 選擇日期
-                  const Text(
-                    '日期',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: KawaiiTheme.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  InkWell(
-                    onTap: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: selectedDate,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime.now(),
-                      );
-                      if (date != null) {
-                        setSheetState(() => selectedDate = date);
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: KawaiiTheme.divider),
-                        borderRadius: BorderRadius.circular(8),
+                    // P3-4: 照片選擇
+                    const Text(
+                      '照片（選填）',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: KawaiiTheme.textSecondary,
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                    ),
+                    const SizedBox(height: 8),
+                    if (selectedPhotoPath != null && selectedPhotoPath!.isNotEmpty)
+                      Stack(
                         children: [
-                          const Icon(Icons.calendar_today, size: 18),
-                          const SizedBox(width: 8),
-                          Text(_formatDate(selectedDate)),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.file(
+                              File(selectedPhotoPath!),
+                              width: double.infinity,
+                              height: 160,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: GestureDetector(
+                              onTap: () => setSheetState(() => selectedPhotoPath = null),
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  size: 18,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Row(
+                        children: [
+                          _buildPhotoButton(
+                            icon: Icons.camera_alt,
+                            label: '拍照',
+                            onTap: () async {
+                              final photo = await _imagePicker.pickImage(
+                                source: ImageSource.camera,
+                                maxWidth: 1024,
+                                maxHeight: 1024,
+                                imageQuality: 85,
+                              );
+                              if (photo != null) {
+                                setSheetState(() => selectedPhotoPath = photo.path);
+                              }
+                            },
+                          ),
+                          const SizedBox(width: 12),
+                          _buildPhotoButton(
+                            icon: Icons.photo_library,
+                            label: '相簿',
+                            onTap: () async {
+                              final photo = await _imagePicker.pickImage(
+                                source: ImageSource.gallery,
+                                maxWidth: 1024,
+                                maxHeight: 1024,
+                                imageQuality: 85,
+                              );
+                              if (photo != null) {
+                                setSheetState(() => selectedPhotoPath = photo.path);
+                              }
+                            },
+                          ),
                         ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  // 日記內容輸入
-                  const Text(
-                    '內容',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: KawaiiTheme.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: controller,
-                    maxLines: 5,
-                    decoration: InputDecoration(
-                      hintText: '記錄今天和貓咪的特別時光...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: KawaiiTheme.divider),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: KawaiiTheme.primaryPink, width: 2),
+                    // 日記內容輸入
+                    const Text(
+                      '內容',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: KawaiiTheme.textSecondary,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // 儲存按鈕
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final content = controller.text.trim();
-                        if (content.isEmpty) {
-                          TopToast.warning(context, message: '請輸入內容');
-                          return;
-                        }
-                        await _diaryService.addEntry(
-                          catId: selectedCat.id,
-                          catName: selectedCat.name,
-                          date: selectedDate,
-                          content: content,
-                        );
-                        if (!mounted) return;
-                        Navigator.pop(context);
-                        setState(() {});
-                        TopToast.success(context, message: '已儲存日記 🐱');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: KawaiiTheme.primaryPink,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: controller,
+                      maxLines: 5,
+                      decoration: InputDecoration(
+                        hintText: '記錄今天和貓咪的特別時光...',
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: KawaiiTheme.divider),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: KawaiiTheme.primaryPink, width: 2),
                         ),
                       ),
-                      child: const Text(
-                        '儲存',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // 儲存按鈕
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final content = controller.text.trim();
+                          if (content.isEmpty) {
+                            TopToast.warning(context, message: '請輸入內容');
+                            return;
+                          }
+                          await _diaryService.addEntry(
+                            catId: selectedCat.id,
+                            catName: selectedCat.name,
+                            date: selectedDate,
+                            content: content,
+                            photoPath: selectedPhotoPath, // P3-4: 照片路徑
+                          );
+                          if (!mounted) return;
+                          Navigator.pop(context);
+                          setState(() {});
+                          TopToast.success(context, message: '已儲存日記 🐱');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: KawaiiTheme.primaryPink,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          '儲存',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  /// P3-4: 照片按鈕Widget
+  Widget _buildPhotoButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: KawaiiTheme.softPink.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: KawaiiTheme.primaryPink.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: KawaiiTheme.primaryPink, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                color: KawaiiTheme.primaryPink,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

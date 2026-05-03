@@ -1,14 +1,17 @@
 import 'dart:convert';
 
 /// 使用者日記 Entry Model
-/// 
-/// 用於儲存使用者自行記錄的貓咪生活日記（第一階段：純文字）
+///
+/// 用於儲存使用者自行記錄的貓咪生活日記
+/// - 第一階段（v1）：純文字
+/// - 第二階段（P3-4）：加入照片
 class UserDiaryEntry {
   final String id;
   final String catId;
   final String catName;
   final DateTime date;
   final String content;
+  final String? photoPath; // P3-4: 照片路徑（可為 null）
   final DateTime createdAt;
 
   UserDiaryEntry({
@@ -17,6 +20,7 @@ class UserDiaryEntry {
     required this.catName,
     required this.date,
     required this.content,
+    this.photoPath, // P3-4: 照片路徑（可為 null）
     required this.createdAt,
   });
 
@@ -27,6 +31,7 @@ class UserDiaryEntry {
       'catName': catName,
       'date': date.toIso8601String(),
       'content': content,
+      'photoPath': photoPath, // P3-4: 照片路徑
       'createdAt': createdAt.toIso8601String(),
     };
   }
@@ -38,6 +43,7 @@ class UserDiaryEntry {
       catName: json['catName'] as String,
       date: DateTime.parse(json['date'] as String),
       content: json['content'] as String,
+      photoPath: json['photoPath'] as String?, // P3-4: 照片路徑
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
   }
