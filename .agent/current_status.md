@@ -71,9 +71,10 @@ OpenClaw 不直接修改 Windows repo。
 
 ## 是否允許 OpenClaw 開新任務
 
-- 目前無明确新任務可執行
-- 所有已知開發任務已完成
-- 等待 Hermes 回歸結果 或 Andy 下達新任務
+- P0-1 + P0-3 已由 Hermes 驗收 PASS
+- handoff 已重置為 IDLE
+- 下一個候選任務：P0-4（全 App 滑動問題）或 P0-5（提示改上方）
+- 等待 Andy 確認方向
 
 ---
 
