@@ -174,6 +174,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _debugEntryDetector = DebugEntryDetector(
       onTriggered: () {
         debugPrint('[Debug] Debug 驗收工具已觸發');
+        if (!mounted) return;
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => const DebugVerificationScreen(),
@@ -1673,7 +1674,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   Text(
-                    '🐱 貓咪姿勢拍照',
+                    '看看牠的姿勢',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
@@ -1682,7 +1683,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    '拍下主子的姿勢，之後可以用來分析狀態',
+                    '拍一張照片，觀察牠現在的狀態線索',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.white70,

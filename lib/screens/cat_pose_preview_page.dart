@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -56,7 +55,7 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          '📸 照片預覽',
+          '✅ 確認照片',
           style: TextStyle(
             color: KawaiiTheme.textPrimary,
             fontWeight: FontWeight.bold,
@@ -218,60 +217,14 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
     setState(() => _isProcessing = true);
 
     try {
-      // P2-3 MVP: 姿勢照片品質檢查（解析實際圖片尺寸）
-      final file = File(widget.imagePath);
-      int? imgWidth;
-      int? imgHeight;
-      List<int>? bytes;
-
-      if (file.existsSync()) {
-        bytes = await file.readAsBytes();
-      }
-
-      // 解析 PNG / JPEG 圖片尺寸（header-only，不載入完整圖片）
-      if (bytes != null && bytes.length > 24) {
-        try {
-          // PNG: signature + IHDR chunk (width at offset 16, height at offset 20, big-endian)
-          if (bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47) {
-            imgWidth  = (bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19];
-            imgHeight = (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
-          }
-          // JPEG: scan for SOF0/SOF1/SOF2 (FF C0 / FF C2 / FF C3)
-          else if (bytes[0] == 0xFF && bytes[1] == 0xD8) {
-            int offset = 2;
-            while (offset < bytes.length - 8) {
-              if (bytes[offset] == 0xFF &&
-                  bytes[offset + 1] >= 0xC0 && bytes[offset + 1] <= 0xCF &&
-                  bytes[offset + 1] != 0xC4 && bytes[offset + 1] != 0xC8 &&
-                  bytes[offset + 1] != 0xCC) {
-                imgHeight = (bytes[offset + 5] << 8) | bytes[offset + 6];
-                imgWidth  = (bytes[offset + 7] << 8) | bytes[offset + 8];
-                break;
-              }
-              final len = (bytes[offset + 2] << 8) | bytes[offset + 3];
-              offset += 2 + len;
-            }
-          }
-        } catch (_) {}
-      }
-
+      // 單純儲存照片，不做任何 AI 或品質檢查（P2-2A MVP）
       final result = await _photoService.savePosePhotoPath(widget.imagePath);
 
       if (!mounted) return;
 
       if (result != null) {
         _taskService.updateTaskProgress(TaskType.pose_photo);
-        // P2-3: 根據實際圖片解析度給予不同提示
-        final int minDim = [imgWidth, imgHeight].whereType<int>().fold(0, (a, b) => a == 0 ? b : (a < b ? a : b));
-        String qualityMsg;
-        if (minDim > 0 && minDim < 640) {
-          qualityMsg = '已保存（解析度偏低，建議光線充足） 🐾';
-        } else if (minDim >= 1280) {
-          qualityMsg = '已保存高畫質照片 🐾';
-        } else {
-          qualityMsg = '已保存照片，之後可用於姿勢辨識 🐾';
-        }
-        TopToastService.success(context, message: qualityMsg);
+        TopToastService.success(context, message: '照片已準備好，之後會用於姿勢觀察 🐾');
         Navigator.pop(context);
       } else {
         TopToastService.error(context, message: '照片儲存失敗，請再試一次');
