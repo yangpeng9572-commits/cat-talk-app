@@ -7,21 +7,21 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: WAITING_FOR_HERMES
-- Waiting for Hermes: YES
-- Last updated by: OpenClaw Auto Development
-- Last updated at: 2026-05-04 10:12 AM (Asia/Taipei)
+- Status: IDLE
+- Waiting for Hermes: NO
+- Last updated by: Hermes Auto Review (WSL2)
+- Last updated at: 2026-05-04 10:16 AM (Asia/Taipei)
 
 ---
 
-## Pending Review: P3-7（全 App 空狀態統一）
+## 上輪待驗收：P3-7（全 App 空狀態統一）— 已轉 Windows Runner
 
 ### 任務 ID
 - Task ID: P3-7
 - Task name: 全 App 空狀態統一
 
 ### Commit
-- Commit: `cdedea1`
+- Commit: `cdedea1`（包含於 `4cd847c`）
 - Branch: main
 - 完成時間：2026-05-04 08:40 AM (Asia/Taipei)
 
@@ -38,22 +38,13 @@ Hermes 每次驗收前應先讀取本檔案。
 - `lib/screens/daily_report_page.dart`
 - `lib/screens/history_page.dart`
 
-### Required Hermes Actions
+### 驗收狀態
 
-請在 Windows Runner 執行：
-1. `git pull --ff-only`
-2. `flutter pub get`
-3. `flutter analyze`
-4. `flutter test`
-5. 驗證：
-   - 進入「記錄」頁（daily_report_page），確認空狀態文字已更新為「今天還沒有和 XXX 的互動記錄」
-   - 進入「歷史」頁（history_page），滑到翻譯 tab，確認空狀態文字已更新
-
-### 上輪 FAIL 說明
-- 上輪 FAIL 原因：Hermes 在 WSL2 無法執行 Flutter validate（環境限制）
-- 本輪等待 Hermes（Windows Runner）執行完整驗收
-- 代碼本身無錯誤，純文案修改
+- **狀態：** FAIL（環境限制）
+- **原因：** WSL2 無 Flutter SDK，無法執行 `flutter analyze` / `flutter test` / `flutter build apk --release`
+- **建議：** 請 Hermes 在 `C:\Users\a0938\cat_talk_proper`（Windows Runner）執行完整驗收流程
+- **hermes_review.md 已有記錄：** `Result: FAIL — WSL2 無 Flutter，需 Windows Runner`
 
 ---
 
-_Last updated: 2026-05-04 10:12 AM (Asia/Taipei)_
+_Last updated: 2026-05-04 10:16 AM (Asia/Taipei)_
