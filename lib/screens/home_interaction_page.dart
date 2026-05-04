@@ -197,6 +197,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
     // +bond（每天最多 +3）
     if (isCorrect) {
       await BondService().addBond(widget.cat.id, BondService.eventActionTap);
+      if (!mounted) return;
     }
 
     await _saveTodayStats();
@@ -253,6 +254,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
     }
 
     final bond = await BondService().getBond(widget.cat.id);
+    if (!mounted) return;
     final bondScore = bond.bondScore;
 
     final score = bondScore + _todayInteractions * 3 + _correctInteractions * 5;
@@ -293,6 +295,8 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
     _textController.clear();
 
     await _speechService.speakText(text);
+    if (!mounted) return;
+    setState(() => _showTextToMeow = false);
   }
 
   void _closeTextToMeow() {
