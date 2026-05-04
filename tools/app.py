@@ -127,6 +127,76 @@ def get_cron_runs(limit: int = 10) -> list:
     return {"raw": output}
 
 
+def parse_task_queue() -> dict:
+    """Parse task_queue.md for task stats."""
+    content = read_file(f"{REPO_PATH}/.agent/task_queue.md")
+    lines = content.split('\n')
+
+    tasks = []
+    current_section = ""
+    in_task = False
+    current_task = {}
+
+    for line in lines:
+        line = line.strip()
+        # Section headers
+        if line.startswith('### ') and not line.startswith('### P') and not line.startswith('### 目前'):
+            current_section = line.replace('### ', '').strip()
+        # Task lines: | Px-x | ✅/TODO | ... |
+        if line.startswith('| P') or line.startswith('| TOOL'):
+            parts = [p.strip() for p in line.split('|')]
+            if len(parts) >= 3:
+                task_id = parts[1].replace('TOOL', 'TOOL')
+                status_raw = parts[2].strip()
+                # Normalize status
+                if '✅' in status_raw or 'DONE' in status_raw or 'PASS' in status_raw:
+                    status = 'done'
+                elif 'WIP' in status_raw or 'IN PROGRESS' in status_raw:
+                    status = 'wip'
+                elif 'BLOCKED' in status_raw:
+                    status = 'blocked'
+                else:
+                    status = 'todo'
+                notes = parts[3].strip() if len(parts) > 3 else ''
+                tasks.append({
+                    'id': task_id,
+                    'status': status,
+                    'notes': notes,
+                    'section': current_section,
+                })
+
+    total = len(tasks)
+    done = sum(1 for t in tasks if t['status'] == 'done')
+    todo = sum(1 for t in tasks if t['status'] == 'todo')
+    wip = sum(1 for t in tasks if t['status'] == 'wip')
+    blocked = sum(1 for t in tasks if t['status'] == 'blocked')
+
+    # Next pending task (highest priority todo)
+    next_task = next((t for t in tasks if t['status'] == 'todo'), None)
+
+    return {
+        'total': total,
+        'done': done,
+        'todo': todo,
+        'wip': wip,
+        'blocked': blocked,
+        'pass_rate': round(done / total * 100, 1) if total > 0 else 0,
+        'next_task': next_task,
+        'tasks': tasks,
+    }
+
+
+def get_next_cron_run() -> dict:
+    """Get next scheduled cron run (read-only)."""
+    output = run_cmd("openclaw cron list")
+    next_line = ""
+    for line in output.split('\n'):
+        if 'next' in line.lower() or 'scheduled' in line.lower() or ('/' in line and ':' in line):
+            next_line = line.strip()
+            break
+    return {'raw': output, 'next_line': next_line}
+
+
 def determine_decision(handoff: dict, review: dict) -> dict:
     """Determine if OpenClaw can continue."""
     handoff_status = handoff.get("status", "UNKNOWN")
@@ -188,6 +258,8 @@ def status():
     recent_commits = get_recent_commits()
     cron_list = get_cron_list()
     cron_runs = get_cron_runs()
+    task_queue = parse_task_queue()
+    next_cron = get_next_cron_run()
     decision = determine_decision(handoff, review)
 
     return jsonify({
@@ -210,9 +282,21 @@ def status():
         "latest_review_task": review["task_name"],
         "latest_review_task_id": review["task_id"],
 
+        # Task Queue
+        "task_queue": {
+            "total": task_queue["total"],
+            "done": task_queue["done"],
+            "todo": task_queue["todo"],
+            "wip": task_queue["wip"],
+            "blocked": task_queue["blocked"],
+            "pass_rate": task_queue["pass_rate"],
+            "next_task": task_queue["next_task"],
+        },
+
         # Cron
         "openclaw_cron_raw": cron_list["raw"],
         "recent_cron_runs_raw": cron_runs["raw"],
+        "next_cron_line": next_cron["next_line"],
 
         # Decision
         "can_openclaw_continue": decision["can_continue"],

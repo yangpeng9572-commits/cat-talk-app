@@ -191,6 +191,50 @@ body {
   margin-top: 8px;
 }
 
+/* Stats Row */
+.stats-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  width: 100%;
+}
+
+.stat-badge {
+  flex: 1;
+  background: var(--bg-primary);
+  border-radius: 10px;
+  padding: 6px 4px;
+  text-align: center;
+}
+
+.stat-num {
+  font-size: 1.2rem;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-done .stat-num { color: var(--accent-green); }
+.stat-pending .stat-num { color: var(--accent-yellow); }
+.stat-rate .stat-num { color: var(--accent-blue); }
+
+/* Next Cron */
+.next-cron {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  width: 100%;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Activity Section */
 .activity-section {
   background: var(--bg-card);
@@ -246,6 +290,63 @@ body {
   font-size: 0.75rem;
   color: var(--text-secondary);
 }
+
+/* Task Queue Section */
+.task-queue-section {
+  background: var(--bg-card);
+  border-radius: var(--border-radius);
+  padding: var(--card-padding);
+  margin-top: 16px;
+}
+
+.next-task-card {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border-left: 4px solid var(--accent-yellow);
+}
+
+.next-task-id {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--accent-yellow);
+  margin-bottom: 4px;
+}
+
+.next-task-section {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.next-task-notes {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+}
+
+/* Task Summary Pills */
+.task-summary-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.task-pill {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: bold;
+}
+
+.task-pill span {
+  font-size: 0.9rem;
+}
+
+.pill-done { background: rgba(105, 240, 174, 0.2); color: var(--accent-green); }
+.pill-todo { background: rgba(255, 213, 79, 0.2); color: var(--accent-yellow); }
+.pill-wip { background: rgba(79, 195, 247, 0.2); color: var(--accent-blue); }
+.pill-blocked { background: rgba(255, 82, 82, 0.2); color: var(--accent-red); }
 
 /* ========== OPENCLAW ANIMATIONS ========== */
 

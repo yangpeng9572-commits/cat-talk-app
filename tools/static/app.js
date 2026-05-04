@@ -220,6 +220,39 @@ function renderFooter(data) {
   setText('current-time', '⏰ ' + (data.current_time ? formatTime(data.current_time) : '—'));
 }
 
+function renderStats(data) {
+  const tq = data.task_queue || {};
+  setText('stat-done-num', tq.done ?? '—');
+  setText('stat-pending-num', tq.todo ?? '—');
+  setText('stat-rate-num', (tq.pass_rate != null ? tq.pass_rate + '%' : '—'));
+
+  // Next cron
+  const nextCron = data.next_cron_line || '—';
+  setText('next-cron', '⏰ ' + (nextCron.length > 40 ? nextCron.substring(0, 40) + '…' : nextCron));
+}
+
+function renderTaskQueue(data) {
+  const tq = data.task_queue || {};
+
+  // Next task card
+  const next = tq.next_task;
+  if (next) {
+    setText('next-task-id', next.id || '—');
+    setText('next-task-section', next.section || '—');
+    setText('next-task-notes', next.notes || '—');
+  } else {
+    setText('next-task-id', '✅');
+    setText('next-task-section', 'All clear!');
+    setText('next-task-notes', 'No pending tasks');
+  }
+
+  // Task summary pills
+  setText('pill-done-num', tq.done ?? 0);
+  setText('pill-todo-num', tq.todo ?? 0);
+  setText('pill-wip-num', tq.wip ?? 0);
+  setText('pill-blocked-num', tq.blocked ?? 0);
+}
+
 // ============================================================
 // Main fetch & render
 // ============================================================
@@ -240,6 +273,8 @@ async function fetchStatus() {
     renderRecentCommits(data);
     renderCronRuns(data);
     renderGitStatus(data);
+    renderStats(data);
+    renderTaskQueue(data);
     renderFooter(data);
 
     // Show connection error banner if it was shown

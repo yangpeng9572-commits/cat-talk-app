@@ -50,6 +50,22 @@
             <span class="info-val" id="can-continue">—</span>
           </div>
         </div>
+        <!-- Stats Row -->
+        <div class="stats-row" id="stats-row">
+          <div class="stat-badge stat-done" id="stat-done">
+            <div class="stat-num" id="stat-done-num">—</div>
+            <div class="stat-label">完成</div>
+          </div>
+          <div class="stat-badge stat-pending" id="stat-pending">
+            <div class="stat-num" id="stat-pending-num">—</div>
+            <div class="stat-label">待做</div>
+          </div>
+          <div class="stat-badge stat-rate" id="stat-rate">
+            <div class="stat-num" id="stat-rate-num">—</div>
+            <div class="stat-label">達成率</div>
+          </div>
+        </div>
+        <div class="next-cron" id="next-cron">⏰ —</div>
         <div class="latest-commit" id="latest-commit">—</div>
       </div>
 
@@ -88,6 +104,22 @@
             <div class="log-line">—</div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Task Queue Section -->
+    <div class="task-queue-section" id="task-queue-section">
+      <div class="section-title">📊 Task Queue — Next Up</div>
+      <div class="next-task-card" id="next-task-card">
+        <div class="next-task-id" id="next-task-id">—</div>
+        <div class="next-task-section" id="next-task-section">—</div>
+        <div class="next-task-notes" id="next-task-notes">—</div>
+      </div>
+      <div class="task-summary-bar" id="task-summary-bar">
+        <div class="task-pill pill-done" id="pill-done">完成 <span id="pill-done-num">0</span></div>
+        <div class="task-pill pill-todo" id="pill-todo">待做 <span id="pill-todo-num">0</span></div>
+        <div class="task-pill pill-wip" id="pill-wip">進行中 <span id="pill-wip-num">0</span></div>
+        <div class="task-pill pill-blocked" id="pill-blocked">受阻 <span id="pill-blocked-num">0</span></div>
       </div>
     </div>
 
