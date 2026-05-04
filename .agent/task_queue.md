@@ -377,8 +377,8 @@ OpenClaw 每輪回報必須包含：
 | P2-7 | TODO | 人話轉喵聲MVP |
 | P3-1 | ✅ PASS | 她的小世界室內示意圖（Hermes 2026-05-03）|
 | P3-2 | ✅ PASS | 小世界家具/配件內容（Hermes 2026-05-03）|
-| P3-3 | TODO | 夏日窗邊活動升級 |
-| P3-4 ~ P3-9 | TODO | 生活日記完整化/穩定性 |
+| P3-3 | ✅ DONE (commit 710bd1b) | 夏日窗邊頭像顯示（Hermes via P3-7 review window）|
+| P3-6 | ✅ DONE (commit 867369c) | 情緒報告頁貓咪頭像顯示（WAITING Hermes）|
 | P4-1 | TODO | Agent Monitor第二階段 |
 | P4-2 | TODO | 任務狀態檔整理 |
 
