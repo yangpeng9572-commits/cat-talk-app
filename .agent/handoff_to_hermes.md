@@ -9,8 +9,8 @@ Hermes 每次驗收前應先讀取本檔案。
 
 - Status: IDLE
 - Waiting for Hermes: NO
-- Last updated by: Hermes Auto Review (WSL2)
-- Last updated at: 2026-05-04 10:16 AM (Asia/Taipei)
+- Last updated by: Hermes (validation complete — P3-7 PASS)
+- Last updated at: 2026-05-04 10:20 AM (Asia/Taipei)
 
 ---
 
