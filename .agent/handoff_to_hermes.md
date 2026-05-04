@@ -7,51 +7,49 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes (validation complete)
-- Last updated at: 2026-05-04 08:38:30
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw Auto Development
+- Last updated at: 2026-05-04 08:40 AM (Asia/Taipei)
 
 ---
 
-## P1-3-test-fix：修正 task_companion_service_test.dart 測試期望值
+## 本輪任務：P3-7（全 App 空狀態統一）
 
 ### 任務 ID
-- Task ID: P1-3-test-fix
-- Task name: Fix task_companion_service_test.dart expectation mismatch
+- Task ID: P3-7
+- Task name: 全 App 空狀態統一
 
-### 問題根因
-commit `3ff62fc`（fix: remove '（待調整）' markers）移除了 service 中的 `（待調整）` 後綴，但 test expectations 仍保留 `（待調整）`，導致 2 個測試失敗。
+### 完成的修改
 
-### 修復方式
-**選擇 A**：更新 test expectation，移除 `（待調整）` 後綴，與 service 輸出一致
+- **Commit:** `cdedea1`
+- **Branch:** main
+- **完成時間：** 2026-05-04 08:40 AM (Asia/Taipei)
 
 ### 修改內容
 
-- **Commit:** `ea30cb0`
-- **Branch:** main
+**lib/screens/daily_report_page.dart:**
+- 空狀態標題：「今天還沒有 ${cat.name} 的翻譯紀錄」→「今天還沒有和 ${cat.name} 的互動記錄」
+- 小提示文字：「長按首頁的橘色按鈕錄下貓叫聲，\n翻譯完成後會自動記錄到今天的報告中。」→「去首頁試試「姿勢拍照」或\n「陪牠小事」互動吧！」
+
+**lib/screens/history_page.dart:**
+- 翻譯空狀態：「還沒有翻譯記錄\n長按首頁的翻譯按鈕開始吧！」→「還沒有翻譯記錄\n去首頁長按翻譯按鈕開始吧！」
 
 ### 修改檔案
-
-- `test/task_companion_service_test.dart`（2 處修正）
-
-### 修改摘要
-
-- `translate_meow` title 期望：`'今天聽她說一次話（待調整）'` → `'今天聽她說一次話'`
-- `give_feedback` title 期望：`'回應她一次小情緒（待調整）'` → `'回應她一次小情緒'`
+- `lib/screens/daily_report_page.dart`
+- `lib/screens/history_page.dart`
 
 ### Required Hermes Actions
 
+請執行：
 1. `git pull --ff-only`
-2. `flutter analyze`
-3. `flutter test`（預期 264 tests passed）
-4. `flutter build apk --release`（必要時）
-5. 更新 `.agent/hermes_review.md` 為 PASS 或 FAIL
-6. 若 PASS，更新本檔案為 IDLE 並 push
+2. `flutter pub get`
+3. `flutter analyze`
+4. `flutter test`
+5. 驗證：
+   - 進入「記錄」頁（daily_report_page），確認空狀態文字已更新為「今天還沒有和 XXX 的互動記錄」
+   - 進入「歷史」頁（history_page），滑到翻譯 tab，確認空狀態文字已更新
 
 ---
 
-## Notes
-
-- service 輸出已移除 `（待調整）` 後綴，測試期望值需與之同步
-- 這只是修正測試期望，不影響實際產品功能
+_Last updated: 2026-05-04 08:40 AM (Asia/Taipei)_
