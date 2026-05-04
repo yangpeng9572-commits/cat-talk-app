@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/cat_service.dart';
@@ -151,6 +153,41 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  // Avatar Helper（與 home_page.dart 一致）
+  // ═══════════════════════════════════════════════════════════════
+
+  Widget _buildCatAvatar(
+    String? avatarPath, {
+    double radius = 24,
+    double iconSize = 24,
+    Color backgroundColor = const Color(0xFFFFE0B2),
+    Color iconColor = const Color(0xFFFF8A65),
+  }) {
+    final path = avatarPath;
+    final hasValidPath = path != null &&
+        path.isNotEmpty &&
+        !path.startsWith('content://') &&
+        File(path).existsSync();
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: backgroundColor,
+      backgroundImage: hasValidPath ? FileImage(File(path)) : null,
+      child: hasValidPath
+          ? null
+          : Icon(
+              Icons.pets,
+              color: iconColor,
+              size: iconSize,
+            ),
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // Build Methods
+  // ═══════════════════════════════════════════════════════════════
+
   Widget _buildSceneVisual(Color themeColor) {
     return Container(
       padding: const EdgeInsets.all(32),
@@ -197,19 +234,26 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
                 right: 20,
                 child: Text('☀️', style: TextStyle(fontSize: 28, color: themeColor)),
               ),
-              // 貓咪（顯示目前選中的貓）
+              // 貓咪（顯示目前選中的貓頭像）
               Positioned(
                 bottom: 8,
                 child: Container(
-                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.orange.shade100,
                     shape: BoxShape.circle,
                   ),
-                  child: Text(
-                    _currentCat != null ? '🐱' : '🐱',
-                    style: const TextStyle(fontSize: 36),
-                  ),
+                  child: _currentCat?.avatarPath != null
+                      ? ClipOval(
+                          child: _buildCatAvatar(
+                            _currentCat!.avatarPath,
+                            radius: 20,
+                            iconSize: 20,
+                          ),
+                        )
+                      : const Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Text('🐱', style: TextStyle(fontSize: 28)),
+                        ),
                 ),
               ),
             ],
