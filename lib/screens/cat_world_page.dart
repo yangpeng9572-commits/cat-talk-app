@@ -1420,10 +1420,12 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
               onPressed: () async {
                 if (_currentCatId == null) {
                   Navigator.pop(dialogCtx);
+                  if (!mounted) return;
                   _showToast('先新增貓咪，我才能幫她佈置小世界 🐱');
                   return;
                 }
                 final result = await _catWorldService.equipItem(_currentCatId!, item.id);
+                if (!mounted) return;
                 if (result == EquipResult.success) {
                   Navigator.pop(dialogCtx);
                   _showToast('她好像很喜歡這個新角落 💕');
@@ -1505,6 +1507,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
               onPressed: () async {
                 if (_currentCatId == null) {
                   Navigator.pop(dialogCtx);
+                  if (!mounted) return;
                   _showToast('先新增貓咪，我才能幫她佈置小世界 🐱');
                   return;
                 }
@@ -1512,18 +1515,19 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
                 if (!mounted) return;
 
                 if (result == UnlockResult.success) {
+                  if (!mounted) return;
                   _showToast('她的小世界變溫暖了一點 🐾');
                   // 解鎖成功，詢問是否放進去
                   final shouldEquip = await _showEquipPrompt(dialogCtx);
+                  if (!mounted) return;
                   if (shouldEquip == true) {
                     final equipResult = await _catWorldService.equipItem(_currentCatId!, item.id);
-                    if (mounted) {
-                      if (equipResult == EquipResult.success) {
-                        Navigator.pop(dialogCtx);
-                        _showToast('她好像很喜歡這個新角落 💕');
-                      } else {
-                        _showToast('這個小物件還不能放進去，先再看看 🐾');
-                      }
+                    if (!mounted) return;
+                    if (equipResult == EquipResult.success) {
+                      Navigator.pop(dialogCtx);
+                      _showToast('她好像很喜歡這個新角落 💕');
+                    } else {
+                      _showToast('這個小物件還不能放進去，先再看看 🐾');
                     }
                   } else {
                     Navigator.pop(dialogCtx);
@@ -1531,6 +1535,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
                   _loadItemsByTab(_tabController.index);
                 } else {
                   Navigator.pop(dialogCtx);
+                  if (!mounted) return;
                   _showToast('這個小物件暫時還不能解鎖，先再看看 🐾');
                 }
               },
