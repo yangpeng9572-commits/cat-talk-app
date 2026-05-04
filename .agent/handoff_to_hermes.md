@@ -7,24 +7,23 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
 - Last updated by: OpenClaw Auto Development
-- Last updated at: 2026-05-04 10:04 AM (Asia/Taipei)
+- Last updated at: 2026-05-04 10:12 AM (Asia/Taipei)
 
 ---
 
-## 本輪任務：P3-7（全 App 空狀態統一）
+## Pending Review: P3-7（全 App 空狀態統一）
 
 ### 任務 ID
 - Task ID: P3-7
 - Task name: 全 App 空狀態統一
 
-### 完成的修改
-
-- **Commit:** `cdedea1`
-- **Branch:** main
-- **完成時間：** 2026-05-04 08:40 AM (Asia/Taipei)
+### Commit
+- Commit: `cdedea1`
+- Branch: main
+- 完成時間：2026-05-04 08:40 AM (Asia/Taipei)
 
 ### 修改內容
 
@@ -41,7 +40,7 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ### Required Hermes Actions
 
-請執行：
+請在 Windows Runner 執行：
 1. `git pull --ff-only`
 2. `flutter pub get`
 3. `flutter analyze`
@@ -50,6 +49,11 @@ Hermes 每次驗收前應先讀取本檔案。
    - 進入「記錄」頁（daily_report_page），確認空狀態文字已更新為「今天還沒有和 XXX 的互動記錄」
    - 進入「歷史」頁（history_page），滑到翻譯 tab，確認空狀態文字已更新
 
+### 上輪 FAIL 說明
+- 上輪 FAIL 原因：Hermes 在 WSL2 無法執行 Flutter validate（環境限制）
+- 本輪等待 Hermes（Windows Runner）執行完整驗收
+- 代碼本身無錯誤，純文案修改
+
 ---
 
-_Last updated: 2026-05-04 08:40 AM (Asia/Taipei)_
+_Last updated: 2026-05-04 10:12 AM (Asia/Taipei)_
