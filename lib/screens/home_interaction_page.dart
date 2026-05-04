@@ -6,6 +6,7 @@ import '../models/translation_result.dart';
 import '../services/bond_service.dart';
 import '../services/translation_history_service.dart';
 import '../services/share_card_service.dart';
+import '../services/meow_speech_service.dart';
 import '../widgets/kawaii_button.dart';
 
 /// 貓咪小日常互動模式
@@ -38,6 +39,11 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
   // 喜歡度測試
   bool _showLikeTest = false;
   int _currentLikeScore = 0;
+
+  // 人話轉喵聲
+  bool _showTextToMeow = false;
+  final TextEditingController _textController = TextEditingController();
+  final MeowSpeechService _speechService = MeowSpeechService();
 
   // 特殊驚喜
   bool _showSurprise = false;
@@ -275,6 +281,24 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
     }
   }
 
+  Future<void> _doTextToMeow() async {
+    final text = _textController.text.trim();
+    if (text.isEmpty) {
+      _showFeedbackMessage('請輸入想說的話 🐱');
+      return;
+    }
+
+    setState(() => _showTextToMeow = true);
+    _textController.clear();
+
+    await _speechService.speakText(text);
+  }
+
+  void _closeTextToMeow() {
+    _speechService.stop();
+    setState(() => _showTextToMeow = false);
+  }
+
   String _getCatEmoji() {
     switch (_currentState) {
       case 'hungry':
@@ -485,6 +509,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
                       _buildInteractionButton('🎾', '陪她玩', () => _doInteraction('play')),
                       _buildInteractionButton('💗', '摸摸她', () => _doInteraction('pet')),
                       _buildInteractionButton('🗣', '跟她說話', () => _doInteraction('talk')),
+                      _buildInteractionButton('🔊', '說給她聽', () => _doTextToMeow()),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -509,72 +534,11 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
 
           // 喜歡度彈窗
           if (_showLikeTest)
-            Container(
-              color: Colors.black.withValues(alpha: 0.5),
-              child: Center(
-                child: Container(
-                  margin: const EdgeInsets.all(32),
-                  padding: const EdgeInsets.all(32),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        '💗',
-                        style: TextStyle(fontSize: 60),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        '${widget.cat.name}的喜歡度',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF6B4B4B),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '$_currentLikeScore%',
-                        style: const TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFFF8FAB),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _getLikeMessage(_currentLikeScore),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF9B8B8B),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          TextButton(
-                            onPressed: () => setState(() => _showLikeTest = false),
-                            child: const Text('關閉'),
-                          ),
-                          ElevatedButton(
-                            onPressed: _shareLikeResult,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFF8FAB),
-                              foregroundColor: Colors.white,
-                            ),
-                            child: const Text('分享 💕'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            _buildLikeTestOverlay(),
+
+          // 人話轉喵聲彈窗
+          if (_showTextToMeow)
+            _buildTextToMeowOverlay(),
         ],
       ),
     );
@@ -693,5 +657,80 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
     if (score >= 60) return '她對你有好感 🙂';
     if (score >= 40) return '她在觀察你 🤔';
     return '她需要多一點時間 🐾';
+  }
+
+  // ===== 人話轉喵聲 =====
+
+  Widget _buildTextToMeowOverlay() {
+    return Container(
+      color: Colors.black.withValues(alpha: 0.5),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🔊', style: TextStyle(fontSize: 48)),
+              const SizedBox(height: 12),
+              const Text(
+                '說給 ${widget.cat.name} 聽',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF6B4B4B),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '輸入你想說的話，會轉成貓咪語播放',
+                style: TextStyle(fontSize: 13, color: Color(0xFF9B8B8B)),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _textController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: '例如：肚子餓了嗎？要喝水嗎？',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFFF8FAB), width: 2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: _closeTextToMeow,
+                    child: const Text('取消'),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: _doTextToMeow,
+                    icon: const Icon(Icons.play_arrow, color: Colors.white),
+                    label: const Text('播放 🎵'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFF8FAB),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

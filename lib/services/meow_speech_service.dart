@@ -82,6 +82,16 @@ class MeowSpeechService {
     _isPlaying = false;
   }
 
+  /// 直接說一段文字（用於人話轉喵聲功能）
+  Future<bool> speakText(String text) async {
+    await _ensureInitialized();
+    if (_flutterTts == null) return false;
+
+    _isPlaying = true;
+    final success = await _flutterTts!.speak(text);
+    return success;
+  }
+
   /// 暫停播放
   Future<void> pause() async {
     if (_flutterTts != null) {
