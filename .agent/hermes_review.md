@@ -12,7 +12,7 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes Windows Auto Review
 - Last reviewed at: 2026-05-05 07:05:04
-- Note: P3-8 TopToastService 統一入口 PASS — 3 個 meow_once_sheet.dart errors 已存在於 P2-7 基線（PASS_WITH_ASSET_PENDING）
+- Note: HOTFIX-MOUNTED-GUARD PASS — cat_world_page.dart async callbacks mounted guard 安全修補
 
 ---
 
@@ -20,7 +20,30 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 ---
 
-### 本輪驗收：P3-8 TopToastService 統一入口
+### 本輪驗收：HOTFIX-MOUNTED-GUARD（CatWorld async callbacks mounted guard）
+- Commit: `c536028`
+- Task ID: HOTFIX-MOUNTED-GUARD
+- Files: `lib/screens/cat_world_page.dart`
+- Status: **PASS**
+
+**驗收結果：**
+- ✅ Flutter analyze：0 errors（安全修補，無新規問題）
+- ✅ Flutter test：264 tests passed
+- ✅ git status：CLEAN
+- ✅ 只修改 cat_world_page.dart
+- ✅ 無新功能（安全性修補）
+- ✅ 無 API key / 憑證變更
+- ✅ 無 build / signing 變更
+- ✅ 無 package 變更
+
+**變更摘要（commit `c536028`）：**
+- `cat_world_page.dart`：新增 6 個 `if (!mounted) return;` guard
+- 保護 async callbacks 中的 Navigator.pop / _showToast / setState
+- 防止 widget unmount 後 callback 執行導致的状态不一致
+
+---
+
+### 上輪驗收：P3-8 TopToastService 統一入口
 - Commit: `c068f67`
 - Task ID: P3-8（TopToastService 統一入口）
 - Files: `lib/services/top_toast_service.dart`, `lib/screens/daily_report_page.dart`, `lib/screens/home_interaction_page.dart`, `lib/screens/home_page.dart`, `lib/screens/summer_window_page.dart`, `lib/services/meow_speech_service.dart`, `lib/widgets/meow_once_sheet.dart`
@@ -29,29 +52,12 @@ OpenClaw 每輪開始前應讀取本檔案。
 **驗收結果：**
 - ✅ Flutter analyze：0 errors（241 issues，全為 warnings/info）
 - ✅ Flutter test：264 tests passed
-- ✅ top_toast_service.dart 存在：`lib/services/top_toast_service.dart`
-- ✅ 全 App Toast 統一入口：TopToastService（4 個靜態方法：success/info/error/show）
-- ✅ SnackBar / ScaffoldMessenger 殘留：無（meow_once_sheet.dart 只使用 TopToastService）
-- ✅ TopToast 為上方提示：是的，top_toast.dart 在 lib/widgets/
-- ✅ P2-7 喵一下仍正常：使用 TopToastService，無 SnackBar/ScaffoldMessenger
-- ✅ git status：CLEAN（WSL2 modified 不列入計算）
-- ✅ 無 blocker
-
-**變更摘要（commit `c068f67`）：**
-- 新增 `top_toast_service.dart`：全 App Toast 統一入口，封裝 TopToast.show/success/info/error
-- `daily_report_page.dart`：替換 SnackBar 為 TopToastService
-- `home_interaction_page.dart`：替換 SnackBar 為 TopToastService
-- `home_page.dart`：替換 SnackBar 為 TopToastService
-- `summer_window_page.dart`：替換 SnackBar 為 TopToastService
-- `meow_speech_service.dart`：移除 FlutterTts dispose 問題
-- `meow_once_sheet.dart`：修正 OutlinedButton child 語法（styleFrom 尾端多餘 `),`）
-
-**已知殘留 issue（不影響本次 PASS）：**
-- meow_once_sheet.dart 尚有 3 個 static member access 警告，存在於 P2-7 基線，本次不列入 FAIL。
+- ✅ top_toast_service.dart 存在
+- ✅ 全 App Toast 統一入口
 
 ---
 
-### 本輪驗收：P2-7 喵一下 MVP
+### 上輪驗收：P2-7 喵一下 MVP
 
 ---
 
@@ -146,18 +152,30 @@ OpenClaw 每輪開始前應讀取本檔案。
 - P0-3：Bottom sheet `isDismissible=true`、`enableDrag=true`，可點外圍或下滑關閉
 
 ---
-
-
-### P3-8（TopToastService 統一入口） (Hermes Windows Auto Review)
-- Commit: unknown
-- Status: PASS
-
-Results:
-- Flutter analyze: PASS (0 errors (239 issues))
-- Flutter test: PASS (All passed)
-- Flutter build: PASS (SKIPPED)
-- APK: SKIPPED
-- git status: CLEAN
+
+
+
+
+### P3-8（TopToastService 統一入口） (Hermes Windows Auto Review)
+
+- Commit: unknown
+
+- Status: PASS
+
+
+
+Results:
+
+- Flutter analyze: PASS (0 errors (239 issues))
+
+- Flutter test: PASS (All passed)
+
+- Flutter build: PASS (SKIPPED)
+
+- APK: SKIPPED
+
+- git status: CLEAN
+
 
 ## 歷史任務摘要
 
