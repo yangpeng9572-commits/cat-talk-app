@@ -41,7 +41,7 @@ import '../widgets/emotion_card.dart';
 import '../widgets/onboarding_overlay.dart';
 import '../widgets/achievement_celebration.dart';
 import '../widgets/review_prompt_dialog.dart';
-import '../widgets/daily_task_card.dart';
+import '../widgets/meow_once_sheet.dart';
 import '../theme/kawaii_theme.dart';
 import '../screens/cat_pose_camera_page.dart';
 
@@ -921,6 +921,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               _buildNotificationHintBanner(),
             // 今日情感狀態區塊（新增）
             _buildEmotionalStatusBlock(),
+            // 喵一下入口
+            _buildMeowOnceButton(),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -1059,6 +1061,69 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
         );
       },
+    );
+  }
+
+  /// 喵一下入口按鈕
+  Widget _buildMeowOnceButton() {
+    return GestureDetector(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          isDismissible: true,
+          enableDrag: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => MeowOnceSheet(
+            catId: selectedCat?.id,
+            catName: selectedCat?.name,
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: KawaiiTheme.primaryPink.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: KawaiiTheme.primaryPink.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Text('🐱', style: TextStyle(fontSize: 20)),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    '喵一下',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF6B4B4B),
+                    ),
+                  ),
+                  Text(
+                    '把你的話變成可愛喵聲',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF9B8B8B)),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFFFF8FAB)),
+          ],
+        ),
+      ),
     );
   }
 
