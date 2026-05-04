@@ -7,57 +7,57 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-05 07:41:03
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw
+- Last updated at: 2026-05-05 07:45:00 GMT+8
 
 ---
 
-## Task: P3-9 導航全域防炸設計 Phase 3 — home_interaction_page.dart mounted guards
+## Task: P3-9 導航全域防炸設計 Phase 4 — daily_report_page.dart mounted guards
 
-- **Task ID:** P3-9-NAV-GUARD-3
-- **Task name:** 導航全域防炸設計 Phase 3
+- **Task ID:** P3-9-NAV-GUARD-4
+- **Task name:** 導航全域防炸設計 Phase 4
 - **Owner:** OpenClaw (自主研發 cron)
 - **Need:** Hermes validate on Windows Runner
 
 ### 修正背景
 
-承接 HOTFIX-MOUNTED-GUARD（c536028）+ P3-9 Phase 1（home_page.dart 3 guards）+ Phase 2（cat_pose_preview_page.dart），在 home_interaction_page.dart 的 async callbacks 中加入 mounted guard，防止 widget unmount 後 callback 執行導致崩溃。
+承接 P3-9 Phase 1-3（home_page / cat_pose_preview / home_interaction），在 daily_report_page.dart 的分享 async callbacks 中加入 mounted guard，防止 widget unmount 後 callback 執行導致崩溃。
 
 ### 修改檔案（共 1 個）
 
 | 檔案 | 變更 |
 |------|------|
-| `lib/screens/home_interaction_page.dart` | 3 個 `if (!mounted) return;` guard：<br>1. `_doInteraction()`：await BondService.addBond 後<br>2. `_doLikeTest()`：await BondService.getBond 後<br>3. `_doTextToMeow()`：await speechService.speakText 後清除 _showTextToMeow |
+| `lib/screens/daily_report_page.dart` | 3 個 `if (!mounted) return;` guard：<br>1. `_shareCardImage()`：generateShareCardImage await 後<br>2. `_shareCardImage()`：saveShareCardImage await 後<br>3. `_shareToThreads()`：Share.share await 後 |
 
-### 具體變更（home_interaction_page.dart）
+### 具體變更（daily_report_page.dart）
 
-1. `_doInteraction()`:
+1. `_shareCardImage()`（第一處）：
 ```dart
-await BondService().addBond(widget.cat.id, BondService.eventActionTap);
+final imageBytes = await _shareService.generateShareCardImage(...);
 if (!mounted) return;
+if (imageBytes == null) { ... }
 ```
 
-2. `_doLikeTest()`:
+2. `_shareCardImage()`（第二處）：
 ```dart
-final bond = await BondService().getBond(widget.cat.id);
+final filePath = await _shareService.saveShareCardImage(...);
 if (!mounted) return;
-final bondScore = bond.bondScore;
+if (filePath != null) { ... }
 ```
 
-3. `_doTextToMeow()`:
+3. `_shareToThreads()`：
 ```dart
-await _speechService.speakText(text);
+await Share.share(caption);
 if (!mounted) return;
-setState(() => _showTextToMeow = false);
 ```
 
 ### 合規檢查清單
 
 | 項目 | 狀態 |
 |------|------|
-| 只修改 home_interaction_page.dart mounted guard | ✅ 是 |
+| 只修改 daily_report_page.dart mounted guard | ✅ 是 |
 | 無新功能 | ✅ 是（安全性修補） |
 | 無 API key / 憑證變更 | ✅ 是 |
 | 無 build / signing 變更 | ✅ 是 |
@@ -67,13 +67,13 @@ setState(() => _showTextToMeow = false);
 ### git status --short
 
 ```
-M  lib/screens/home_interaction_page.dart
+M  lib/screens/daily_report_page.dart
 ```
 
 ### Commit
 
-- Hash: `4a82e1a`
-- Message: `fix(home_interaction): add mounted guards on BondService and speakText async callbacks`
+- Hash: `f8e97fa`
+- Message: `fix(daily_report): add mounted guards on share async callbacks`
 
 ### Required Hermes Actions
 
@@ -83,15 +83,8 @@ M  lib/screens/home_interaction_page.dart
 
 ### 備註
 
-- P3-9 Phase 1（home_page.dart）：commit 81d325c — Hermes review PASS
-- P3-9 Phase 2（cat_pose_preview_page.dart）：commit 36c2794 — Hermes review PASS
-- P3-9 Phase 3（home_interaction_page.dart）：commit 4a82e1a — 需 Hermes 驗收
-- P3-9 Phase 4 候選：daily_report_page.dart
-
----
-
-## Notes
-
-- 追蹤表落後：P2-7 已由 Hermes 驗收 PASS_WITH_ASSET_PENDING（75ab4dd），task_queue.md 已同步
-- 所有已完成 P0/P1/P2/P3 任務均已標記為 ✅ PASS / ✅ DONE
-- P2-7 為 PASS_WITH_ASSET_PENDING（需後續 asset 處理）
+- P3-9 Phase 1（home_page.dart）：commit 81d325c — Hermes PASS
+- P3-9 Phase 2（cat_pose_preview_page.dart）：commit 36c2794 — Hermes PASS
+- P3-9 Phase 3（home_interaction_page.dart）：commit 4a82e1a — Hermes review PASS
+- P3-9 Phase 4（daily_report_page.dart）：commit f8e97fa — 需 Hermes 驗收
+- P3-9 全部完成後，建議標記為 DONE
