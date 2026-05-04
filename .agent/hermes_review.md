@@ -285,3 +285,37 @@ Results:
 
 - P0 系列需手機實測（CLI 無法驗證真實 UX bug）
 - OpenClaw 下一個建議任務：P0-5（完成提示改到上方）
+
+---
+
+### P4-1-DASHBOARD-PHASE2 (Hermes Auto Review from WSL/Unix runner)
+
+- Commit: `6449fab`
+- Task ID: P4-1-DASHBOARD-PHASE2
+- Files: `tools/app.py`, `tools/static/app.js`, `tools/static/style.css`, `tools/templates/index.html`
+- Status: **PASS**
+
+**驗收結果：**
+- ✅ Python compile (`python3 -m py_compile tools/app.py`)：0 errors
+- ✅ tools/ 目錄變更，隔離於 Flutter app 之外，無 Flutter code 變更
+- ✅ 無 Flutter analyze / test 需要（pure Python/JS/CSS/HTML）
+- ✅ git status：CLEAN（已 pull --ff-only 完成）
+- ✅ 無 API key / 憑證變更
+- ✅ 合規檢查：Read-only backend，僅修改 tools/ 工具
+
+**變更摘要：**
+- `tools/app.py`：新增 `parse_task_queue()`、`get_next_cron_run()`，更新 `/api/status` 回傳 task_queue 統計
+- `tools/static/app.js`：新增 `renderStats()`、`renderTaskQueue()`，每 5s 刷新
+- `tools/static/style.css`：Stats Row / Task Queue Section / Summary Pills 樣式
+- `tools/templates/index.html`：Stats Row、Next Cron、Task Queue Section DOM
+
+**限制說明：**
+- 此環境（WSL/Linux）無法執行 Windows Flask server（需 `python tools/app.py` + 瀏覽器 UI 驗證）
+- 但 tools/ 變更隔離於 Flutter app，Python compile 已通過，邏輯審查正確
+
+Results:
+
+- Flutter analyze: SKIPPED (tools/ only, not Flutter)
+- Flutter test: SKIPPED (tools/ only, not Flutter)
+- Python compile: PASS (0 errors)
+- git status: CLEAN
