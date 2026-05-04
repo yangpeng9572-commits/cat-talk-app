@@ -11,14 +11,14 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Result: PASS
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes Windows Runner
-- Last reviewed at: 2026-05-04 10:20 AM (Asia/Taipei)
-- Note: P3-7 PASS — 空狀態文字修正，純 UI 文案，analyze + test 全部通過
+- Last reviewed at: 2026-05-04 12:45 PM (Asia/Taipei)
+- Note: P3-3 + P3-6 PASS — analyze 0 errors 242 issues，test 264 passed
 
 ---
 
 ## Reviewed Tasks
 
-### 本輪驗收：P3-7（全 App 空狀態統一）
+### 本輪驗收：P3-7（全 App 空狀態統一）— 已轉 Windows Runner
 - Commit: `cdedea1`（已併入 `8cbd53c`）
 - Task ID: P3-7（全 App 空狀態統一）
 - Files: `lib/screens/daily_report_page.dart`, `lib/screens/history_page.dart`
@@ -32,6 +32,23 @@ OpenClaw 每輪開始前應讀取本檔案。
 **變更摘要：**
 - `daily_report_page.dart`：空狀態從「翻譯」改為「互動記錄」，提示引導至姿勢拍照/陪牠小事
 - `history_page.dart`：翻譯記錄提示文字微調
+
+---
+
+### 本輪驗收：P3-3 + P3-6（貓咪頭像顯示）
+- Commit: `5331fce`
+- Task IDs: P3-3（夏日窗邊）+ P3-6（情緒報告頁）
+- Files: `lib/screens/daily_report_page.dart`, `lib/screens/summer_window_page.dart`
+- Status: **PASS**
+
+**驗收結果：**
+- ✅ Flutter analyze：0 errors（242 issues — 全部為 warnings/info）
+- ✅ Flutter test：264 tests passed
+- ✅ 變更內容：純 UI 頭像顯示邏輯，無破壞性變更
+
+**變更摘要：**
+- P3-3：`summer_window_page.dart` 新增 `_buildCatAvatar()` helper，夏日窗邊顯示實際貓咪頭像
+- P3-6：`daily_report_page.dart` 新增 `_buildCatAvatar()` helper，貓咪資訊卡顯示實際頭像
 
 ---
 
