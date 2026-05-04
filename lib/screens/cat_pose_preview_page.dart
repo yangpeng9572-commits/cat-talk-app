@@ -270,18 +270,17 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
       }
 
       // 直接替換當前預覽頁的 imagePath，避免 Navigator 堆疊問題
-      if (mounted) {
-        setState(() {
-          // widget.imagePath 是 final，但我們用新路徑重建
-        });
-        // 使用 pushReplacement 避免堆疊問題
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CatPosePreviewPage(imagePath: imagePath),
-          ),
-        );
-      }
+      if (!mounted) return;
+      setState(() {
+        // widget.imagePath 是 final，但我們用新路徑重建
+      });
+      // 使用 pushReplacement 避免堆疊問題
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CatPosePreviewPage(imagePath: imagePath),
+        ),
+      );
     } catch (e) {
       if (mounted) {
         TopToastService.error(context, message: '相機開啟失敗，請確認權限後再試一次。');
