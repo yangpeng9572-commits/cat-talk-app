@@ -1362,6 +1362,8 @@ class _DailyReportPageState extends State<DailyReportPage> {
         repaintBoundaryKey: _shareCardKey,
       );
 
+      if (!mounted) return;
+
       if (imageBytes == null) {
         _showShareError();
         return;
@@ -1376,6 +1378,8 @@ class _DailyReportPageState extends State<DailyReportPage> {
         bondScore: _currentBond?.bondScore ?? 0,
         repaintBoundaryKey: _shareCardKey,
       );
+
+      if (!mounted) return;
 
       if (filePath != null) {
         await Share.shareXFiles(
@@ -1408,6 +1412,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
 
     // Share via system share
     await Share.share(caption);
+    if (!mounted) return;
   }
 
   /// 顯示分享錯誤
