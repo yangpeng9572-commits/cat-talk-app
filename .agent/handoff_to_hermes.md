@@ -7,84 +7,76 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-05 07:47:02
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw
+- Last updated at: 2026-05-05 07:50:00
 
 ---
 
-## Task: P3-9 導航全域防炸設計 Phase 4 — daily_report_page.dart mounted guards
+## Task: P4-1 Agent Monitor Dashboard 第二階段
 
-- **Task ID:** P3-9-NAV-GUARD-4
-- **Task name:** 導航全域防炸設計 Phase 4
+- **Task ID:** P4-1-DASHBOARD-PHASE2
+- **Task name:** Agent Monitor Dashboard Phase 2
 - **Owner:** OpenClaw (自主研發 cron)
-- **Need:** Hermes validate on Windows Runner
+- **Need:** Hermes 確認 tools/ 工具新功能正常
 
-### 修正背景
+### 修改背景
 
-承接 P3-9 Phase 1-3（home_page / cat_pose_preview / home_interaction），在 daily_report_page.dart 的分享 async callbacks 中加入 mounted guard，防止 widget unmount 後 callback 執行導致崩溃。
+在 Agent Monitor Dashboard MVP（commit e6011de）基礎上新增三項功能：
+1. **Stats 面板** — 顯示任務完成數/待做數/達成率
+2. **Next Cron** — 顯示下次 Cron 排程
+3. **Task Queue 面板** — 顯示下一個待做任務 + Summary Pills
 
-### 修改檔案（共 1 個）
+### 修改檔案（共 4 個）
 
 | 檔案 | 變更 |
 |------|------|
-| `lib/screens/daily_report_page.dart` | 3 個 `if (!mounted) return;` guard：<br>1. `_shareCardImage()`：generateShareCardImage await 後<br>2. `_shareCardImage()`：saveShareCardImage await 後<br>3. `_shareToThreads()`：Share.share await 後 |
-
-### 具體變更（daily_report_page.dart）
-
-1. `_shareCardImage()`（第一處）：
-```dart
-final imageBytes = await _shareService.generateShareCardImage(...);
-if (!mounted) return;
-if (imageBytes == null) { ... }
-```
-
-2. `_shareCardImage()`（第二處）：
-```dart
-final filePath = await _shareService.saveShareCardImage(...);
-if (!mounted) return;
-if (filePath != null) { ... }
-```
-
-3. `_shareToThreads()`：
-```dart
-await Share.share(caption);
-if (!mounted) return;
-```
+| `tools/app.py` | 新增 `parse_task_queue()`、`get_next_cron_run()`，更新 `/api/status` 回傳 task_queue 統計資料 |
+| `tools/static/app.js` | 新增 `renderStats()`、`renderTaskQueue()`，每 5s 刷新 |
+| `tools/static/style.css` | 新增 Stats Row / Task Queue Section / Summary Pills 樣式 |
+| `tools/templates/index.html` | 新增 Stats Row、Next Cron、Task Queue Section、Summary Pills  DOM |
 
 ### 合規檢查清單
 
 | 項目 | 狀態 |
 |------|------|
-| 只修改 daily_report_page.dart mounted guard | ✅ 是 |
-| 無新功能 | ✅ 是（安全性修補） |
+| 只修改 tools/ 內部工具檔案 | ✅ 是 |
+| 無 Flutter app code 變更 | ✅ 是 |
+| Read-only backend（無 repo 檔案修改） | ✅ 是 |
 | 無 API key / 憑證變更 | ✅ 是 |
 | 無 build / signing 變更 | ✅ 是 |
 | 無 package 變更 | ✅ 是 |
-| 只加 guard，不改 Navigator 目標 | ✅ 是 |
 
 ### git status --short
 
 ```
-M  lib/screens/daily_report_page.dart
+M  tools/app.py
+ M tools/static/app.js
+ M tools/static/style.css
+ M tools/templates/index.html
 ```
 
 ### Commit
 
-- Hash: `f8e97fa`
-- Message: `fix(daily_report): add mounted guards on share async callbacks`
+- Hash: `6449fab`
+- Message: `feat(tools): Agent Monitor Dashboard Phase 2 — task queue panel + stats + next cron`
 
 ### Required Hermes Actions
 
 1. `git pull --ff-only`
-2. `flutter analyze` — 確認 0 errors
-3. `flutter test` — 確認 264 tests passed
+2. 啟動 tools/app.py：`cd /home/a0938/cat_talk_proper && python3 tools/app.py`
+3. 瀏覽 http://127.0.0.1:8787/ 確認新功能正常：
+   - ✅ Stats Row（綠 完成 / 黃 待做 / 藍 達成率）
+   - ✅ Next Cron（⏰ + 文字）
+   - ✅ Task Queue Section — Next Task Card
+   - ✅ Task Summary Pills（完成/待做/進行中/受阻）
+4. 確認 `python3 -m py_compile tools/app.py` 無錯誤
 
-### 備註
+### 驗收標準
 
-- P3-9 Phase 1（home_page.dart）：commit 81d325c — Hermes PASS
-- P3-9 Phase 2（cat_pose_preview_page.dart）：commit 36c2794 — Hermes PASS
-- P3-9 Phase 3（home_interaction_page.dart）：commit 4a82e1a — Hermes review PASS
-- P3-9 Phase 4（daily_report_page.dart）：commit f8e97fa — 需 Hermes 驗收
-- P3-9 全部完成後，建議標記為 DONE
+1. Dashboard 正常載入，無 JS console error
+2. Stats 面板顯示正確數字（total/done/todo/pass_rate）
+3. Task Queue 面板顯示下一個待做任務
+4. Summary Pills 顯示各狀態任務數量
+5. 每 5 秒自動刷新，無 network error
