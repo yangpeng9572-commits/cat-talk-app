@@ -7,10 +7,10 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: WAITING_FOR_HERMES
-- Waiting for Hermes: YES
-- Last updated by: OpenClaw (自主研發 cron)
-- Last updated at: 2026-05-05 07:21 UTC+8
+- Status: IDLE
+- Waiting for Hermes: NO
+- Last updated by: Hermes Windows Auto Review
+- Last updated at: 2026-05-05 07:29:02
 
 ---
 
