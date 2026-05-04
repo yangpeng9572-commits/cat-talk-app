@@ -382,7 +382,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              '還沒有翻譯記錄\n長按首頁的翻譯按鈕開始吧！',
+              '還沒有翻譯記錄\n去首頁長按翻譯按鈕開始吧！',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, height: 1.5),
             ),

@@ -214,7 +214,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           ),
           const SizedBox(height: 32),
           Text(
-            '今天還沒有 ${cat.name} 的翻譯紀錄',
+            '今天還沒有和 ${cat.name} 的互動記錄',
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -223,7 +223,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
           ),
           const SizedBox(height: 12),
           const Text(
-            '試著錄下第一聲喵，\n看看牠想表達什麼吧！',
+            '試著幫牠拍照、寫日記，\n或去小世界互動吧！',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
@@ -256,12 +256,12 @@ class _DailyReportPageState extends State<DailyReportPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  '長按首頁的橘色按鈕錄下貓叫聲，\n翻譯完成後會自動記錄到今天的報告中。',
+                const Text(
+                  '去首頁試試「姿勢拍照」或\n「陪牠小事」互動吧！',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey.shade700,
+                    color: Colors.grey,
                     height: 1.5,
                   ),
                 ),
