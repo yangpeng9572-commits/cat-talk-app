@@ -22,16 +22,24 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Commit: `4cd847c`（含 `cdedea1` P3-7 變更）
 - Task ID: P3-7（全 App 空狀態統一）
 - Files: `lib/screens/daily_report_page.dart`, `lib/screens/history_page.dart`
-- Status: **FAIL — 需要 Windows Runner**
+- Status: **FAIL — WSL2 無 Flutter，需 Windows Runner**
 
 **驗收結果：**
-- ❌ Flutter analyze：無法執行（WSL2 無 Flutter）
-- ❌ Flutter test：無法執行（WSL2 無 Flutter）
-- ❌ Flutter build apk：無法執行（WSL2 無 Flutter）
+- ❌ Flutter analyze：無法執行（WSL2 無 Flutter SDK）
+- ❌ Flutter test：無法執行（WSL2 無 Flutter SDK）
+- ❌ Flutter build apk：無法執行（WSL2 無 Flutter SDK）
 
 **原因：** WSL2 環境無 Flutter SDK，無法執行 `flutter analyze`、`flutter test`、`flutter build apk --release`。
 
 **建議：** 請 Hermes 在 `C:\Users\a0938\cat_talk_proper`（Windows Runner）執行完整驗收流程。
+
+---
+
+### 上輪待驗收：P3-7（全 App 空狀態統一）— 已轉 Windows Runner
+- Commit: `cdedea1`（包含於 `4cd847c`）
+- Task ID: P3-7（全 App 空狀態統一）
+- Files: `lib/screens/daily_report_page.dart`, `lib/screens/history_page.dart`
+- Status: **FAIL（環境限制）— WSL2 無 Flutter，需 Windows Runner**
 
 ---
 
