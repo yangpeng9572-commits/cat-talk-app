@@ -7,10 +7,10 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: WAITING_FOR_HERMES
-- Waiting for Hermes: YES
-- Last updated by: OpenClaw 小龍女
-- Last updated at: 2026-05-04 04:50 PM (Asia/Taipei)
+- Status: IDLE
+- Waiting for Hermes: NO
+- Last updated by: Hermes Windows Runner
+- Last updated at: 2026-05-04 07:35 PM (Asia/Taipei)
 
 ---
 
@@ -18,8 +18,9 @@ Hermes 每次驗收前應先讀取本檔案。
 
 - **Task ID:** P3-8
 - **Task name:** 全 App 上方提示 TopToast 共用化
-- **Commit:** `963ac05`
+- **Commit:** `c068f67`（含 OpenClaw fixup）
 - **Branch:** main
+- **Result:** ✅ PASS
 
 ### 修改檔案（共 16 個）
 
