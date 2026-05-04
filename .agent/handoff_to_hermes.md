@@ -9,8 +9,8 @@ Hermes 每次驗收前應先讀取本檔案。
 
 - Status: IDLE
 - Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-04 08:23:02
+- Last updated by: Hermes Linux Auto Review (WSL2 runner)
+- Last updated at: 2026-05-04 08:27:35
 
 ---
 
@@ -60,4 +60,18 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ---
 
-_Last updated: 2026-05-04 08:16 AM (Asia/Taipei)_
+## 🛑 WSL2 Runner 無法執行 Flutter
+
+**本輪由 Hermes Linux Auto Review 執行，發現：**
+- `flutter: command not found` in WSL2 environment
+- 此 WSL2 環境無 Flutter SDK，無法執行 `flutter analyze` / `flutter test`
+
+**建議：**
+- 本任務（P2-3）需由 Hermes 在 Windows Runner（C:\Users\a0938\cat_talk_proper）執行驗收
+- 或由 Andy 在本地 Windows 環境執行驗收
+
+**狀態：handoff 已設為 IDLE，等待 Hermes 在正確環境驗收。**
+
+---
+
+_Last updated: 2026-05-04 08:27:35 (Asia/Taipei)_
