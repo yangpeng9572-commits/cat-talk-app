@@ -10,14 +10,32 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 - Result: PASS
 - Waiting for OpenClaw fix: NO
-- Last reviewed by: Hermes Windows Auto Review
-- Last reviewed at: 2026-05-04 08:35:01
+- Last reviewed by: Hermes (manual flutter test)
+- Last reviewed at: 2026-05-04 08:38:30
 
 ---
 
 ## Reviewed Tasks
 
-### 本輪驗收：P0-4（Windows Runner 執行）
+### 本輪驗收：P1-3-test-fix（Windows Runner 執行）
+- Commit: `ea30cb0`
+- Task ID: P1-3-test-fix（修正 task_companion_service_test 期望值）
+- Files: `test/task_companion_service_test.dart`
+- Status: **PASS**
+
+**驗收結果：**
+- ✅ Flutter test：264 tests passed
+- ✅ 2 個原本失敗的測試已修復（translate_meow / give_feedback 標題期望值）
+
+**問題根因：**
+- commit `3ff62fc` 移除 service 的 `（待調整）` 後綴
+- 但 test expectations 未同步，導致 2 個測試失敗
+
+**修復內容：**
+- 移除 `translate_meow` title 期望中的 `（待調整）` 後綴
+- 移除 `give_feedback` title 期望中的 `（待調整）` 後綴
+
+### 上輪驗收：P0-4（Windows Runner 執行）
 - Commit: `bce2395`
 - Task ID: P0-4（全 App 超出螢幕都必須能滑動）
 - Files: `lib/screens/home_page.dart`
@@ -757,18 +775,30 @@ Results:
 
 - git status: CLEAN
 
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-- Commit: unknown
-- Status: PASS
-
-Results:
-- Flutter analyze: PASS (0 errors (240 issues))
-- Flutter test: PASS (All passed)
-- Flutter build: PASS (SKIPPED)
-- APK: SKIPPED
-- git status: CLEAN
+
+
+
+
+### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
+
+- Commit: unknown
+
+- Status: PASS
+
+
+
+Results:
+
+- Flutter analyze: PASS (0 errors (240 issues))
+
+- Flutter test: PASS (All passed)
+
+- Flutter build: PASS (SKIPPED)
+
+- APK: SKIPPED
+
+- git status: CLEAN
+
 
 ## 歷史任務摘要
 
