@@ -7,47 +7,52 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes (validation complete — P3-3 + P3-6 PASS)
-- Last updated at: 2026-05-04 12:45 PM (Asia/Taipei)
+- Status: WAITING_FOR_HERMES_REVIEW
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw Auto Development
+- Last updated at: 2026-05-04 04:23 PM (Asia/Taipei)
 
 ---
 
-## 本輪任務：P3-6（情緒報告頁內容優化 — 貓咪頭像顯示）
+## 本輪任務：P2-7 喵一下 MVP
 
 ### 任務 ID
-- Task ID: P3-6
-- Task name: 情緒報告頁內容優化
+- Task ID: P2-7
+- Task name: 喵一下 MVP
 
 ### Commit
-- Commit: `867369c`
+- Commit: `75ab4dd`
 - Branch: main
-- 完成時間：2026-05-04 12:10 PM (Asia/Taipei)
+- 完成時間：2026-05-04 04:23 PM (Asia/Taipei)
 
-### 修改內容
+### 完成內容
 
-**lib/screens/daily_report_page.dart:**
-- 新增 `import 'dart:io';`（用於 `File` 檢查）
-- 新增 `_buildCatAvatar()` helper method（與 home_page / summer_window_page 一致的頭像顯示邏輯）
-- 將 `_buildCatInfoCard()` 中的固定 🐱 emoji 改為動態顯示目前貓咪的 `avatarPath`
-- `_buildCatAvatar()` 實作與 home_page / summer_window_page 完全一致：
-  - 檢查 `avatarPath` 非空、不以 `content://` 開頭、檔案存在
-  - 有效時顯示 `FileImage`，無效時顯示 `Icons.pets` 預設圖示
-  - 與 P3-3 夏日窗邊頭像顯示採用相同模式
+1. ✅ 首頁新增「喵一下」入口（`_buildMeowOnceButton()`）
+2. ✅ 使用 bottom sheet，不使用 overlay
+3. ✅ 不使用 flutter_tts
+4. ✅ 15 種喵語文字（`MeowSoundModeService.meowTexts`）
+5. ✅ 15 種聲音模式（`MeowSoundModeService.modes`，含 assetPath）
+6. ✅ 音效播放防呆（try/catch + TopToast 友善提示）
+7. ✅ 保留 / 不保留
+8. ✅ 備註欄（placeholder：「例如：奶茶聽到會抬頭」）
+9. ✅ 常用喵聲清單
+10. ✅ SharedPreferences 本地保存
+11. ✅ 可刪除保留項目（二次確認 AlertDialog）
+12. ✅ SnackBar 已改 TopToast
+13. ✅ 不宣稱準確翻譯
 
 ### 修改檔案
-- `lib/screens/daily_report_page.dart`（35 insertions, 10 deletions）
 
-### 驗收要求
+- `lib/screens/home_page.dart` — 新增喵一下入口按鈕
+- `lib/models/saved_meow_sound.dart` — SavedMeowSound model
+- `lib/services/meow_sound_mode_service.dart` — 15 種喵語文字 + 15 種聲音模式
+- `lib/services/saved_meow_sound_service.dart` — SharedPreferences 持久化
+- `lib/widgets/meow_once_sheet.dart` — Bottom Sheet UI（含 TopToast）
 
-請 Hermes 在 `C:\Users\a0938\cat_talk_proper`（Windows Runner）執行：
-1. `git pull --ff-only`
-2. `flutter analyze`
-3. `flutter test`
-4. 確認 `lib/screens/daily_report_page.dart` 編譯無錯誤
-5. 確認 `_buildCatInfoCard` 中貓咪頭像正確顯示（實際頭像或預設圖示）
+### 驗收說明
+
+- WSL2 無 Flutter，analyze / test 請由 Hermes Windows Runner 執行
+- 音效檔尚未提供，播放失敗時顯示友善提示，不閃退
+- 請執行 `flutter analyze` + `flutter test` 後回報結果
 
 ---
-
-_Last updated: 2026-05-04 12:10 PM (Asia/Taipei)_
