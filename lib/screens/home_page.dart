@@ -1933,6 +1933,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         final newCatId = await Navigator.of(rootContext).push<String?>(
                           MaterialPageRoute(builder: (_) => const AddCatPage()),
                         );
+                        if (!mounted) return;
                         if (newCatId != null) {
                           await _loadCatData();
                           if (!mounted) return;
@@ -1987,6 +1988,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             final result = await Navigator.of(rootContext).push<Cat?>(
                               MaterialPageRoute(builder: (_) => EditCatPage(cat: cat)),
                             );
+                            if (!mounted) return;
                             if (result != null) {
                               _cats = _catService!.getAllCats();
                               if (selectedCat == null || !_cats.any((c) => c.id == selectedCat!.id)) {
@@ -2017,6 +2019,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   final newCatId = await Navigator.of(rootContext).push<String?>(
                     MaterialPageRoute(builder: (_) => const AddCatPage()),
                   );
+                  if (!mounted) return;
                   if (newCatId != null) {
                     await _loadCatData();
                     if (!mounted) return;

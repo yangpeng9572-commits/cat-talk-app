@@ -374,14 +374,34 @@ OpenClaw 每輪回報必須包含：
 | P2-4 | ✅ PASS | 姿勢分類MVP（Hermes 2026-05-03）|
 | P2-5 | ✅ PASS | 姿勢+情緒+日常聯動（Hermes 2026-05-03）|
 | P2-6 | ✅ DONE (commit 9008aaf) | 成就頁加入進度 |
-| P2-7 | TODO | 人話轉喵聲MVP |
+| P2-7 | ✅ PASS_WITH_ASSET_PENDING | 人話轉喵聲MVP（Hermes 75ab4dd, 2026-05-04）|
 | P3-1 | ✅ PASS | 她的小世界室內示意圖（Hermes 2026-05-03）|
 | P3-2 | ✅ PASS | 小世界家具/配件內容（Hermes 2026-05-03）|
 | P3-3 | ✅ DONE (commit 710bd1b) | 夏日窗邊頭像顯示（Hermes via P3-7 review window）|
-| P3-6 | ✅ DONE (commit 867369c) | 情緒報告頁貓咪頭像顯示（WAITING Hermes）|
+| P3-7 | ✅ PASS | 全App空狀態統一（Hermes cdedea1, 2026-05-04）|
+| P3-8 | ✅ PASS | TopToastService統一入口（Hermes c068f67, 2026-05-04）|
+| P3-9 | TODO | 導航全域防炸設計 |
+| P3-6 | ✅ DONE (commit 867369c) | 情緒報告頁貓咪頭像顯示（Hermes 2026-05-04）|
 | P4-1 | TODO | Agent Monitor第二階段 |
 | P4-2 | TODO | 任務狀態檔整理 |
 
 ---
 
-_Last updated: 2026-05-04 02:16 GMT+8_
+_Last updated: 2026-05-05 07:09 GMT+8_
+
+## 附：P3-9 導航全域防炸設計 — 執行備忘
+
+目標：在全 App 主要 async Navigator 呼叫點加入 `if (!mounted) return;` guard，防止 widget unmount 後 callback 執行導致崩溃。
+
+優先檢查畫面（高風險）：
+1. home_page.dart — 首頁，互動多
+2. cat_world_page.dart — 已做6個guard（本次複查）
+3. home_interaction_page.dart — 錄音/翻譯流程
+4. cat_pose_preview_page.dart — 拍照後處理
+5. daily_report_page.dart — 情緒報告
+
+原則：
+- 只加 guard，不改任何業務邏輯
+- 每次只改一個檔案
+- 每個 guard commit + push 後再進行下一個
+- 不修改 Navigator 跳轉目標
