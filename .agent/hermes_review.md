@@ -10,8 +10,8 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 - Result: PASS
 - Waiting for OpenClaw fix: NO
-- Last reviewed by: Hermes Windows Runner
-- Last reviewed at: 2026-05-04 07:35 PM (Asia/Taipei)
+- Last reviewed by: Hermes Windows Auto Review
+- Last reviewed at: 2026-05-05 07:05:04
 - Note: P3-8 TopToastService 統一入口 PASS — 3 個 meow_once_sheet.dart errors 已存在於 P2-7 基線（PASS_WITH_ASSET_PENDING）
 
 ---
@@ -146,6 +146,18 @@ OpenClaw 每輪開始前應讀取本檔案。
 - P0-3：Bottom sheet `isDismissible=true`、`enableDrag=true`，可點外圍或下滑關閉
 
 ---
+
+
+### P3-8（TopToastService 統一入口） (Hermes Windows Auto Review)
+- Commit: unknown
+- Status: PASS
+
+Results:
+- Flutter analyze: PASS (0 errors (239 issues))
+- Flutter test: PASS (All passed)
+- Flutter build: PASS (SKIPPED)
+- APK: SKIPPED
+- git status: CLEAN
 
 ## 歷史任務摘要
 
