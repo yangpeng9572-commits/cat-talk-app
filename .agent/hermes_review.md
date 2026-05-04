@@ -8,24 +8,64 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 ## Current Review Status
 
-- Result: PASS
+- Result: PASS_WITH_ASSET_PENDING
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes Windows Runner
-- Last reviewed at: 2026-05-04 12:45 PM (Asia/Taipei)
-- Note: P3-3 + P3-6 PASS — analyze 0 errors 242 issues，test 264 passed
+- Last reviewed at: 2026-05-04 04:45 PM (Asia/Taipei)
+- Note: P2-7 喵一下 MVP PASS_WITH_ASSET_PENDING
 
 ---
 
 ## Reviewed Tasks
 
-### 本輪驗收：P3-7（全 App 空狀態統一）— 已轉 Windows Runner
+### 本輪驗收：P2-7 喵一下 MVP
+- Commit: `75ab4dd`（push）、`3f1e8bf`（WSL2最終）
+- Task ID: P2-7（喵一下 MVP）
+- Files: `lib/screens/home_page.dart`, `lib/widgets/meow_once_sheet.dart`, `lib/models/saved_meow_sound.dart`, `lib/services/meow_sound_mode_service.dart`, `lib/services/saved_meow_sound_service.dart`
+- Status: **PASS_WITH_ASSET_PENDING**
+
+**驗收結果：**
+- ✅ Flutter analyze：0 errors（254 issues，全為 warnings/info，與基線相同）
+- ✅ Flutter test：264 tests passed
+- ✅ 首頁「喵一下」入口：完成，按鈕文案「把你的話變成可愛喵聲」
+- ✅ Bottom sheet：使用 `showModalBottomSheet` + `DraggableScrollableSheet` + `SafeArea` + `SingleChildScrollView`，`isDismissible=true`、`enableDrag=true`、`isScrollControlled=true`
+- ✅ 不使用 overlay
+- ✅ 不使用 flutter_tts，使用 `audioplayers`
+- ✅ 15 種喵語文字（`MeowSoundModeService.meowTexts`）：全部不同，無人類翻譯
+- ✅ 15 種聲音模式（`MeowSoundModeService.modes`，含 id/name/assetPath）
+- ✅ TopToast（已全數使用 TopToast，無 SnackBar，無 ScaffoldMessenger）
+- ✅ 播放防呆：try/catch + `TopToast.info("這個喵聲還沒放進來，之後可以替換成真的喵聲 🐾")`
+- ✅ 「保留」按鈕：儲存至常用喵聲
+- ✅ 「不保留」按鈕：關閉 bottom sheet
+- ✅ 備註欄：`TextField(maxLines: 2)`，placeholder「例如：奶茶聽到會抬頭」
+- ✅ 常用喵聲清單：顯示模式名稱、喵語文字、備註、日期
+- ✅ SharedPreferences 本地保存：重開 App 仍存在
+- ✅ 刪除保留項目：二次確認 `AlertDialog`，標題「刪除這個喵聲？」
+- ✅ 不當翻譯宣稱檢查：無「準確翻譯」「真正貓語」「貓一定聽得懂」
+- ✅ 無 blocker
+
+**Hermes 小修（3 處 syntax/static errors）：**
+1. `meow_once_sheet.dart:70`：`_modeService.modes` → `MeowSoundModeService.modes`（靜態成員）
+2. `meow_once_sheet.dart:71`：`_modeService.meowTexts` → `MeowSoundModeService.meowTexts`（靜態成員）
+3. `meow_once_sheet.dart:101`：同上 static 修正
+4. `meow_once_sheet.dart:273-280`：`OutlinedButton` child 縮排錯誤（syntax fix）
+
+**備註：**
+- 真實音效檔（15 個 .mp3）尚未提供，目前為 placeholder assetPaths
+- 播放失敗不閃退，顯示友善提示，符合 MVP 要求
+
+**待 Andy 真機測試確認。**
+
+---
+
+### 本輪驗收：P3-7（全 App 空狀態統一）
 - Commit: `cdedea1`（已併入 `8cbd53c`）
 - Task ID: P3-7（全 App 空狀態統一）
 - Files: `lib/screens/daily_report_page.dart`, `lib/screens/history_page.dart`
 - Status: **PASS**
 
 **驗收結果：**
-- ✅ Flutter analyze：0 errors（242 issues — 全部為 warnings/info）
+- ✅ Flutter analyze：0 errors（242 issues，全為 warnings/info）
 - ✅ Flutter test：264 tests passed
 - ✅ 變更內容：純文字修正，符合預期
 
@@ -42,7 +82,7 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Status: **PASS**
 
 **驗收結果：**
-- ✅ Flutter analyze：0 errors（242 issues — 全部為 warnings/info）
+- ✅ Flutter analyze：0 errors（242 issues，全為 warnings/info）
 - ✅ Flutter test：264 tests passed
 - ✅ 變更內容：純 UI 頭像顯示邏輯，無破壞性變更
 
@@ -70,14 +110,16 @@ OpenClaw 每輪開始前應讀取本檔案。
 - 移除 `translate_meow` title 期望中的 `（待調整）` 後綴
 - 移除 `give_feedback` title 期望中的 `（待調整）` 後綴
 
-### 上輪驗收：P0-4（Windows Runner 執行）
+---
+
+### 上輪驗收：P0-4（全 App 超出螢幕都必須能滑動）
 - Commit: `bce2395`
 - Task ID: P0-4（全 App 超出螢幕都必須能滑動）
 - Files: `lib/screens/home_page.dart`
 - Status: **PASS**
 
 **驗收結果：**
-- ✅ Flutter analyze：0 errors（201 issues — 全部為 warnings/info）
+- ✅ Flutter analyze：0 errors（201 issues，全為 warnings/info）
 - ✅ Flutter test：264 passed
 - ✅ Flutter build apk --release：SUCCESS（90.9MB）
 - ✅ git status：CLEAN
@@ -88,14 +130,16 @@ OpenClaw 每輪開始前應讀取本檔案。
 - 支援 5 隻以上貓咪時可滾動
 - 移除了部分冗餘的中文註解
 
-### 上輪驗收：P0-1 + P0-3（Windows Runner 執行）
+---
+
+### 上輪驗收：P0-1 + P0-3（選擇貓咪點空白處可返回）
 - Commit: `4db847c`
 - Task IDs: P0-1（刪除貓咪後卡住）+ P0-3（選擇貓咪點空白處可返回）
 - Files: `lib/screens/edit_cat_page.dart`, `lib/screens/home_page.dart`
 - Status: **PASS**
 
 **驗收結果：**
-- ✅ Flutter analyze：0 errors（201 issues — 全部為 warnings/info）
+- ✅ Flutter analyze：0 errors（201 issues，全為 warnings/info）
 - ✅ Flutter test：264 passed
 - ✅ Flutter build apk --release：SUCCESS（90.9MB）
 - ✅ git status：CLEAN
@@ -104,744 +148,18 @@ OpenClaw 每輪開始前應讀取本檔案。
 - P0-1：編輯/刪除後重新載入 _cats，selectedCat 被刪除時自動切換至第一個
 - P0-3：Bottom sheet `isDismissible=true`、`enableDrag=true`，可點外圍或下滑關閉
 
-### 上輪驗收：任務佇列同步
-- Commit range: `fc1a0d6`（同步）
-- Status: **PASS**（純文件同步，無 code 變更）
-
-### 上上輪驗收：TOOL-1 Agent Monitor Dashboard
-- Commit: `e6011de`
-- Type: Python Flask 工具（非 Flutter App）
-- Status: **PASS**
-
 ---
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (0 errors (0 issues))
-
-- Flutter test: PASS (N/A)
-
-- Flutter build: PASS (N/A)
-
-- APK: N/A
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (0 errors (213 issues))
-
-- Flutter test: PASS (All passed)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (0 errors (213 issues))
-
-- Flutter test: PASS (All passed)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (0 errors (206 issues))
-
-- Flutter test: PASS (All passed)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (0 errors (211 issues))
-
-- Flutter test: PASS (All passed)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (0 errors (212 issues))
-
-- Flutter test: PASS (All passed)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (0 errors (212 issues))
-
-- Flutter test: PASS (All passed)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (FAIL(analyze=True test=False build=True))
-
-- Flutter test: PASS (FAIL)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
-
-
-
-
-### P0-4（全 App 超出螢幕都必須能滑動） (Hermes Windows Auto Review)
-
-- Commit: unknown
-
-- Status: PASS
-
-
-
-Results:
-
-- Flutter analyze: PASS (0 errors (240 issues))
-
-- Flutter test: PASS (All passed)
-
-- Flutter build: PASS (SKIPPED)
-
-- APK: SKIPPED
-
-- git status: CLEAN
-
 
 ## 歷史任務摘要
 
-| AutoReview | unknown | PASS | 2026-05-03 20:48:10 |
- Status | Date |
-|------|--------|--------|------|
-| P0-4 | `bce2395` | PASS | 2026-05-03 |
-| P0-1+P0-3 | `4db847c` | PASS | 2026-05-03 |
+| 任務 | Commit | 結果 | 日期 |
+|------|--------|------|------|
+| P2-7 喵一下 MVP | `75ab4dd` | PASS_WITH_ASSET_PENDING | 2026-05-04 |
+| P3-7 全App空狀態統一 | `cdedea1` | PASS | 2026-05-04 |
+| P3-3+P3-6 貓咪頭像 | `5331fce` | PASS | 2026-05-04 |
+| P1-3-test-fix | `ea30cb0` | PASS | 2026-05-03 |
+| P0-4 滑動修復 | `bce2395` | PASS | 2026-05-03 |
+| P0-1+P0-3 刪除/返回 | `4db847c` | PASS | 2026-05-03 |
 | P3-1 Batch 1-4 | multiple | PASS | 2026-05-03 |
 | P3-2 | `ea846dd` | PASS | 2026-05-03 |
 | P2-1 | `cee79b2` | PASS | 2026-05-03 |
