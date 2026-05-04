@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
@@ -451,6 +453,33 @@ class _DailyReportPageState extends State<DailyReportPage> {
     );
   }
 
+  /// 貓咪頭像元件（與 home_page / summer_window_page 一致的顯示邏輯）
+  Widget _buildCatAvatar(
+    String? avatarPath, {
+    double radius = 24,
+    double iconSize = 24,
+    Color backgroundColor = const Color(0xFFFFE0B2),
+    Color iconColor = const Color(0xFFFF8A65),
+  }) {
+    final hasValidPath = avatarPath != null &&
+        avatarPath.isNotEmpty &&
+        !avatarPath.startsWith('content://') &&
+        File(avatarPath).existsSync();
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: backgroundColor,
+      backgroundImage: hasValidPath ? FileImage(File(avatarPath)) : null,
+      child: hasValidPath
+          ? null
+          : Icon(
+              Icons.pets,
+              color: iconColor,
+              size: iconSize,
+            ),
+    );
+  }
+
   /// 貓咪資訊卡片
   Widget _buildCatInfoCard(Cat cat, DailyCatReport report) {
     return Column(
@@ -519,16 +548,12 @@ class _DailyReportPageState extends State<DailyReportPage> {
           child: Row(
             children: [
               // 貓咪頭像
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Text('🐱', style: TextStyle(fontSize: 30)),
-                ),
+              _buildCatAvatar(
+                cat.avatarPath,
+                radius: 30,
+                iconSize: 30,
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                iconColor: Colors.white,
               ),
               const SizedBox(width: 16),
               // 資訊
