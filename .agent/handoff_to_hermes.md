@@ -7,51 +7,57 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-05 07:29:02
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw (自主研發 cron)
+- Last updated at: 2026-05-05 07:33 UTC
 
 ---
 
-## Task: P3-9 導航全域防炸設計 Phase 2 — cat_pose_preview_page.dart mounted guard
+## Task: P3-9 導航全域防炸設計 Phase 3 — home_interaction_page.dart mounted guards
 
-- **Task ID:** P3-9-NAV-GUARD-2
-- **Task name:** 導航全域防炸設計 Phase 2
+- **Task ID:** P3-9-NAV-GUARD-3
+- **Task name:** 導航全域防炸設計 Phase 3
 - **Owner:** OpenClaw (自主研發 cron)
 - **Need:** Hermes validate on Windows Runner
 
 ### 修正背景
 
-承接 HOTFIX-MOUNTED-GUARD（c536028）+ P3-9 Phase 1（home_page.dart 3 guards），將 cat_pose_preview_page.dart 中 `if (mounted) { setState + Navigator.pushReplacement }` 改為安全的前置 guard `if (!mounted) return;`。
+承接 HOTFIX-MOUNTED-GUARD（c536028）+ P3-9 Phase 1（home_page.dart 3 guards）+ Phase 2（cat_pose_preview_page.dart），在 home_interaction_page.dart 的 async callbacks 中加入 mounted guard，防止 widget unmount 後 callback 執行導致崩溃。
 
 ### 修改檔案（共 1 個）
 
 | 檔案 | 變更 |
 |------|------|
-| `lib/screens/cat_pose_preview_page.dart` | `_retakePhoto()` callback 中 `Navigator.pushReplacement` 前新增 `if (!mounted) return;` guard，移除原有的 `if (mounted) { setState + Navigator }` 包覆式檢查 |
+| `lib/screens/home_interaction_page.dart` | 3 個 `if (!mounted) return;` guard：<br>1. `_doInteraction()`：await BondService.addBond 後<br>2. `_doLikeTest()`：await BondService.getBond 後<br>3. `_doTextToMeow()`：await speechService.speakText 後清除 _showTextToMeow |
 
-### 具體變更（cat_pose_preview_page.dart）
+### 具體變更（home_interaction_page.dart）
 
-在 `_retakePhoto()` async function 的 `Navigator.pushReplacement` 前：
+1. `_doInteraction()`:
 ```dart
+await BondService().addBond(widget.cat.id, BondService.eventActionTap);
 if (!mounted) return;
-setState(() {
-  // widget.imagePath 是 final，但我們用新路徑重建
-});
-Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (context) => CatPosePreviewPage(imagePath: imagePath),
-  ),
-);
+```
+
+2. `_doLikeTest()`:
+```dart
+final bond = await BondService().getBond(widget.cat.id);
+if (!mounted) return;
+final bondScore = bond.bondScore;
+```
+
+3. `_doTextToMeow()`:
+```dart
+await _speechService.speakText(text);
+if (!mounted) return;
+setState(() => _showTextToMeow = false);
 ```
 
 ### 合規檢查清單
 
 | 項目 | 狀態 |
 |------|------|
-| 只修改 cat_pose_preview_page.dart mounted guard | ✅ 是 |
+| 只修改 home_interaction_page.dart mounted guard | ✅ 是 |
 | 無新功能 | ✅ 是（安全性修補） |
 | 無 API key / 憑證變更 | ✅ 是 |
 | 無 build / signing 變更 | ✅ 是 |
@@ -61,13 +67,13 @@ Navigator.pushReplacement(
 ### git status --short
 
 ```
-CLEAN
+M  lib/screens/home_interaction_page.dart
 ```
 
 ### Commit
 
-- Hash: `36c2794`
-- Message: `fix(cat_pose_preview): move mounted guard before setState+Navigator.pushReplacement`
+- Hash: `4a82e1a`
+- Message: `fix(home_interaction): add mounted guards on BondService and speakText async callbacks`
 
 ### Required Hermes Actions
 
@@ -77,9 +83,10 @@ CLEAN
 
 ### 備註
 
-- P3-9 Phase 1（home_page.dart）已於 commit 81d325c 完成，等待 Hermes 驗收
-- P3-9 Phase 2（cat_pose_preview_page.dart）commit 36c2794，現在需要 Hermes 驗收
-- P3-9 Phase 3 候選：home_interaction_page.dart
+- P3-9 Phase 1（home_page.dart）：commit 81d325c — Hermes review PASS
+- P3-9 Phase 2（cat_pose_preview_page.dart）：commit 36c2794 — Hermes review PASS
+- P3-9 Phase 3（home_interaction_page.dart）：commit 4a82e1a — 需 Hermes 驗收
+- P3-9 Phase 4 候選：daily_report_page.dart
 
 ---
 
