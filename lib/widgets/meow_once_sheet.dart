@@ -67,8 +67,8 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
     if (mounted) setState(() => _savedSounds = sounds);
   }
 
-  MeowSoundMode get _currentMode => _modeService.modes[_currentModeIndex];
-  String get _currentMeowText => _modeService.meowTexts[_currentModeIndex];
+  MeowSoundMode get _currentMode => MeowSoundModeService.modes[_currentModeIndex];
+  String get _currentMeowText => MeowSoundModeService.meowTexts[_currentModeIndex];
 
   Future<void> _playSound() async {
     if (_isPlaying) {
@@ -275,7 +275,8 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ), child: const Text('不保留'),
+                            ),
+                            child: const Text('不保留'),
                         ),
                         const SizedBox(width: 12),
                         Expanded(

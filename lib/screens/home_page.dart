@@ -30,6 +30,7 @@ import '../services/push_notification_service.dart';
 import '../services/review_service.dart';
 import '../services/cat_birthday_service.dart';
 import '../widgets/birthday_gift_dialog.dart';
+import '../widgets/daily_task_card.dart';
 import 'pose_recognition_page.dart';
 import 'daily_report_page.dart';
 import 'add_cat_page.dart';

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/cat_service.dart';
+import '../models/cat.dart';
 import '../services/seasonal_event_service.dart';
 import '../services/bond_service.dart';
 import '../services/top_toast_service.dart';

@@ -533,10 +533,6 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
             ),
           ),
 
-          // 喜歡度彈窗
-          if (_showLikeTest)
-            _buildLikeTestOverlay(),
-
           // 人話轉喵聲彈窗
           if (_showTextToMeow)
             _buildTextToMeowOverlay(),
@@ -678,7 +674,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
             children: [
               const Text('🔊', style: TextStyle(fontSize: 48)),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 '說給 ${widget.cat.name} 聽',
                 style: TextStyle(
                   fontSize: 18,

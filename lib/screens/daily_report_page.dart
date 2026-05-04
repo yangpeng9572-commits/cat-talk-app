@@ -453,6 +453,87 @@ class _DailyReportPageState extends State<DailyReportPage> {
     );
   }
 
+  /// 新增日記對話框
+  Future<void> _showAddDiaryDialog() async {
+    if (_selectedCatId == null) return;
+    final cat = _cats.firstWhere((c) => c.id == _selectedCatId);
+    final controller = TextEditingController();
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('寫日記'),
+        content: TextField(
+          controller: controller,
+          maxLines: 4,
+          decoration: InputDecoration(
+            hintText: '記錄和${cat.name}的一天...',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: KawaiiTheme.primaryPink),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('儲存', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (result == true && controller.text.trim().isNotEmpty) {
+      await _userDiaryService.addEntry(
+        catId: cat.id,
+        catName: cat.name,
+        date: DateTime.now(),
+        content: controller.text.trim(),
+      );
+      final entries = _userDiaryService.getByCatId(_selectedCatId!);
+      if (mounted) setState(() => _userDiaryEntries = entries);
+      TopToastService.success(context, message: '已記錄下來了 💕');
+    }
+    controller.dispose();
+  }
+
+  /// 使用者日記區塊
+  Widget _buildUserDiarySection(Cat cat) {
+    if (_userDiaryEntries.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const Icon(Icons.book_outlined, size: 32, color: Color(0xFFBDBDBD)),
+            const SizedBox(height: 8),
+            Text('還沒有和${cat.name}的日記', style: TextStyle(color: Colors.grey[600])),
+          ],
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('生活日記', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        ..._userDiaryEntries.take(3).map((e) => Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFFFE4E1)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('${e.date.month}/${e.date.day}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              const SizedBox(height: 4),
+              Text(e.content, maxLines: 2, overflow: TextOverflow.ellipsis),
+            ],
+          ),
+        )),
+      ],
+    );
+  }
+
   /// 貓咪頭像元件（與 home_page / summer_window_page 一致的顯示邏輯）
   Widget _buildCatAvatar(
     String? avatarPath, {

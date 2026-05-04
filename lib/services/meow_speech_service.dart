@@ -145,8 +145,6 @@ class MeowSpeechService {
 
   Future<void> dispose() async {
     await stop();
-    _flutterTts?.dispose();
-    _flutterTts = null;
     _isInitialized = false;
   }
 }
