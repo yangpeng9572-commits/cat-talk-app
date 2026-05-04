@@ -9,6 +9,7 @@ import '../services/daily_report_service.dart';
 import '../services/bond_service.dart';
 import '../services/cat_learning_service.dart';
 import '../services/share_card_service.dart';
+import '../services/top_toast_service.dart';
 import '../theme/kawaii_theme.dart';
 
 /// 7天貓咪個性分析卡頁面
@@ -103,7 +104,7 @@ class _PersonalityCardPageState extends State<PersonalityCardPage> {
       }
     } catch (e) {
       if (mounted) {
-        TopToast.error(context, message: '分享卡生成失敗，請稍後再試 🥺');
+        TopToastService.error(context, message: '分享卡生成失敗，請稍後再試 🥺');
       }
     } finally {
       if (mounted) {

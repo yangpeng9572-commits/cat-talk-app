@@ -8,7 +8,7 @@ import '../models/daily_task.dart';
 import '../services/cat_pose_photo_service.dart';
 import '../services/daily_task_service.dart';
 import '../theme/kawaii_theme.dart';
-import '../widgets/top_toast.dart';
+import '../services/top_toast_service.dart';
 
 /// 貓咪姿勢拍照預覽頁
 /// 顯示拍攝的照片，提供重新拍攝或使用此照片的選項
@@ -271,10 +271,10 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
         } else {
           qualityMsg = '已保存照片，之後可用於姿勢辨識 🐾';
         }
-        TopToast.success(context, message: qualityMsg);
+        TopToastService.success(context, message: qualityMsg);
         Navigator.pop(context);
       } else {
-        TopToast.error(context, message: '照片儲存失敗，請再試一次');
+        TopToastService.error(context, message: '照片儲存失敗，請再試一次');
       }
     } finally {
       if (mounted) {
@@ -289,7 +289,7 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
 
     if (!status.isGranted) {
       if (mounted) {
-        TopToast.error(context, message: '相機開啟失敗，請確認權限後再試一次。');
+        TopToastService.error(context, message: '相機開啟失敗，請確認權限後再試一次。');
       }
       return;
     }
@@ -311,7 +311,7 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
 
       if (!File(imagePath).existsSync()) {
         if (mounted) {
-          TopToast.error(context, message: '照片存取失敗，請確認權限後再試一次。');
+          TopToastService.error(context, message: '照片存取失敗，請確認權限後再試一次。');
         }
         return;
       }
@@ -331,7 +331,7 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
       }
     } catch (e) {
       if (mounted) {
-        TopToast.error(context, message: '相機開啟失敗，請確認權限後再試一次。');
+        TopToastService.error(context, message: '相機開啟失敗，請確認權限後再試一次。');
       }
     }
   }

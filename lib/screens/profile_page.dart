@@ -6,6 +6,7 @@ import 'privacy_policy_page.dart';
 import 'cat_world_page.dart';
 import '../theme/kawaii_theme.dart';
 import '../widgets/onboarding_overlay.dart';
+import '../services/top_toast_service.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key, this.onReplayOnboarding});
@@ -64,7 +65,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                     onPressed: () {
                       // 升級 - 未來功能
-                      TopToast.info(context, message: '高級版功能即將推出 🐾');
+                      TopToastService.info(context, message: '高級版功能即將推出 🐾');
                     },
                     child: const Text('她的小世界 Plus'),
                   ),
@@ -107,7 +108,7 @@ class ProfilePage extends StatelessWidget {
                   // 通知 HomePage 重新顯示 onboarding
                   onReplayOnboarding?.call();
                   if (context.mounted) {
-                    TopToast.success(context, message: '新手教程已重新開啟 🐾');
+                    TopToastService.success(context, message: '新手教程已重新開啟 🐾');
                   }
                 },
               ),
@@ -218,7 +219,7 @@ class ProfilePage extends StatelessWidget {
             ),
             onPressed: () {
               Navigator.pop(context);
-              TopToast.error(context, message: '請透過設定 > 應用程式 > 喵心語 刪除所有資料 🐾');
+              TopToastService.error(context, message: '請透過設定 > 應用程式 > 喵心語 刪除所有資料 🐾');
             },
             child: const Text('確定刪除'),
           ),
@@ -256,7 +257,7 @@ class ProfilePage extends StatelessWidget {
             ),
             onPressed: () {
               Navigator.pop(context);
-              TopToast.info(context, message: '退出功能即將開放 🐾');
+              TopToastService.info(context, message: '退出功能即將開放 🐾');
             },
             child: const Text('確定退出'),
           ),

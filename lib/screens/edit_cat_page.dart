@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cat.dart';
 import '../services/cat_service.dart';
-import '../widgets/top_toast.dart';
+import '../services/top_toast_service.dart';
 
 class EditCatPage extends StatefulWidget {
   final Cat cat;
@@ -122,7 +122,7 @@ class _EditCatPageState extends State<EditCatPage> {
       }
     } catch (e) {
       if (mounted) {
-        TopToast.error(context, message: '無法開啟相機：$e');
+        TopToastService.error(context, message: '無法開啟相機：$e');
       }
     }
   }
@@ -233,13 +233,13 @@ class _EditCatPageState extends State<EditCatPage> {
   Future<void> _saveCat() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      TopToast.error(context, message: '名字不能為空 🐱');
+      TopToastService.error(context, message: '名字不能為空 🐱');
       return;
     }
 
     final birthdayError = _validateBirthday();
     if (birthdayError != null) {
-      TopToast.error(context, message: birthdayError ?? '生日資料有誤');
+      TopToastService.error(context, message: birthdayError ?? '生日資料有誤');
       return;
     }
 
@@ -263,7 +263,7 @@ class _EditCatPageState extends State<EditCatPage> {
     await catService.updateCat(updatedCat);
 
     if (!mounted) return;
-    TopToast.success(context, message: '儲存成功 🐾');
+    TopToastService.success(context, message: '儲存成功 🐾');
     Navigator.of(context).pop(updatedCat);
   }
 
@@ -422,7 +422,7 @@ class _EditCatPageState extends State<EditCatPage> {
     final deletedCatId = widget.cat.id;
     await catService.deleteCat(deletedCatId);
     if (!mounted) return;
-    TopToast.success(context, message: '已刪除 🐱');
+    TopToastService.success(context, message: '已刪除 🐱');
     Navigator.pop(context, true); // 回傳 true 給上一層刷新，通知 caller 貓已被刪除
   }
 

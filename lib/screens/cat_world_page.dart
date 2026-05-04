@@ -13,7 +13,7 @@ import '../services/seasonal_event_service.dart';
 import '../services/cat_birthday_service.dart';
 import '../services/daily_task_service.dart';
 import '../theme/kawaii_theme.dart';
-import '../widgets/top_toast.dart';
+import '../services/top_toast_service.dart';
 import 'memory_cards_page.dart';
 import 'summer_window_page.dart';
 
@@ -231,7 +231,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
   }
 
   void _showToast(String message) {
-    TopToast.show(context, message: message, backgroundColor: KawaiiTheme.primaryPink);
+    TopToastService.show(context, message: message, backgroundColor: KawaiiTheme.primaryPink);
   }
 
   void _showPaidDialog() {
@@ -440,7 +440,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
   Widget _buildBirthdayEventCard() {
     return GestureDetector(
       onTap: () {
-        TopToast.info(context, message: '生日派對功能即將開放 🐾');
+        TopToastService.info(context, message: '生日派對功能即將開放 🐾');
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

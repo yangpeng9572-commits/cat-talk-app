@@ -10,7 +10,7 @@ import '../services/translation_history_service.dart';
 import '../services/cat_service.dart';
 import '../services/user_diary_service.dart';
 import '../widgets/emotion_card.dart';
-import '../widgets/top_toast.dart';
+import '../services/top_toast_service.dart';
 import '../theme/kawaii_theme.dart';
 
 /// 記錄頁（生活日記 MVP）
@@ -686,7 +686,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
       onDismissed: (direction) {
         _diaryService.deleteEntry(entry.id);
         setState(() {});
-        TopToast.success(context, message: '已刪除日記');
+        TopToastService.success(context, message: '已刪除日記');
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -811,7 +811,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
   Future<void> _showAddDiaryDialog() async {
     final cats = _catService.getAllCats();
     if (cats.isEmpty) {
-      TopToast.warning(context, message: '請先新增貓咪再寫日記');
+      TopToastService.warning(context, message: '請先新增貓咪再寫日記');
       return;
     }
 
@@ -1090,7 +1090,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                         onPressed: () async {
                           final content = controller.text.trim();
                           if (content.isEmpty) {
-                            TopToast.warning(context, message: '請輸入內容');
+                            TopToastService.warning(context, message: '請輸入內容');
                             return;
                           }
                           await _diaryService.addEntry(
@@ -1104,7 +1104,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                           if (!mounted) return;
                           Navigator.pop(context);
                           setState(() {});
-                          TopToast.success(context, message: '已儲存日記 🐱');
+                          TopToastService.success(context, message: '已儲存日記 🐱');
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: KawaiiTheme.primaryPink,
@@ -1179,7 +1179,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
           _historyService.updateWithFeedback(result, feedback);
           setState(() {});
           // 顯示感謝
-          TopToast.success(context, message: '謝謝修正，之後會更懂牠 🐱');
+          TopToastService.success(context, message: '謝謝修正，之後會更懂牠 🐱');
         },
         onClose: () => Navigator.pop(context),
       ),

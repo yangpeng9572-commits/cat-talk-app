@@ -5,7 +5,7 @@ import '../models/saved_meow_sound.dart';
 import '../services/meow_sound_mode_service.dart';
 import '../services/saved_meow_sound_service.dart';
 import '../theme/kawaii_theme.dart';
-import '../widgets/top_toast.dart';
+import '../services/top_toast_service.dart';
 
 /// 喵一下 Bottom Sheet
 /// 
@@ -85,7 +85,7 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
       // 音效檔不存在時顯示友善提示，不閃退
       if (mounted) {
         setState(() => _isPlaying = false);
-        TopToast.info(
+        TopToastService.info(
           context,
           message: '這個喵聲還沒放進來，之後可以替換成真的喵聲 🐾',
         );
@@ -120,7 +120,7 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
     await _savedService.add(sound);
     await _loadSavedSounds();
     if (mounted) {
-      TopToast.success(
+      TopToastService.success(
         context,
         message: '已保留這個喵聲 💕',
       );

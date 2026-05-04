@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/cat_service.dart';
 import '../services/seasonal_event_service.dart';
 import '../services/bond_service.dart';
-import '../widgets/top_toast.dart';
+import '../services/top_toast_service.dart';
 import '../models/translation_result.dart';
 
 /// 夏日窗邊活動頁 ☀️
@@ -76,7 +76,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
       'playing': '🎾 ${_currentCat?.name ?? "貓咪"}想玩毛球，夏日動一動！',
       'grooming': '🫧 ${_currentCat?.name ?? "貓咪"}在整理毛髮，優雅过夏天～',
     };
-    TopToast.show(
+    TopToastService.show(
       context,
       message: poseMessages[pose] ?? '和${_currentCat?.name ?? "貓咪"}一起享受涼涼的風～ 🐱💨',
       backgroundColor: const Color(0xFF87CEEB),
@@ -92,7 +92,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
       _bondService!.addBond(_currentCat!.id, 'summer_window');
     }
 
-    TopToast.show(context, message: '和${_currentCat?.name ?? "貓咪"}一起享受涼涼的風～ 🐱💨', backgroundColor: const Color(0xFF87CEEB));
+    TopToastService.show(context, message: '和${_currentCat?.name ?? "貓咪"}一起享受涼涼的風～ 🐱💨', backgroundColor: const Color(0xFF87CEEB));
   }
 
   @override

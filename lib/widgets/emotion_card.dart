@@ -4,7 +4,7 @@ import '../services/audio_player_service.dart';
 import '../services/cat_speech_service.dart';
 import '../services/meow_speech_service.dart';
 import '../theme/kawaii_theme.dart';
-import 'top_toast.dart';
+import '../services/top_toast_service.dart';
 
 /// 情緒卡片 widget - 情感陪伴版
 /// 溫暖可愛的設計，貓咪擬人化語氣
@@ -435,7 +435,7 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
     // 呼叫回調通知 HomePage
     widget.onActionTap?.call();
     
-    TopToast.show(
+    TopToastService.show(
       context,
       message: _catSpeechService.getActionCompletedFeedback(),
       icon: Icons.favorite,
@@ -639,7 +639,7 @@ class _EmotionCardState extends State<EmotionCard> with SingleTickerProviderStat
   }
 
   void _onFeedbackCorrect() {
-    TopToast.success(context, message: _catSpeechService.getCorrectFeedback());
+    TopToastService.success(context, message: _catSpeechService.getCorrectFeedback());
     
     final feedback = UserFeedback.correct();
     widget.onFeedback(feedback);

@@ -18,7 +18,7 @@ import '../services/personality_analysis_service.dart';
 import '../services/user_diary_service.dart';
 import '../widgets/share_card_widget.dart';
 import '../theme/kawaii_theme.dart';
-import '../widgets/top_toast.dart';
+import '../services/top_toast_service.dart';
 import 'personality_card_page.dart';
 
 /// 每日貓咪報告頁面
@@ -1175,7 +1175,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
   /// 顯示分享選單
   void _showShareMenu() {
     if (_currentDiary == null || _currentCat == null) {
-      TopToast.info(context, message: '今天還沒有小日記可以分享 🐾');
+      TopToastService.info(context, message: '今天還沒有小日記可以分享 🐾');
       return;
     }
 
@@ -1246,7 +1246,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
     if (_currentDiary == null || _currentCat == null) return;
 
     // Show loading
-    TopToast.show(context, message: '產生分享卡片中...', backgroundColor: KawaiiTheme.primaryPink);
+    TopToastService.show(context, message: '產生分享卡片中...', backgroundColor: KawaiiTheme.primaryPink);
 
     // Get top speech (from latest translation if available)
     final topSpeech = _report?.totalTranslations != null && _report!.totalTranslations > 0
@@ -1332,7 +1332,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
   /// 顯示分享錯誤
   void _showShareError() {
     if (!mounted) return;
-    TopToast.error(context, message: '分享失敗了，請再試一次 🐾');
+    TopToastService.error(context, message: '分享失敗了，請再試一次 🐾');
   }
 
   /// 取得情緒句

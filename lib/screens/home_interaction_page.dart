@@ -8,6 +8,7 @@ import '../services/translation_history_service.dart';
 import '../services/share_card_service.dart';
 import '../services/meow_speech_service.dart';
 import '../widgets/kawaii_button.dart';
+import '../services/top_toast_service.dart';
 
 /// 貓咪小日常互動模式
 class HomeInteractionPage extends StatefulWidget {
@@ -104,7 +105,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
   }
 
   void _showFeedbackMessage(String msg) {
-    TopToast.show(context, message: msg, backgroundColor: const Color(0xFFFF8FAB));
+    TopToastService.show(context, message: msg, backgroundColor: const Color(0xFFFF8FAB));
   }
 
   Future<void> _updateCatState() async {
@@ -277,7 +278,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
 
     if (result != null && mounted) {
       setState(() => _shareCardPath = result);
-      TopToast.success(context, message: '分享卡已生成 💕');
+      TopToastService.success(context, message: '分享卡已生成 💕');
     }
   }
 

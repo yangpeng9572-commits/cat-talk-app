@@ -76,6 +76,21 @@ class TopToast {
       duration: duration,
     );
   }
+
+  /// Convenience: warning toast (amber accent)
+  static void warning(
+    BuildContext context, {
+    required String message,
+    Duration duration = const Duration(seconds: 2),
+  }) {
+    show(
+      context,
+      message: message,
+      icon: Icons.warning_amber_rounded,
+      backgroundColor: Colors.orange.shade400,
+      duration: duration,
+    );
+  }
 }
 
 class _TopToastWidget extends StatefulWidget {

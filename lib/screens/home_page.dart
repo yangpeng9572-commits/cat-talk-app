@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import '../widgets/top_toast.dart';
+import '../services/top_toast_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../debug/debug_entry_detector.dart';
@@ -398,7 +398,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         setState(() => _isPermissionDenied = true);
         _showPermissionDeniedDialog();
       } else {
-        TopToast.error(context, message: '需要麥克風權限才能錄音喔！');
+        TopToastService.error(context, message: '需要麥克風權限才能錄音喔！');
       }
       return;
     }
@@ -467,7 +467,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       await _processTranslation(realRecording.path!);
     } else if (realRecording.isTooShort) {
       // 錄音太短
-      TopToast.error(context, message: '錄音太短，再試一次 🐱');
+      TopToastService.error(context, message: '錄音太短，再試一次 🐱');
     } else {
       // 錄音失敗，使用 Mock
       await _processMockTranslation();
@@ -514,7 +514,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     } catch (e) {
       debugPrint('翻譯失敗: $e');
       setState(() => _isAnalyzing = false);
-      TopToast.error(context, message: '翻譯失敗了，再試一次吧 🐱');
+      TopToastService.error(context, message: '翻譯失敗了，再試一次吧 🐱');
     }
   }
 
@@ -606,7 +606,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         message = '+${gain}';
     }
     
-    TopToast.success(context, message: message);
+    TopToastService.success(context, message: message);
   }
 
   void _showNoCatSelectedDialog() {
@@ -729,7 +729,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   
   /// 顯示短暫提示（約 1.5 秒）
   void _showBriefToast(String message) {
-    TopToast.show(
+    TopToastService.show(
       context,
       message: message,
       icon: Icons.favorite,
@@ -772,7 +772,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       message = '✅ 已記錄你的回饋';
     }
 
-    TopToast.success(context, message: message);
+    TopToastService.success(context, message: message);
   }
 
   void _onDailyReportViewed() {
@@ -991,7 +991,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               await prefs.setBool('hasSeenOnboarding', false);
               await prefs.setBool('hasSeenCatWorld', false);
               if (mounted) {
-                TopToast.info(context, message: '已重置新手教學，請重啟App 🐾');
+                TopToastService.info(context, message: '已重置新手教學，請重啟App 🐾');
               }
             },
             style: ElevatedButton.styleFrom(
