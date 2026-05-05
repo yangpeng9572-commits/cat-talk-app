@@ -7,22 +7,21 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes Linux Auto Review
-- Last updated at: 2026-05-05 08:41:00
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw 小龍女
+- Last updated at: 2026-05-05 08:43 AM (Asia/Taipei)
 
 ---
 
-## Task: P3-9-PHASE9 — home_interaction_page.dart mounted guards
+## Task: P3-9-PHASE10 — about_page.dart + profile_page.dart mounted guards
 
-- **Commit**: `03bdb24`
-- **Task ID**: P3-9-PHASE9
-- **Files Modified**: `lib/screens/home_interaction_page.dart`
-- **Change Summary**: Added `if (!mounted) return;` guards before 5 setState calls after await in async methods:
-  - `_loadTodayStats()`: guard after SharedPreferences await
-  - `_updateCatState()`: guards before 3 setState calls after TranslationHistoryService await
-  - `_doLikeTest()`: guard before setState after BondService.getBond await
+- **Commit**: `7a2bf02`
+- **Task ID**: P3-9-PHASE10
+- **Files Modified**: `lib/screens/about_page.dart`, `lib/screens/profile_page.dart`
+- **Change Summary**: Added `if (!mounted) return;` guards before Navigator.push calls in tap handlers:
+  - `about_page.dart`: TermsOfServicePage (line ~221), PrivacyPolicyPage (line ~240)
+  - `profile_page.dart`: AchievementPage (line ~85), CatWorldPage (line ~96), AboutPage (line ~121), PrivacyPolicyPage (line ~132)
 
 ---
 
@@ -43,4 +42,5 @@ Hermes 每次驗收前應先讀取本檔案。
 - No API key / credential changes
 - No build / signing changes
 - No package changes
-- Only 1 file modified (5 insertions, 3 deletions)
+- Only 2 files modified (6 insertions)
+- P3-9 Navigator guard: continuing through remaining pages
