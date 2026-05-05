@@ -81,6 +81,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
   Future<void> _loadTodayStats() async {
     // 從 local storage 讀取今日統計
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     final today = _todayKey();
     final stats = prefs.getString(today);
     if (stats != null) {
@@ -113,7 +114,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
       // 取得今日 dominant emotion
       final history = await TranslationHistoryService().getByCatIdWithinDays(widget.cat.id, 1);
       if (history.isEmpty) {
-        setState(() => _currentState = 'idle');
+        if (mounted) setState(() => _currentState = 'idle');
         return;
       }
 
@@ -124,7 +125,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
       }
 
       if (emotionCount.isEmpty) {
-        setState(() => _currentState = 'idle');
+        if (mounted) setState(() => _currentState = 'idle');
         return;
       }
 
@@ -138,7 +139,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
         }
       });
 
-      setState(() {
+      if (mounted) setState(() {
         _currentState = _emotionToState(dominant);
       });
     } catch (e) {
@@ -260,6 +261,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
     final score = bondScore + _todayInteractions * 3 + _correctInteractions * 5;
     final clampedScore = score.clamp(0, 100);
 
+    if (!mounted) return;
     setState(() {
       _todayLikeTests++;
       _currentLikeScore = clampedScore;
