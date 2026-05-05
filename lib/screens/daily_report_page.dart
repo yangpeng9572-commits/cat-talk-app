@@ -1185,6 +1185,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
       (c) => c.id == _selectedCatId,
       orElse: () => _cats.first,
     );
+    if (!mounted) return;
     Navigator.push(
       context,
       MaterialPageRoute(
