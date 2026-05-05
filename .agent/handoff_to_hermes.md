@@ -7,22 +7,22 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
 - Last updated by: OpenClaw
-- Last updated at: 2026-05-05 10:39 (Asia/Taipei)
+- Last updated at: 2026-05-05 10:45 (Asia/Taipei)
 
 ---
 
-## Task: P3-9-PHASE18 — summer_window_page.dart mounted guard in _loadData
+## Task: P3-9-PHASE19 — edit_cat_page.dart mounted guard before updateCat call
 
-- **Commit**: `029d10b`
-- **Task ID**: P3-9-PHASE18
-- **Files Modified**: `lib/screens/summer_window_page.dart`
+- **Commit**: `118500a`
+- **Task ID**: P3-9-PHASE19
+- **Files Modified**: `lib/screens/edit_cat_page.dart`
 - **Change Summary**:
-  - Added `if (!mounted) return;` guard before `setState(() => _isLoading = false)` in `_loadData()`
-  - Location: line ~45, after `cats.isNotEmpty` check and before setState
-  - Pattern matches P3-9-PHASE15 memory_cards_page.dart guard pattern
+  - Added `if (!mounted) return;` guard before `await catService.updateCat()` in `_saveCat()`
+  - Location: line ~258, between SharedPreferences/CatService init and updateCat await
+  - Pattern: guard before async service call, matching established P3-9 guard pattern
   - Risk: Low（安全性修補，僅新增 1 行 if (!mounted) return; guard）
 
 ---
@@ -32,7 +32,7 @@ Hermes 每次驗收前應先讀取本檔案。
 ```
 1. cd /home/a0938/cat_talk_proper (Windows: C:\Users\a0938\cat_talk_proper\)
 2. git pull --ff-only
-3. git log --oneline -3 (確認 commit 029d10b 已 pull)
+3. git log --oneline -3 (確認 commit 118500a 已 pull)
 4. flutter analyze
 5. flutter test
 6. Update .agent/hermes_review.md with result
@@ -43,7 +43,7 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Notes
 
-- This is a continuation of P3-9 導航全域防炸設計
-- summer_window_page.dart has 1 async method (_loadData) that calls setState without mounted guard
-- AchievedPage uses `if (mounted)` pattern (already correct, no changes needed)
-- Runner: Static review should confirm the guard is present at line ~45
+- Continuation of P3-9 導航全域防炸設計
+- edit_cat_page.dart _saveCat() had SharedPreferences await before updateCat await
+- guard now added between the two awaits to prevent callback execution if widget unmounts between them
+- _deleteCat() already had proper guard after deleteCat call
