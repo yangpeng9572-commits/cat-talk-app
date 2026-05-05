@@ -75,6 +75,7 @@ class _PersonalityCardPageState extends State<PersonalityCardPage> {
       widget.cat.name,
     );
 
+    if (!mounted) return;
     setState(() {
       _analysis = analysis;
       _isLoading = false;
