@@ -11,12 +11,36 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Result: PASS
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes Windows Auto Review
-- Last reviewed at: 2026-05-05 08:11:02
-- Note: HOTFIX-MOUNTED-GUARD PASS — cat_world_page.dart async callbacks mounted guard 安全修補
+- Last reviewed at: 2026-05-05 08:09:33
+- Note: P3-9-PHASE5 PASS — home_page.dart _showCatSwitcher async Navigator mounted guards
 
 ---
 
 ## Reviewed Tasks
+
+---
+
+### 本輪驗收：P3-9-PHASE5（home_page.dart async Navigator mounted guards）
+- Commit: `ccc430b`
+- Task ID: P3-9-PHASE5
+- Files: `lib/screens/home_page.dart`
+- Status: **PASS**
+
+**驗收結果：**
+- ✅ Flutter analyze：0 errors（239 issues，全為 warnings/info）
+- ✅ Flutter test：264 tests passed
+- ✅ git status：CLEAN（commit 已 push）
+- ✅ 只修改 home_page.dart
+- ✅ 新增 2 個 `if (!mounted) return;` guard（line ~1987、~2020）
+- ✅ 無新功能（安全性修補）
+- ✅ 無 API key / 憑證變更
+- ✅ 無 build / signing 變更
+- ✅ 無 package 變更
+
+**變更摘要（commit `ccc430b`）：**
+- `home_page.dart` `_showCatSwitcher()` BottomSheet 內的 async Navigator callbacks 加入 mounted guard
+- EditCatPage 按鈕：pop 後 push 前檢查 `if (!mounted) return;`
+- AddCatPage 按鈕：pop 後 push 前檢查 `if (!mounted) return;`
 
 ---
 
@@ -272,18 +296,30 @@ Results:
 
 - git status: CLEAN
 
-
-
-### HOTFIX-MOUNTED-GUARD (Hermes Windows Auto Review)
-- Commit: unknown
-- Status: PASS
-
-Results:
-- Flutter analyze: PASS (0 errors (239 issues))
-- Flutter test: PASS (All passed)
-- Flutter build: PASS (SKIPPED)
-- APK: SKIPPED
-- git status: CLEAN
+
+
+
+
+### HOTFIX-MOUNTED-GUARD (Hermes Windows Auto Review)
+
+- Commit: unknown
+
+- Status: PASS
+
+
+
+Results:
+
+- Flutter analyze: PASS (0 errors (239 issues))
+
+- Flutter test: PASS (All passed)
+
+- Flutter build: PASS (SKIPPED)
+
+- APK: SKIPPED
+
+- git status: CLEAN
+
 
 ## 歷史任務摘要
 
