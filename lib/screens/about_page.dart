@@ -44,9 +44,9 @@ class AboutPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  const Text(
-                    '🐱',
-                    style: TextStyle(fontSize: 64),
+                  const Image(
+                    image: AssetImage('assets/branding/logo/cat_talk_logo_icon_main_1024.png'),
+                    height: 80,
                   ),
                   const SizedBox(height: 12),
                   const Text(
