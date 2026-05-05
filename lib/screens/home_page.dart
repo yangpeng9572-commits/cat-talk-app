@@ -1984,6 +1984,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           icon: const Icon(Icons.edit, color: Colors.grey, size: 20),
                           onPressed: () async {
                             Navigator.of(rootContext).pop();
+                            if (!mounted) return;
                             _cats = _catService!.getAllCats();
                             final result = await Navigator.of(rootContext).push<Cat?>(
                               MaterialPageRoute(builder: (_) => EditCatPage(cat: cat)),
@@ -2016,6 +2017,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ElevatedButton.icon(
                 onPressed: () async {
                   Navigator.of(rootContext).pop();
+                  if (!mounted) return;
                   final newCatId = await Navigator.of(rootContext).push<String?>(
                     MaterialPageRoute(builder: (_) => const AddCatPage()),
                   );
