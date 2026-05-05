@@ -11,8 +11,8 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Result: PASS
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes Linux Auto Review
-- Last reviewed at: 2026-05-05 09:13 (Asia/Taipei)
-- Note: Static verification PASS — P3-9-PHASE10-FIX removes 6 StatelessWidget mounted guards (6 deletions)
+- Last reviewed at: 2026-05-05 09:34 (Asia/Taipei)
+- Note: Static verification PASS — P3-9-PHASE12 daily_report_page.dart 5 mounted guards
 
 ---
 
@@ -20,6 +20,33 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 ---
 
+### P3-9-PHASE12（daily_report_page.dart mounted guards）
+- Commit: `62f5689`
+- Task ID: P3-9-PHASE12
+- Files: `lib/screens/daily_report_page.dart`
+- Status: **PASS** (static verification; Flutter CLI unavailable in this Linux runner)
+
+**驗收結果：**
+- ✅ Static code review：5 個 `if (!mounted) return;` guard 確認存在
+  - `_showAddDiaryDialog()` line ~491：`if (!mounted) return;` 在 setState 前（await _userDiaryService.addEntry 之後）
+  - `_shareCardImage()` line ~1332：`if (!mounted) return;` 在 TopToastService.show 之前
+  - `_shareCardImage()` line ~1368：`if (!mounted) return;` 在 imageBytes null check 之前
+  - `_shareCardImage()` line ~1385：`if (!mounted) return;` 在 filePath block 之前
+  - `_shareCardImage()` line ~1396：`if (!mounted) return;` 在 _showShareError() 之前（catch block）
+- ⚠️ Flutter analyze：SKIPPED（Flutter SDK 未安裝於此 Linux runner）
+- ⚠️ Flutter test：SKIPPED（Flutter SDK 未安裝於此 Linux runner）
+- ✅ git log：`62f5689` 已 pull 至 `9790d36`
+- ✅ 只修改 daily_report_page.dart，新增 5 個 guard
+- ✅ 無新功能（安全性修補）
+- ✅ 無 API key / 憑證變更
+- ✅ 無 build / signing 變更
+- ✅ 無 package 變更
+
+**變更摘要（commit `62f5689`）：**
+- `_showAddDiaryDialog()`：await `_userDiaryService.addEntry` 後 setState 前加入 `if (!mounted) return;`
+- `_shareCardImage()`：4 個 guard 保護 TopToastService.show、imageBytes null check、filePath block、catch block 中的 _showShareError()
+
+---
 
 ### 本輪驗收：P3-9-PHASE10（about_page.dart + profile_page.dart mounted guards）
 - Commit: `7a2bf02`
