@@ -24,7 +24,9 @@ class _MemoryCardsPageState extends State<MemoryCardsPage> {
   }
 
   Future<void> _loadCards() async {
+    if (!mounted) return;
     final cards = await _memoryCardService.getMemoryCards(widget.catId);
+    if (!mounted) return;
     setState(() {
       _cards = cards;
       _isLoading = false;
