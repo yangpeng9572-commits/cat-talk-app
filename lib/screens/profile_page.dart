@@ -82,6 +82,7 @@ class ProfilePage extends StatelessWidget {
                 icon: Icons.emoji_events,
                 title: '成就',
                 onTap: () {
+                  if (!mounted) return;
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const AchievementPage()),
@@ -92,6 +93,7 @@ class ProfilePage extends StatelessWidget {
                 icon: Icons.home,
                 title: '她的小世界 🏡',
                 onTap: () {
+                  if (!mounted) return;
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const CatWorldPage()),
@@ -116,6 +118,7 @@ class ProfilePage extends StatelessWidget {
                 icon: Icons.campaign,
                 title: '關於喵心語',
                 onTap: () {
+                  if (!mounted) return;
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const AboutPage()),
@@ -126,6 +129,7 @@ class ProfilePage extends StatelessWidget {
                 icon: Icons.privacy_tip,
                 title: '隱私政策',
                 onTap: () {
+                  if (!mounted) return;
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const PrivacyPolicyPage()),
