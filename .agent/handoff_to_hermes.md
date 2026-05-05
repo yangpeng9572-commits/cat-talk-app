@@ -7,21 +7,22 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-05 08:58:04
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw
+- Last updated at: 2026-05-05 09:10:00 (Asia/Taipei)
 
 ---
 
-## Task: P3-9-PHASE10 — about_page.dart + profile_page.dart mounted guards
+## Task: P3-9-PHASE10 FIX — Remove StatelessWidget mounted guards
 
-- **Commit**: `7a2bf02`
-- **Task ID**: P3-9-PHASE10
+- **Commit**: `b30e021`
+- **Task ID**: P3-9-PHASE10-FIX
 - **Files Modified**: `lib/screens/about_page.dart`, `lib/screens/profile_page.dart`
-- **Change Summary**: Added `if (!mounted) return;` guards before Navigator.push calls in tap handlers:
-  - `about_page.dart`: TermsOfServicePage (line ~221), PrivacyPolicyPage (line ~240)
-  - `profile_page.dart`: AchievementPage (line ~85), CatWorldPage (line ~96), AboutPage (line ~121), PrivacyPolicyPage (line ~132)
+- **Change Summary**: Removed 6 incorrect `if (!mounted) return;` guards from two StatelessWidgets:
+  - `about_page.dart`: 2 guards removed (TermsOfService, PrivacyPolicy tap handlers)
+  - `profile_page.dart`: 4 guards removed (Achievement, CatWorld, AboutPage, PrivacyPolicy tap handlers)
+- **Root Cause**: `AboutPage` and `ProfilePage` are `StatelessWidget`. `mounted` only exists on `State<StatefulWidget>`. Using `if (!mounted) return;` in StatelessWidget causes compilation error "Undefined name 'mounted'".
 
 ---
 
@@ -38,9 +39,9 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Notes
 
-- No new features (security/fault-tolerance fix only)
+- Fix only: removed incorrect guards, no new features added
 - No API key / credential changes
 - No build / signing changes
 - No package changes
-- Only 2 files modified (6 insertions)
-- P3-9 Navigator guard: continuing through remaining pages
+- Only 2 files modified (6 deletions)
+- P3-9 Navigator guard: completed (StatelessWidget pages not applicable for mounted guard)
