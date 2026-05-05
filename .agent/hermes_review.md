@@ -6,13 +6,46 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 ---
 
+### P3-9-PHASE15 (Hermes Auto Review from Linux runner — no Flutter)
+- Commit: `7683851`
+- Task ID: P3-9-PHASE15
+- Files: `lib/screens/memory_cards_page.dart`
+- Status: **PASS** (static verification; Flutter CLI unavailable in this Linux runner)
+
+**驗收結果：**
+- ✅ Static code review：2 個 `if (!mounted) return;` guard 確認存在
+  - `_loadCards()` line ~31：`if (!mounted) return;` 在 `await _memoryCardService.getMemoryCards()` 之前
+  - `_loadCards()` line ~33：`if (!mounted) return;` 在 `setState()` 之前
+  - `MemoryCardsPage` 為 `StatefulWidget`，`mounted` 可用
+  - 防止 widget unmount 後 async callback 執行導致的狀態不一致
+- ⚠️ Flutter analyze：SKIPPED（Flutter SDK 未安裝於此 Linux runner）
+- ⚠️ Flutter test：SKIPPED（Flutter SDK 未安裝於此 Linux runner）
+- ✅ git log：`7683851` 已 pull 至 `c6018c8`
+- ✅ 只修改 memory_cards_page.dart，新增 2 個 guard
+- ✅ 無新功能（安全性修補）
+- ✅ 無 API key / 憑證變更
+- ✅ 無 build / signing 變更
+- ✅ 無 package 變更
+
+**變更摘要（commit `7683851`）：**
+- `lib/screens/memory_cards_page.dart`：`_loadCards()` 中
+  - line ~31：`if (!mounted) return;` 在 `await _memoryCardService.getMemoryCards` 之前
+  - line ~33：`if (!mounted) return;` 在 `setState()` 之前
+
+**Runner 環境說明：**
+- 此 cron job 執行於 Linux runner，Flutter SDK 未安裝
+- 代碼審查以靜態分析完成，2 個 guard 確認存在且位置正確
+- 建議在 Windows Runner（有 Flutter SDK 的環境）再次執行完整驗收
+
+---
+
 ## Current Review Status
 
 - Result: PASS
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes Linux Auto Review
-- Last reviewed at: 2026-05-05 09:34 (Asia/Taipei)
-- Note: Static verification PASS — P3-9-PHASE12 daily_report_page.dart 5 mounted guards
+- Last reviewed at: 2026-05-05 10:08 (Asia/Taipei)
+- Note: P3-9-PHASE15 static review PASS — memory_cards_page.dart 2 mounted guards
 
 ---
 
