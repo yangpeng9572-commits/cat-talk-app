@@ -130,6 +130,7 @@ class _CatsPageState extends State<CatsPage> {
     return GestureDetector(
       onTap: () async {
         // 編輯這隻貓咪
+        if (!mounted) return;
         final updatedCat = await Navigator.push<Cat?>(
           context,
           MaterialPageRoute(builder: (context) => EditCatPage(cat: cat)),
@@ -189,6 +190,7 @@ class _CatsPageState extends State<CatsPage> {
     return GestureDetector(
       onTap: () async {
         // 添加新貓咪
+        if (!mounted) return;
         final newCatId = await Navigator.push<String?>(
           context,
           MaterialPageRoute(builder: (context) => const AddCatPage()),
