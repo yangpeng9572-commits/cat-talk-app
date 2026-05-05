@@ -260,6 +260,7 @@ class _EditCatPageState extends State<EditCatPage> {
 
     final prefs = await SharedPreferences.getInstance();
     final catService = CatService(prefs);
+    if (!mounted) return;
     await catService.updateCat(updatedCat);
 
     if (!mounted) return;
