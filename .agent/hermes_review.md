@@ -438,3 +438,33 @@ Results:
 - Flutter test: SKIPPED (tools/ only, not Flutter)
 - Python compile: PASS (0 errors)
 - git status: CLEAN
+
+---
+
+### P3-9-PHASE8 (Hermes Auto Review from Linux runner — no Flutter)
+
+- Commit: `b3d9f7c`
+- Task ID: P3-9-PHASE8
+- Files: `lib/screens/cat_world_page.dart`
+- Status: **PASS** (static verification; Flutter CLI unavailable in this Linux runner)
+
+**驗收結果：**
+- ✅ Static code review：guard confirmed at line 417 (event card onTap Navigator.push) and line 1080 (_openMemoryCards Navigator.push)
+- ⚠️ Flutter analyze：SKIPPED (Flutter SDK not installed in this Linux runner environment)
+- ⚠️ Flutter test：SKIPPED (Flutter SDK not installed in this Linux runner environment)
+- ✅ git status：CLEAN（commit `b3d9f7c` already pushed to remote）
+- ✅ 只修改 cat_world_page.dart，新增 2 個 guard
+- ✅ 無新功能（安全性修補）
+- ✅ 無 API key / 憑證變更
+- ✅ 無 build / signing 變更
+- ✅ 無 package 變更
+
+**變更摘要（commit `b3d9f7c`）：**
+- `cat_world_page.dart`：兩處 `Navigator.push` 前加入 `if (!mounted) return;` guard
+  - line ~417：夏日窗邊活動卡 onTap handler
+  - line ~1080：`_openMemoryCards()` function
+
+**Runner 環境說明：**
+- 此 cron job 執行於 Linux runner，Flutter SDK 未安裝
+- 代碼審查以靜態分析完成，guard 確認存在且位置正確
+- 建議在 Windows Runner（有 Flutter SDK 的環境）再次執行完整驗收
