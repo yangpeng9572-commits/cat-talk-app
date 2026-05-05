@@ -1931,6 +1931,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ElevatedButton.icon(
                       onPressed: () async {
                         Navigator.of(rootContext).pop();
+                        if (!mounted) return;
                         final newCatId = await Navigator.of(rootContext).push<String?>(
                           MaterialPageRoute(builder: (_) => const AddCatPage()),
                         );
