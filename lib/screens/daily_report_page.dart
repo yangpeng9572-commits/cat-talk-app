@@ -488,7 +488,8 @@ class _DailyReportPageState extends State<DailyReportPage> {
         content: controller.text.trim(),
       );
       final entries = _userDiaryService.getByCatId(_selectedCatId!);
-      if (mounted) setState(() => _userDiaryEntries = entries);
+      if (!mounted) return;
+      setState(() => _userDiaryEntries = entries);
       TopToastService.success(context, message: '已記錄下來了 💕');
     }
     controller.dispose();
@@ -1328,6 +1329,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
     if (_currentDiary == null || _currentCat == null) return;
 
     // Show loading
+    if (!mounted) return;
     TopToastService.show(context, message: '產生分享卡片中...', backgroundColor: KawaiiTheme.primaryPink);
 
     // Get top speech (from latest translation if available)
@@ -1391,6 +1393,7 @@ class _DailyReportPageState extends State<DailyReportPage> {
         _showShareError();
       }
     } catch (e) {
+      if (!mounted) return;
       _showShareError();
     }
   }
@@ -1413,7 +1416,6 @@ class _DailyReportPageState extends State<DailyReportPage> {
 
     // Share via system share
     await Share.share(caption);
-    if (!mounted) return;
   }
 
   /// 顯示分享錯誤
