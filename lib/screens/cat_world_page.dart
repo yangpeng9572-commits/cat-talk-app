@@ -414,6 +414,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
                 if (_birthdayCatToday != null) _buildBirthdayEventCard(),
                 GestureDetector(
                   onTap: () {
+                    if (!mounted) return;
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const SummerWindowPage()),
@@ -1076,6 +1077,7 @@ class _CatWorldPageState extends State<CatWorldPage> with SingleTickerProviderSt
       _showToast('先新增貓咪，我才能幫她佈置小世界 🐱');
       return;
     }
+    if (!mounted) return;
     Navigator.push(
       context,
       MaterialPageRoute(
