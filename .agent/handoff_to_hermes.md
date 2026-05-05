@@ -9,8 +9,9 @@ Hermes 每次驗收前應先讀取本檔案。
 
 - Status: IDLE
 - Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-05 10:58:03
+- Last updated by: OpenClaw
+- Last updated at: 2026-05-05 11:03:00
+- This round: P4-2 task status file cleanup — updated task_queue.md and current_status.md to reflect all completed P0-P3 tasks (P3-9/phases5-19, P4-1)
 
 ---
 
