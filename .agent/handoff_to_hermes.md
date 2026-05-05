@@ -7,48 +7,52 @@ Hermes 每次驗收前應先讀取本檔案。
 
 ## Current Handoff Status
 
-- Status: IDLE
-- Waiting for Hermes: NO
-- Last updated by: Hermes Windows Auto Review
-- Last updated at: 2026-05-05 08:17:02
+- Status: WAITING_FOR_HERMES
+- Waiting for Hermes: YES
+- Last updated by: OpenClaw Auto Dev v2 (cron:c593b84c-16b8-4cc0-be58-e3d358641b2d)
+- Last updated at: 2026-05-05 00:19 UTC (08:19 AM Asia/Taipei)
 
 ---
 
-## Task: P3-9 Phase 6 — cat_pose_preview_page.dart Navigator.pushReplacement guard
+## Task: P3-9 Phase 7 — daily_report_page.dart _openPersonalityCard Navigator.push guard
 
-- **Task ID:** P3-9-PHASE6
-- **Task name:** P3-9 導航全域防炸設計 — cat_pose_preview_page.dart Navigator.pushReplacement guard
+- **Task ID:** P3-9-PHASE7
+- **Task name:** P3-9 導航全域防炸設計 — daily_report_page.dart _openPersonalityCard Navigator.push guard
 - **Owner:** OpenClaw (自主研發 cron)
 - **Need:** Hermes 驗收
 
 ### 修改背景
 
-P3-9 導航全域防炸設計第六階段：為 `_retakePhoto()` async function 中執行 `Navigator.pushReplacement` 前加入 mounted guard。
+P3-9 導航全域防炸設計第七階段：為 `_openPersonalityCard()` function 中執行 `Navigator.push` 前加入 mounted guard。
 
 ### 修改檔案（共 1 個）
 
 | 檔案 | 變更 |
 |------|------|
-| `lib/screens/cat_pose_preview_page.dart` | 新增 1 個 `if (!mounted) return;` guard |
+| `lib/screens/daily_report_page.dart` | 新增 1 個 `if (!mounted) return;` guard |
 
-### 變更摘要（commit `5afb728`）
+### 變更摘要（commit `4b46401`）
 
-在 `_retakePhoto()` async function 中，`Navigator.pushReplacement` 前加入 mounted guard：
+在 `_openPersonalityCard()` 中，`Navigator.push` 前加入 mounted guard：
 
 ```dart
-// 直接替換當前預覽頁的 imagePath，避免 Navigator 堆疊問題
-if (!mounted) return;
-setState(() {
-  // widget.imagePath 是 final，但我們用新路徑重建
-});
-// 使用 pushReplacement 避免堆疊問題
-if (!mounted) return;  // <-- 新增
-Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (context) => CatPosePreviewPage(imagePath: imagePath),
-  ),
-);
+void _openPersonalityCard() {
+  if (_selectedCatId == null) return;
+  final cat = _cats.firstWhere(
+    (c) => c.id == _selectedCatId,
+    orElse: () => _cats.first,
+  );
+  if (!mounted) return;  // <-- 新增
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => PersonalityCardPage(
+        catId: _selectedCatId!,
+        cat: cat,
+      ),
+    ),
+  );
+}
 ```
 
 ### 合規檢查清單
@@ -58,7 +62,7 @@ Navigator.pushReplacement(
 | 只加 guard，不改業務邏輯 | ✅ 是 |
 | 不修改 Navigator 跳轉目標 | ✅ 是 |
 | 只修改 1 個檔案 | ✅ 是 |
-| Flutter analyze 0 errors | （待 Hermes 確認）|
+| 只新增 1 行 | ✅ 是 |
 | 無 API key / 憑證變更 | ✅ 是 |
 | 無 build / signing 變更 | ✅ 是 |
 | 無 package 變更 | ✅ 是 |
@@ -66,26 +70,26 @@ Navigator.pushReplacement(
 ### git status --short
 
 ```
-M  lib/screens/cat_pose_preview_page.dart
+M  lib/screens/daily_report_page.dart
 ```
 
 ### Commit
 
-- Hash: `5afb728`
-- Message: `fix(cat_pose_preview): add mounted guard before Navigator.pushReplacement in _retakePhoto`
+- Hash: `4b46401`
+- Message: `fix(daily_report): add mounted guard before Navigator.push in _openPersonalityCard`
 
 ### Required Hermes Actions
 
 1. `git pull --ff-only`
 2. 執行 `flutter analyze` — 確認 0 errors
 3. 執行 `flutter test` — 確認 264 tests passed
-4. 檢查 `lib/screens/cat_pose_preview_page.dart` line ~278：`Navigator.pushReplacement` 前有 `if (!mounted) return;`
+4. 檢查 `lib/screens/daily_report_page.dart` line ~1187：`Navigator.push` 前有 `if (!mounted) return;`
 5. 確認 guard 只保護 navigation，不影響業務邏輯
 
 ### 驗收標準
 
 1. ✅ Flutter analyze：0 errors
 2. ✅ Flutter test：264 tests passed
-3. ✅ 只修改 cat_pose_preview_page.dart，新增 1 個 guard
+3. ✅ 只修改 daily_report_page.dart，新增 1 個 guard
 4. ✅ git status：CLEAN（commit 已 push）
 5. ✅ 無其他意外變更
