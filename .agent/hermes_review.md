@@ -566,3 +566,33 @@ Results:
 - 此 cron job 執行於 Linux runner，Flutter SDK 未安裝
 - 代碼審查以靜態分析完成，guard 確認存在且位置正確
 - 建議在 Windows Runner（有 Flutter SDK 的環境）再次執行完整驗收
+
+### P3-9-PHASE11 (Hermes Auto Review from Linux runner — no Flutter)
+- Commit: `32d66a4`
+- Task ID: P3-9-PHASE11
+- Files: `lib/screens/cats_page.dart`
+- Status: **PASS** (static verification; Flutter CLI unavailable in this Linux runner)
+
+**驗收結果：**
+- ✅ Static code review：2 個 `if (!mounted) return;` guard 確認存在
+  - `_buildCatCard()` onTap line ~132：`if (!mounted) return;` 在 Navigator.push (EditCatPage) 之前
+  - `_buildAddCatCard()` onTap line ~193：`if (!mounted) return;` 在 Navigator.push (AddCatPage) 之前
+- ⚠️ Flutter analyze：SKIPPED (Flutter SDK not installed in this Linux runner environment)
+- ⚠️ Flutter test：SKIPPED (Flutter SDK not installed in this Linux runner environment)
+- ✅ git status：CLEAN（commit `32d66a4` already pushed to remote）
+- ✅ 只修改 cats_page.dart，新增 2 個 guard
+- ✅ 無新功能（安全性修補）
+- ✅ 無 API key / 憑證變更
+- ✅ 無 build / signing 變更
+- ✅ 無 package 變更
+
+**變更摘要（commit `32d66a4`）：**
+- `lib/screens/cats_page.dart`：兩處 Navigator.push 前加入 `if (!mounted) return;` guard
+  - _buildCatCard onTap：保護 EditCatPage 導航
+  - _buildAddCatCard onTap：保護 AddCatPage 導航
+  - 防止 widget unmount 後 async Navigator callback 執行
+
+**Runner 環境說明：**
+- 此 cron job 執行於 Linux runner，Flutter SDK 未安裝
+- 代碼審查以靜態分析完成，2 個 guard 確認存在且位置正確
+- 建議在 Windows Runner（有 Flutter SDK 的環境）再次執行完整驗收
