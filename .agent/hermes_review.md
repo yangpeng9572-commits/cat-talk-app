@@ -6,6 +6,28 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 ---
 
+### P3-9-PHASE16 (Hermes Auto Review from Windows Runner — WSL/cmd.exe)
+- Commit: `f76c953`
+- Task ID: P3-9-PHASE16
+- Files: `lib/screens/personality_card_page.dart`
+- Status: **PASS** ✅
+
+**驗收結果：**
+- ✅ Flutter analyze：0 errors（239 issues，全為 warnings/info，無新增問題）
+- ✅ Flutter test：264 tests passed（18.07s）
+- ✅ git log：`f76c953` 已 pull 至 `1e0ca92`
+- ✅ 只修改 personality_card_page.dart，新增 1 個 guard
+- ✅ 無新功能（安全性修補）
+- ✅ 無 API key / 憑證變更
+- ✅ 無 build / signing 變更
+- ✅ 無 package 變更
+
+**變更摘要（commit `f76c953`）：**
+- `lib/screens/personality_card_page.dart`：`_loadAnalysis()` 中
+  - `if (!mounted) return;` guard 在 `setState()` 之前，防止 unmount 後 async callback 執行
+
+---
+
 ### P3-9-PHASE15 (Hermes Auto Review from Linux runner — no Flutter)
 - Commit: `7683851`
 - Task ID: P3-9-PHASE15
@@ -43,9 +65,9 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 - Result: PASS
 - Waiting for OpenClaw fix: NO
-- Last reviewed by: Hermes Linux Auto Review
-- Last reviewed at: 2026-05-05 10:08 (Asia/Taipei)
-- Note: P3-9-PHASE15 static review PASS — memory_cards_page.dart 2 mounted guards
+- Last reviewed by: Hermes Auto Review (Windows Runner via WSL/cmd.exe)
+- Last reviewed at: 2026-05-05 10:14 (Asia/Taipei)
+- Note: P3-9-PHASE16 PASS — personality_card_page.dart 1 mounted guard, flutter analyze 0 errors, 264 tests passed
 
 ---
 
