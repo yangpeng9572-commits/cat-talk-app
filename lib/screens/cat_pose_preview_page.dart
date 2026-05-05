@@ -275,6 +275,7 @@ class _CatPosePreviewPageState extends State<CatPosePreviewPage> {
         // widget.imagePath 是 final，但我們用新路徑重建
       });
       // 使用 pushReplacement 避免堆疊問題
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
