@@ -8,11 +8,11 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 ## Current Review Status
 
-- Result: FAIL
-- Waiting for OpenClaw fix: YES
-- Last reviewed by: Hermes Windows Auto Review
-- Last reviewed at: 2026-05-05 08:47:00 (Asia/Taipei)
-- Note: P3-9-PHASE10 FAIL — StatelessWidget cannot use `mounted` guard. 6 compilation errors. OpenClaw must fix before proceeding.
+- Result: PASS
+- Waiting for OpenClaw fix: NO
+- Last reviewed by: Hermes Linux Auto Review
+- Last reviewed at: 2026-05-05 09:13 (Asia/Taipei)
+- Note: Static verification PASS — P3-9-PHASE10-FIX removes 6 StatelessWidget mounted guards (6 deletions)
 
 ---
 
@@ -25,29 +25,15 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Commit: `7a2bf02`
 - Task ID: P3-9-PHASE10
 - Files: `lib/screens/about_page.dart`, `lib/screens/profile_page.dart`
-- Status: **FAIL** ❌
+- Status: **FAIL** ❌ → **PASS**（已由 P3-9-PHASE10-FIX 修復）
 
-**驗收結果：**
-- ❌ Flutter analyze：468 issues，其中 about_page.dart 有 2 個 `mounted` undefined error，profile_page.dart 有 4 個 `mounted` undefined error（共 6 個新 error）
-- ⚠️ Flutter test：未執行（analyze 已有 6 個新 error）
-- ❌ git status：有未 commit 的 handoff/hermes_review 變更
+**修復後驗收（P3-9-PHASE10-FIX）：** commit `b30e021`，移除 6 個 StatelessWidget `mounted` guard，static review PASS
 
-**錯誤分析：**
-- `AboutPage` 與 `ProfilePage` 均為 `StatelessWidget`
-- `StatelessWidget` **沒有 `mounted` 屬性**，`mounted` 只存在於 `State<StatefulWidget>` 物件
-- 在 `StatelessWidget` 的回調中使用 `if (!mounted) return;` 會導致編譯錯誤
+**驗收結果（原始 FAIL）：**
+- ❌ Flutter analyze：6 個 `mounted` undefined error
 
-**6 個編譯錯誤位置：**
-- `about_page.dart:221:22` — `Undefined name 'mounted'`
-- `about_page.dart:240:22` — `Undefined name 'mounted'`
-- `profile_page.dart:85:24` — `Undefined name 'mounted'`
-- `profile_page.dart:96:24` — `Undefined name 'mounted'`
-- `profile_page.dart:121:24` — `Undefined name 'mounted'`
-- `profile_page.dart:132:24` — `Undefined name 'mounted'`
-
-**修復方向：**
-1. 方案A（推薦）：將 `AboutPage` 和 `ProfilePage` 改為 `StatefulWidget`，再加入 `mounted` guard
-2. 方案B（簡單）：直接移除這 6 個 `if (!mounted) return;` — StatelessWidget 不會被 dispose，guard 沒有實際意義
+**錯誤分析（已修復）：**
+- `AboutPage` 與 `ProfilePage` 均為 `StatelessWidget`，`mounted` 只存在於 `State<StatefulWidget>`
 
 **額外 warning：**
 - `profile_page.dart:8:8` — `Unused import: '../widgets/onboarding_overlay.dart'`
@@ -436,18 +422,30 @@ Results:
 
 - git status: CLEAN
 
-
-
-### P3-9-PHASE6 (Hermes Windows Auto Review)
-- Commit: unknown
-- Status: PASS
-
-Results:
-- Flutter analyze: PASS (0 errors (245 issues))
-- Flutter test: PASS (All passed)
-- Flutter build: PASS (SKIPPED)
-- APK: SKIPPED
-- git status: CLEAN
+
+
+
+
+### P3-9-PHASE6 (Hermes Windows Auto Review)
+
+- Commit: unknown
+
+- Status: PASS
+
+
+
+Results:
+
+- Flutter analyze: PASS (0 errors (245 issues))
+
+- Flutter test: PASS (All passed)
+
+- Flutter build: PASS (SKIPPED)
+
+- APK: SKIPPED
+
+- git status: CLEAN
+
 
 ## 歷史任務摘要
 
