@@ -623,3 +623,33 @@ Results:
 - 此 cron job 執行於 Linux runner，Flutter SDK 未安裝
 - 代碼審查以靜態分析完成，2 個 guard 確認存在且位置正確
 - 建議在 Windows Runner（有 Flutter SDK 的環境）再次執行完整驗收
+
+### P3-9-PHASE13 (Hermes Auto Review from Linux runner — no Flutter)
+- Commit: `ca4315d`
+- Task ID: P3-9-PHASE13
+- Files: `lib/screens/home_page.dart`
+- Status: **PASS** (static verification; Flutter CLI unavailable in this Linux runner)
+
+**驗收結果：**
+- ✅ Static code review：`if (!mounted) return;` guard 確認存在（line ~864）
+  - `ElevatedButton.icon onPressed`：`if (!mounted) return;` 在 `await Navigator.push<String?>` (AddCatPage) 之前
+  - 防止 widget unmount 後 async Navigator callback 執行
+  - 符合現有模式：guard → await → null check → _loadCatData → setState
+- ⚠️ Flutter analyze：SKIPPED（Flutter SDK 未安裝於此 Linux runner）
+- ⚠️ Flutter test：SKIPPED（Flutter SDK 未安裝於此 Linux runner）
+- ✅ git log：`ca4315d` 已 pull 至 `a09fa37`
+- ✅ 只修改 home_page.dart，新增 1 個 guard
+- ✅ 無新功能（安全性修補）
+- ✅ 無 API key / 憑證變更
+- ✅ 無 build / signing 變更
+- ✅ 無 package 變更
+
+**變更摘要（commit `ca4315d`）：**
+- `lib/screens/home_page.dart`：`ElevatedButton.icon onPressed` 中 `await Navigator.push<String?>` 前加入 `if (!mounted) return;` guard
+- 這是 home_page.dart 第 11 個 mounted guard
+
+**Runner 環境說明：**
+- 此 cron job 執行於 Linux runner，Flutter SDK 未安裝
+- 代碼審查以靜態分析完成，guard 確認存在且位置正確
+- 建議在 Windows Runner（有 Flutter SDK 的環境）再次執行完整驗收
+
