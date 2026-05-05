@@ -75,7 +75,7 @@ OpenClaw 不直接修改 Windows repo。
 - P4-1 ✅ PASS（Dashboard Phase2）
 
 ### 待 Andy 提供任務
-- P1-6：Logo整合（需美術素材）
+- ~~P1-6：Logo整合（需美術素材）~~ ✅ DONE (commit 72acbaa)
 - P2-2：姿勢拍照必須在App內完成
 - P2-3：姿勢照片品質檢查
 
@@ -86,7 +86,7 @@ OpenClaw 不直接修改 Windows repo。
 - ✅ YES — handoff IDLE, hermes_review PASS, git CLEAN
 - 所有 P0-P4-2 任務已全部完成 ✅
 - 2026-05-05 20:59: P3-9 完整複查完成（無遺漏 async Navigator 呼叫）
-- 待 Andy 提供任務：P1-6（Logo素材）、P2-2（姿勢拍照App內完成）、P2-3（照片品質檢查）
+- 待 Andy 提供任務：P2-2（姿勢拍照App內完成）、P2-3（照片品質檢查）
 
 ---
 

@@ -363,7 +363,7 @@ OpenClaw 每輪回報必須包含：
 | P1-3 | ✅ PASS | 任務內容調整 — 已替換 translate/feedback → pose_photo + cat_world_interact（commit 64d3843，Hermes pass b89bd28） |
 | P1-4 | ✅ DONE (commit b1ac215) | 記錄頁改生活日記 |
 | P1-5 | ✅ DONE (commit c910ca6) | 品牌統一 |
-| P1-6 | TODO | Logo整合（需 Andy 提供素材）|
+| P1-6 | ✅ DONE (commit 72acbaa) | Logo初版整合 — Android mipmap icons + AboutPage logo（等待 Hermes 驗收）|
 | P1-7 | ✅ DONE (commit b4adbfc) | 新手教程黑屏 |
 | P1-8 | ✅ DONE (commit e1c5654) | 照片同步修正 |
 | P1-9 | ✅ DONE (已有頭像編輯入口) | 編輯頁頭像入口 |
