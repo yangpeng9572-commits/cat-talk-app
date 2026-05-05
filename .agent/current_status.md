@@ -51,34 +51,40 @@ OpenClaw 不直接修改 Windows repo。
 
 ## 當前任務狀態
 
-### 所有 P2/P3 任務已完成
+### 所有 P0/P1/P2/P3 任務已完成
+- P0-1 ✅ PASS（刪除貓咪後正確返回）
+- P0-2 ✅ PASS（5+隻貓滑動）
+- P0-3 ✅ PASS（空白處可返回）
+- P0-4 ✅ PASS（全App滑動）
+- P0-5 ✅ PASS（TopToast 統一）
+- P1-1~P1-10 ✅ DONE/PASS（全部完成）
 - P2-1 ✅ PASS
 - P2-4 ✅ PASS
 - P2-5 ✅ PASS
-- P3-1 ✅ 全批次完成
+- P2-6 ✅ DONE
+- P2-7 ✅ PASS_WITH_ASSET_PENDING
+- P3-1 ✅ PASS
 - P3-2 ✅ PASS
-- TOOL-1 ✅ PASS
+- P3-3 ✅ DONE
+- P3-4 ✅ DONE
+- P3-5 ✅ DONE
+- P3-6 ✅ DONE
+- P3-7 ✅ PASS
+- P3-8 ✅ PASS
+- P3-9 ✅ DONE（phases 5-19, Hermes validated 2026-05-05）
+- P4-1 ✅ PASS（Dashboard Phase2）
 
-### 執行中（等待 Hermes 驗收）
-- P0-4：全 App 超出螢幕都必須能滑動（commit bce2395）
-
-### 等待 Hermes 手機實測回歸
-- P0-1 新手教程 replayOnboarding
-- P0-2 翻譯記錄頁空白
-- P1-1 新增/編輯貓咪完整性
-- P1-2 貓咪頭像持久化
-- P0-6 刪除貓咪功能
-
-### 待 Andy 提供任務描述
-- P2-2（task_queue.md 無描述）
+### 待 Andy 提供任務
+- P1-6：Logo整合（需美術素材）
+- P2-2：姿勢拍照必須在App內完成
+- P2-3：姿勢照片品質檢查
 
 ---
 
 ## 是否允許 OpenClaw 開新任務
 
-- P0-1 + P0-3 已由 Hermes 驗收 PASS
-- P0-4 已完成，等待 Hermes 驗收
-- 下一個候選任務（需等 Hermes PASS）：P0-5（完成提示改上方）
+- ✅ YES — handoff IDLE, hermes_review PASS, git CLEAN
+- 本輪執行：P4-2 任務狀態檔整理
 
 ---
 

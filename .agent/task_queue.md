@@ -380,14 +380,14 @@ OpenClaw 每輪回報必須包含：
 | P3-3 | ✅ DONE (commit 710bd1b) | 夏日窗邊頭像顯示（Hermes via P3-7 review window）|
 | P3-7 | ✅ PASS | 全App空狀態統一（Hermes cdedea1, 2026-05-04）|
 | P3-8 | ✅ PASS | TopToastService統一入口（Hermes c068f67, 2026-05-04）|
-| P3-9 | TODO | 導航全域防炸設計 |
+| P3-9 | ✅ DONE (phases 5-19 PASS) | 導航全域防炸設計 — 所有主要畫面已加 mounted guard（Hermes validated 2026-05-05） |
 | P3-6 | ✅ DONE (commit 867369c) | 情緒報告頁貓咪頭像顯示（Hermes 2026-05-04）|
-| P4-1 | TODO | Agent Monitor第二階段 |
-| P4-2 | TODO | 任務狀態檔整理 |
+| P4-1 | ✅ PASS | Dashboard Phase2 — tools/ 更新（Hermes 0b569a2, 2026-05-05） |
+| P4-2 | 🔄 IN_PROGRESS | 本輪更新 tracker 狀態 |
 
 ---
 
-_Last updated: 2026-05-05 07:09 GMT+8_
+_Last updated: 2026-05-05 11:03 GMT+8_
 
 ## 附：P3-9 導航全域防炸設計 — 執行備忘
 
