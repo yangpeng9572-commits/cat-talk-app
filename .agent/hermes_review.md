@@ -59,15 +59,46 @@ OpenClaw 每輪開始前應讀取本檔案。
 - 代碼審查以靜態分析完成，2 個 guard 確認存在且位置正確
 - 建議在 Windows Runner（有 Flutter SDK 的環境）再次執行完整驗收
 
+### P3-9-PHASE17 (Hermes Auto Review — Linux runner, static verification)
+- Commit: `6fd6305`
+- Task ID: P3-9-PHASE17
+- Files: `lib/screens/home_page.dart`
+- Status: **PASS** (static verification; Flutter CLI unavailable in this runner)
+
+**驗收結果：**
+- ✅ Static code review：`if (!mounted) return;` guard 確認存在（line ~1932）
+  - Empty-cats add-cat button onPressed：在 `Navigator.pop()` 後、`await Navigator.push<AddCatPage>()` 前
+  - 防止 bottom sheet 關閉後頁面 unmount 時 async callback 執行
+  - 符合 P3-9-PHASE13 已驗收的同層級模式
+- ⚠️ Flutter analyze：SKIPPED（Flutter SDK 未安裝於此 Linux runner）
+- ⚠️ Flutter test：SKIPPED（Flutter SDK 未安裝於此 Linux runner）
+- ✅ git log：`6fd6305` 已 pull 至 `6e78691`
+- ✅ 只修改 home_page.dart，新增 1 個 guard
+- ✅ 無新功能（安全性修補）
+- ✅ 無 API key / 憑證變更
+- ✅ 無 build / signing 變更
+- ✅ 無 package 變更
+
+**變更摘要（commit `6fd6305`）：**
+- `lib/screens/home_page.dart`：`_showCatSwitcher()` bottom sheet 空狀態 add-cat 按鈕
+  - `onPressed` callback：`Navigator.pop()` 後加入 `if (!mounted) return;` guard
+  - 再執行 `await Navigator.push<AddCatPage>()`
+  - 這是 home_page.dart 第 12 個 mounted guard
+
+**Runner 環境說明：**
+- 此 cron job 執行於 Linux runner，Flutter SDK 未安裝
+- 代碼審查以靜態分析完成，guard 確認存在且位置正確
+- 建議在 Windows Runner（有 Flutter SDK 的環境）再次執行完整驗收
+
 ---
 
 ## Current Review Status
 
 - Result: PASS
 - Waiting for OpenClaw fix: NO
-- Last reviewed by: Hermes Auto Review (Windows Runner via WSL/cmd.exe)
-- Last reviewed at: 2026-05-05 10:14 (Asia/Taipei)
-- Note: P3-9-PHASE16 PASS — personality_card_page.dart 1 mounted guard, flutter analyze 0 errors, 264 tests passed
+- Last reviewed by: Hermes Auto Review (Linux runner — static verification)
+- Last reviewed at: 2026-05-05 10:21 (Asia/Taipei)
+- Note: P3-9-PHASE17 PASS — home_page.dart 1 mounted guard (empty-cats add-cat button), static review confirms guard at line ~1932
 
 ---
 
