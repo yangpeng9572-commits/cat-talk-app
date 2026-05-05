@@ -11,12 +11,35 @@ OpenClaw 每輪開始前應讀取本檔案。
 - Result: PASS
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes Windows Auto Review
-- Last reviewed at: 2026-05-05 08:17:02
-- Note: P3-9-PHASE5 PASS — home_page.dart _showCatSwitcher async Navigator mounted guards
+- Last reviewed at: 2026-05-05 08:15:00
+- Note: P3-9-PHASE6 PASS — cat_pose_preview_page.dart _retakePhoto Navigator.pushReplacement guard
 
 ---
 
 ## Reviewed Tasks
+
+---
+
+### 本輪驗收：P3-9-PHASE6（cat_pose_preview_page.dart Navigator.pushReplacement guard）
+- Commit: `5afb728`
+- Task ID: P3-9-PHASE6
+- Files: `lib/screens/cat_pose_preview_page.dart`
+- Status: **PASS**
+
+**驗收結果：**
+- ✅ Flutter analyze：0 errors（239 issues，全為 warnings/info）
+- ✅ Flutter test：264 tests passed
+- ✅ git status：CLEAN（commit 已 push）
+- ✅ 只修改 cat_pose_preview_page.dart
+- ✅ 新增 1 個 `if (!mounted) return;` guard（line ~278）
+- ✅ guard 保護 Navigator.pushReplacement，防止 unmount 後執行
+- ✅ 無新功能（安全性修補）
+- ✅ 無 API key / 憑證變更
+- ✅ 無 build / signing 變更
+- ✅ 無 package 變更
+
+**變更摘要（commit `5afb728`）：**
+- `cat_pose_preview_page.dart`：`_retakePhoto()` 中 `Navigator.pushReplacement` 前加入 mounted guard
 
 ---
 
@@ -320,18 +343,30 @@ Results:
 
 - git status: CLEAN
 
-
-
-### P3-9-PHASE5 (Hermes Windows Auto Review)
-- Commit: unknown
-- Status: PASS
-
-Results:
-- Flutter analyze: PASS (0 errors (239 issues))
-- Flutter test: PASS (All passed)
-- Flutter build: PASS (SKIPPED)
-- APK: SKIPPED
-- git status: CLEAN
+
+
+
+
+### P3-9-PHASE5 (Hermes Windows Auto Review)
+
+- Commit: unknown
+
+- Status: PASS
+
+
+
+Results:
+
+- Flutter analyze: PASS (0 errors (239 issues))
+
+- Flutter test: PASS (All passed)
+
+- Flutter build: PASS (SKIPPED)
+
+- APK: SKIPPED
+
+- git status: CLEAN
+
 
 ## 歷史任務摘要
 
