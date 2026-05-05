@@ -42,6 +42,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
     if (cats.isNotEmpty) {
       _currentCat = cats.first;
     }
+    if (!mounted) return;
     setState(() => _isLoading = false);
   }
 
