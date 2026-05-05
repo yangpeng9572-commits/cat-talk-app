@@ -33,9 +33,11 @@ class _LoveMeterPageState extends State<LoveMeterPage> {
     await Future.delayed(const Duration(seconds: 2));
 
     // 產生隨機結果
+    if (!mounted) return;
     final score = 65 + (DateTime.now().millisecond % 30);
     final messageIndex = DateTime.now().second % _messages.length;
 
+    if (!mounted) return;
     setState(() {
       _loveScore = score;
       _loveMessage = _messages[messageIndex];
