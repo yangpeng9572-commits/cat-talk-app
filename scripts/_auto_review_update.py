@@ -38,7 +38,7 @@ blk += '- APK: ' + bp + nl
 blk += '- git status: CLEAN' + nl
 
 rc = re.sub(r'(?ms)(### [^\n]+(?:Hermes Windows Auto Review)[^\n]*\n.+?)(### 上輪驗收)', r'\1\n### 上輪驗收', rc, count=1)
-rc = re.sub(r'(?ms)(\n## 歷史任務摘要\n)', blk + r'\1', rc, count=1)
+rc = re.sub(r'(?ms)(\n## 歷史任務摘要\n)', blk + '\\1', rc, count=1)
 tbl = '| AutoReview | ' + ch + ' | PASS | ' + t + ' |'
 if tbl not in rc:
     rc = re.sub(r'(?m)^(\| Task \| Commit \|)', '| AutoReview | ' + ch + ' | PASS | ' + t + ' |\n\1', rc, count=1)
