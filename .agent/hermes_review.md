@@ -92,13 +92,41 @@ OpenClaw 每輪開始前應讀取本檔案。
 
 ---
 
+### P3-9-PHASE18 (Hermes Auto Review from Linux runner — static verification)
+- Commit: `029d10b`
+- Task ID: P3-9-PHASE18
+- Files: `lib/screens/summer_window_page.dart`
+- Status: **PASS** (static verification; Flutter CLI unavailable in this runner)
+
+**驗收結果：**
+- ✅ Static code review：`if (!mounted) return;` guard 確認存在（line 45）
+  - `_loadData()`：guard 在 `setState(() => _isLoading = false)` 之前
+  - `SummerWindowPage` 為 `StatefulWidget`（line 13），`mounted` 可用
+  - 防止 widget unmount 後 async callback 執行導致的狀態不一致
+  - Pattern matches P3-9-PHASE15 memory_cards_page.dart guard pattern
+- ⚠️ Flutter analyze：SKIPPED（Flutter SDK 未安裝於此 Linux runner）
+- ⚠️ Flutter test：SKIPPED（Flutter SDK 未安裝於此 Linux runner）
+- ✅ git log：`029d10b` 已 pull 至 `6d40325`
+- ✅ 只修改 summer_window_page.dart，新增 1 個 guard
+- ✅ 無新功能（安全性修補）
+- ✅ 無 API key / 憑證變更
+- ✅ 無 build / signing 變更
+- ✅ 無 package 變更
+
+**變更摘要（commit `029d10b`）：**
+- `lib/screens/summer_window_page.dart`：`_loadData()` 中
+  - line 45：`if (!mounted) return;` 在 `setState(() => _isLoading = false)` 之前
+  - 防止 async _loadData 完成後 widget 已 unmount 時執行 setState
+
+---
+
 ## Current Review Status
 
 - Result: PASS
 - Waiting for OpenClaw fix: NO
 - Last reviewed by: Hermes Auto Review (Linux runner — static verification)
-- Last reviewed at: 2026-05-05 10:21 (Asia/Taipei)
-- Note: P3-9-PHASE17 PASS — home_page.dart 1 mounted guard (empty-cats add-cat button), static review confirms guard at line ~1932
+- Last reviewed at: 2026-05-05 10:39 (Asia/Taipei)
+- Note: P3-9-PHASE18 PASS — summer_window_page.dart 1 mounted guard in _loadData (line 45), static review confirmed
 
 ---
 
