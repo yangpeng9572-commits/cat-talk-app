@@ -1,0 +1,240 @@
+﻿diff --git a/lib/widgets/meow_once_sheet.dart b/lib/widgets/meow_once_sheet.dart
+index 9715951..d37162c 100644
+--- a/lib/widgets/meow_once_sheet.dart
++++ b/lib/widgets/meow_once_sheet.dart
+@@ -8,7 +8,7 @@ import '../theme/kawaii_theme.dart';
+ import '../services/top_toast_service.dart';
+ 
+ /// ?萎?銝?Bottom Sheet
+-/// 
++///
+ /// 雿輻?孵?嚗? /// ```dart
+ /// showModalBottomSheet(
+@@ -67,8 +67,10 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+     if (mounted) setState(() => _savedSounds = sounds);
+   }
+ 
+-  MeowSoundMode get _currentMode => MeowSoundModeService.modes[_currentModeIndex];
+-  String get _currentMeowText => MeowSoundModeService.meowTexts[_currentModeIndex];
++  MeowSoundMode get _currentMode =>
++      MeowSoundModeService.modes[_currentModeIndex];
++  String get _currentMeowText =>
++      MeowSoundModeService.meowTexts[_currentModeIndex];
+ 
+   Future<void> _playSound() async {
+     if (_isPlaying) {
+@@ -80,7 +82,8 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+     setState(() => _isPlaying = true);
+ 
+     try {
+-      await _audioPlayer.play(AssetSource(_currentMode.assetPath.replaceFirst('assets/', '')));
++      await _audioPlayer.play(
++          AssetSource(_currentMode.assetPath.replaceFirst('assets/', '')));
+     } catch (e) {
+       // ?單?瑼?摮?＊蝷箏???蝷綽?銝??
+       if (mounted) {
+@@ -98,7 +101,8 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+       await _audioPlayer.stop();
+     }
+     setState(() {
+-      _currentModeIndex = (_currentModeIndex + 1) % _modeService.modes.length;
++      _currentModeIndex =
++          (_currentModeIndex + 1) % MeowSoundModeService.modes.length;
+       _isPlaying = false;
+       _noteController.clear();
+     });
+@@ -134,7 +138,9 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+         title: const Text('?芷??莎?'),
+         content: const Text('?芷敺瘜敺?),
+         actions: [
+-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('??')),
++          TextButton(
++              onPressed: () => Navigator.pop(ctx, false),
++              child: const Text('??')),
+           TextButton(
+             onPressed: () => Navigator.pop(ctx, true),
+             child: const Text('?芷', style: TextStyle(color: Colors.red)),
+@@ -171,7 +177,8 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+                   // ??璇?                   Center(
+                     child: Container(
+-                      width: 40, height: 4,
++                      width: 40,
++                      height: 4,
+                       decoration: BoxDecoration(
+                         color: Colors.grey[300],
+                         borderRadius: BorderRadius.circular(2),
+@@ -184,12 +191,15 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+                   Row(
+                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                     children: [
+-                      const Text('?萎?銝?, style: TextStyle(
+-                        fontSize: 22, fontWeight: FontWeight.bold,
+-                        color: Color(0xFF6B4B4B),
+-                      )),
++                      const Text('?萎?銝?,
++                          style: TextStyle(
++                            fontSize: 22,
++                            fontWeight: FontWeight.bold,
++                            color: Color(0xFF6B4B4B),
++                          )),
+                       TextButton(
+-                        onPressed: () => setState(() => _showSaved = !_showSaved),
++                        onPressed: () =>
++                            setState(() => _showSaved = !_showSaved),
+                         child: Text(_showSaved ? '餈?' : '撣貊?菔'),
+                       ),
+                     ],
+@@ -227,13 +237,16 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+                       children: [
+                         ElevatedButton.icon(
+                           onPressed: _playSound,
+-                          icon: Icon(_isPlaying ? Icons.stop : Icons.play_arrow, color: Colors.white),
++                          icon: Icon(_isPlaying ? Icons.stop : Icons.play_arrow,
++                              color: Colors.white),
+                           label: Text(_isPlaying ? '?迫' : '?剜 ?'),
+                           style: ElevatedButton.styleFrom(
+                             backgroundColor: KawaiiTheme.primaryPink,
+                             foregroundColor: Colors.white,
+-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
++                            padding: const EdgeInsets.symmetric(
++                                horizontal: 20, vertical: 12),
++                            shape: RoundedRectangleBorder(
++                                borderRadius: BorderRadius.circular(12)),
+                           ),
+                         ),
+                         OutlinedButton.icon(
+@@ -243,8 +256,10 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+                           style: OutlinedButton.styleFrom(
+                             foregroundColor: KawaiiTheme.primaryPink,
+                             side: BorderSide(color: KawaiiTheme.primaryPink),
+-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
++                            padding: const EdgeInsets.symmetric(
++                                horizontal: 20, vertical: 12),
++                            shape: RoundedRectangleBorder(
++                                borderRadius: BorderRadius.circular(12)),
+                           ),
+                         ),
+                       ],
+@@ -257,10 +272,12 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+                       maxLines: 2,
+                       decoration: InputDecoration(
+                         hintText: '?酉嚗?憒?憟嗉?賢???,
+-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
++                        border: OutlineInputBorder(
++                            borderRadius: BorderRadius.circular(12)),
+                         focusedBorder: OutlineInputBorder(
+                           borderRadius: BorderRadius.circular(12),
+-                          borderSide: BorderSide(color: KawaiiTheme.primaryPink, width: 2),
++                          borderSide: BorderSide(
++                              color: KawaiiTheme.primaryPink, width: 2),
+                         ),
+                       ),
+                     ),
+@@ -274,9 +291,11 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+                             onPressed: () => Navigator.pop(context),
+                             style: OutlinedButton.styleFrom(
+                               padding: const EdgeInsets.symmetric(vertical: 14),
+-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
++                              shape: RoundedRectangleBorder(
++                                  borderRadius: BorderRadius.circular(12)),
+                             ),
+                             child: const Text('銝???),
++                          ),
+                         ),
+                         const SizedBox(width: 12),
+                         Expanded(
+@@ -286,7 +305,8 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+                               backgroundColor: KawaiiTheme.primaryPink,
+                               foregroundColor: Colors.white,
+                               padding: const EdgeInsets.symmetric(vertical: 14),
+-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
++                              shape: RoundedRectangleBorder(
++                                  borderRadius: BorderRadius.circular(12)),
+                             ),
+                             child: const Text('靽? ??'),
+                           ),
+@@ -311,40 +331,51 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+                       )
+                     else
+                       ..._savedSounds.map((sound) => Card(
+-                        margin: const EdgeInsets.only(bottom: 12),
+-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+-                        child: Padding(
+-                          padding: const EdgeInsets.all(12),
+-                          child: Column(
+-                            crossAxisAlignment: CrossAxisAlignment.start,
+-                            children: [
+-                              Row(
++                            margin: const EdgeInsets.only(bottom: 12),
++                            shape: RoundedRectangleBorder(
++                                borderRadius: BorderRadius.circular(12)),
++                            child: Padding(
++                              padding: const EdgeInsets.all(12),
++                              child: Column(
++                                crossAxisAlignment: CrossAxisAlignment.start,
+                                 children: [
+-                                  Expanded(
+-                                    child: Text(sound.modeName,
+-                                        style: const TextStyle(fontWeight: FontWeight.bold)),
+-                                  ),
+-                                  IconButton(
+-                                    icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+-                                    onPressed: () => _deleteSound(sound.id),
+-                                    padding: EdgeInsets.zero, constraints: const BoxConstraints(),
++                                  Row(
++                                    children: [
++                                      Expanded(
++                                        child: Text(sound.modeName,
++                                            style: const TextStyle(
++                                                fontWeight: FontWeight.bold)),
++                                      ),
++                                      IconButton(
++                                        icon: const Icon(Icons.delete_outline,
++                                            color: Colors.red, size: 20),
++                                        onPressed: () => _deleteSound(sound.id),
++                                        padding: EdgeInsets.zero,
++                                        constraints: const BoxConstraints(),
++                                      ),
++                                    ],
+                                   ),
++                                  const SizedBox(height: 4),
++                                  Text(sound.meowText,
++                                      style: const TextStyle(fontSize: 14)),
++                                  if (sound.note != null &&
++                                      sound.note!.isNotEmpty) ...[
++                                    const SizedBox(height: 4),
++                                    Text('?? ${sound.note}',
++                                        style: TextStyle(
++                                            color: Colors.grey[600],
++                                            fontSize: 12)),
++                                  ],
++                                  const SizedBox(height: 4),
++                                  Text(
++                                      '${sound.catName} 繚 ${sound.createdAt.month}/${sound.createdAt.day}',
++                                      style: TextStyle(
++                                          color: Colors.grey[500],
++                                          fontSize: 11)),
+                                 ],
+                               ),
+-                              const SizedBox(height: 4),
+-                              Text(sound.meowText, style: const TextStyle(fontSize: 14)),
+-                              if (sound.note != null && sound.note!.isNotEmpty) ...[
+-                                const SizedBox(height: 4),
+-                                Text('?? ${sound.note}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+-                              ],
+-                              const SizedBox(height: 4),
+-                              Text(
+-                                '${sound.catName} 繚 ${sound.createdAt.month}/${sound.createdAt.day}',
+-                                style: TextStyle(color: Colors.grey[500], fontSize: 11)),
+-                            ],
+-                          ),
+-                        ),
+-                      )),
++                            ),
++                          )),
+                   ],
+ 
+                   const SizedBox(height: 24),
+

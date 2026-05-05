@@ -1,0 +1,31 @@
+﻿diff --git a/lib/widgets/meow_once_sheet.dart b/lib/widgets/meow_once_sheet.dart
+index 9715951..d9be24f 100644
+--- a/lib/widgets/meow_once_sheet.dart
++++ b/lib/widgets/meow_once_sheet.dart
+@@ -98,7 +98,7 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+       await _audioPlayer.stop();
+     }
+     setState(() {
+-      _currentModeIndex = (_currentModeIndex + 1) % _modeService.modes.length;
++      _currentModeIndex = (_currentModeIndex + 1) % MeowSoundModeService.modes.length;
+       _isPlaying = false;
+       _noteController.clear();
+     });
+@@ -277,6 +277,7 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                             ),
+                             child: const Text('銝???),
++                          ),
+                         ),
+                         const SizedBox(width: 12),
+                         Expanded(
+@@ -293,6 +294,8 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
+                         ),
+                       ],
+                     ),
++
++                    ),
+                   ] else ...[
+                     // === 撣貊?菔?” ===
+ 
+

@@ -1,0 +1,19 @@
+﻿diff --git a/.agent/task_queue.md b/.agent/task_queue.md
+index 1039adb..87a5920 100644
+--- a/.agent/task_queue.md
++++ b/.agent/task_queue.md
+@@ -56,8 +56,6 @@ OpenClaw 瘥憚隞餃?????霈?瑼??? **蝚砍?對?撌亦?蝛拙??扯?撌亙嚗3/P4嚗?*
+ 30. P3-8嚗 App 銝?內 Top Toast ?梁?? 31. P3-9嚗??芸??貉身閮?-32. P4-1嚗gent Monitor Dashboard 蝚砌??挾
+-33. P4-2嚗gent ?芸???隞餃?????渡?
+ 
+ ---
+ 
+@@ -379,8 +377,6 @@ OpenClaw 瘥憚?敹??嚗? | P3-2 | ??PASS | 撠??振???辣?批捆嚗ermes 2026-05-03嚗
+ | P3-3 | ??DONE (commit 710bd1b) | 憭蝒??剖?憿舐內嚗ermes via P3-7 review window嚗
+ | P3-6 | ??DONE (commit 867369c) | ???勗????芷?＊蝷綽?WAITING Hermes嚗
+-| P4-1 | TODO | Agent Monitor蝚砌??挾 |
+-| P4-2 | TODO | 隞餃?????渡? |
+ 
+ ---
+ 
+
