@@ -18,10 +18,10 @@ class CatPoseCameraFrame extends StatelessWidget {
             width: frameWidth,
             height: frameHeight,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: Colors.white.withOpacity(0.15),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.6),
+                color: Colors.white.withOpacity(0.6),
                 width: 2,
               ),
             ),
@@ -36,19 +36,19 @@ class CatPoseCameraFrame extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.pets,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: Colors.white.withOpacity(0.5),
                         size: 48,
                       ),
                       const SizedBox(height: 12),
                       Text(
                         '請讓貓咪全身進入框內',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: Colors.white.withOpacity(0.85),
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           shadows: [
                             Shadow(
-                              color: Colors.black.withValues(alpha: 0.3),
+                              color: Colors.black.withOpacity(0.3),
                               blurRadius: 4,
                             ),
                           ],
@@ -69,7 +69,7 @@ class CatPoseCameraFrame extends StatelessWidget {
   List<Widget> _buildCornerDecorations(double frameWidth, double frameHeight) {
     const cornerSize = 20.0;
     const cornerThickness = 3.0;
-    final cornerColor = Colors.white.withValues(alpha: 0.8);
+    final cornerColor = Colors.white.withOpacity(0.8);
 
     return [
       // 左上角

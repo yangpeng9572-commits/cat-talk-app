@@ -395,7 +395,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: Colors.white.withOpacity(0.8),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -428,7 +428,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.pink.withValues(alpha: 0.3),
+                        color: Colors.pink.withOpacity(0.3),
                         blurRadius: 20,
                         spreadRadius: 5,
                       ),
@@ -460,7 +460,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: Colors.black.withOpacity(0.1),
                         blurRadius: 10,
                       ),
                     ],
@@ -488,7 +488,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 20,
                     offset: const Offset(0, -5),
                   ),
@@ -569,7 +569,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
               width: 80,
               height: 100,
               decoration: BoxDecoration(
-                color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+                color: const Color(0xFFFFD700).withOpacity(0.3),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.white, width: 4),
               ),
@@ -590,7 +590,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
               width: 100,
               height: 50,
               decoration: BoxDecoration(
-                color: const Color(0xFFFFB6C1).withValues(alpha: 0.6),
+                color: const Color(0xFFFFB6C1).withOpacity(0.6),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               ),
             ),
@@ -637,9 +637,9 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: const Color(0xFFFF8FAB).withValues(alpha: 0.1),
+              color: const Color(0xFFFF8FAB).withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFFF8FAB).withValues(alpha: 0.3)),
+              border: Border.all(color: const Color(0xFFFF8FAB).withOpacity(0.3)),
             ),
             child: Center(
               child: Text(emoji, style: const TextStyle(fontSize: 28)),
@@ -666,7 +666,7 @@ class _HomeInteractionPageState extends State<HomeInteractionPage>
 
   Widget _buildTextToMeowOverlay() {
     return Container(
-      color: Colors.black.withValues(alpha: 0.5),
+      color: Colors.black.withOpacity(0.5),
       child: Center(
         child: Container(
           margin: const EdgeInsets.all(32),

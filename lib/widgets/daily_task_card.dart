@@ -54,7 +54,7 @@ class _DailyTaskCardState extends State<DailyTaskCard>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -191,7 +191,7 @@ class _DailyTaskCardState extends State<DailyTaskCard>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -226,7 +226,7 @@ class _DailyTaskCardState extends State<DailyTaskCard>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -260,7 +260,7 @@ class _DailyTaskCardState extends State<DailyTaskCard>
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isCompleted
-            ? Colors.green.shade50.withValues(alpha: 0.5)
+            ? Colors.green.shade50.withOpacity(0.5)
             : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(

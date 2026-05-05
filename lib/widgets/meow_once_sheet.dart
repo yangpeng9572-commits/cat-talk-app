@@ -213,7 +213,7 @@ class _MeowOnceSheetState extends State<MeowOnceSheet> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: KawaiiTheme.primaryPink.withValues(alpha: 0.1),
+                        color: KawaiiTheme.primaryPink.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Text(

@@ -218,7 +218,7 @@ class _CatPoseCameraPageState extends State<CatPoseCameraPage>
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: Colors.white.withOpacity(0.5),
                       width: 2,
                     ),
                   ),
@@ -334,7 +334,7 @@ class _CatPoseCameraPageState extends State<CatPoseCameraPage>
                         borderRadius: BorderRadius.circular(30),
                       ),
                       elevation: 4,
-                      shadowColor: KawaiiTheme.primaryPink.withValues(alpha: 0.4),
+                      shadowColor: KawaiiTheme.primaryPink.withOpacity(0.4),
                     ),
                   ),
                 ),

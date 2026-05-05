@@ -167,7 +167,7 @@ class _AchievementCelebrationState extends State<AchievementCelebration>
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.orange.withValues(alpha: 0.5),
+                      color: Colors.orange.withOpacity(0.5),
                       blurRadius: 30,
                       spreadRadius: 5,
                     ),
@@ -192,7 +192,7 @@ class _AchievementCelebrationState extends State<AchievementCelebration>
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: Colors.white.withOpacity(0.2),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -221,7 +221,7 @@ class _AchievementCelebrationState extends State<AchievementCelebration>
                       widget.message,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: Colors.white.withOpacity(0.9),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -232,7 +232,7 @@ class _AchievementCelebrationState extends State<AchievementCelebration>
                       '點擊任意處關閉',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: Colors.white.withOpacity(0.6),
                       ),
                     ),
                   ],

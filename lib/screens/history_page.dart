@@ -369,7 +369,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: KawaiiTheme.softPink.withValues(alpha: 0.3),
+              color: KawaiiTheme.softPink.withOpacity(0.3),
               shape: BoxShape.circle,
             ),
             child: const Text(
@@ -402,7 +402,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: KawaiiTheme.softPink.withValues(alpha: 0.3),
+              color: KawaiiTheme.softPink.withOpacity(0.3),
               shape: BoxShape.circle,
             ),
             child: const Text(
@@ -455,13 +455,13 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
           borderRadius: BorderRadius.circular(KawaiiTheme.radiusLarge),
           border: Border.all(
             color: hasCorrection
-                ? KawaiiTheme.primaryPink.withValues(alpha: 0.5)
+                ? KawaiiTheme.primaryPink.withOpacity(0.5)
                 : KawaiiTheme.divider,
             width: hasCorrection ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -513,7 +513,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Color(result.emotionType.colorValue).withValues(alpha: 0.15),
+                    color: Color(result.emotionType.colorValue).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -697,7 +697,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
           border: Border.all(color: KawaiiTheme.divider),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -754,7 +754,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                     return Container(
                       width: double.infinity,
                       height: 180,
-                      color: KawaiiTheme.softPink.withValues(alpha: 0.3),
+                      color: KawaiiTheme.softPink.withOpacity(0.3),
                       child: const Icon(
                         Icons.image_not_supported,
                         color: KawaiiTheme.textSecondary,
@@ -787,7 +787,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: KawaiiTheme.primaryPink.withValues(alpha: 0.1),
+                      color: KawaiiTheme.primaryPink.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -883,7 +883,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                               setSheetState(() {});
                             }
                           },
-                          selectedColor: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
+                          selectedColor: KawaiiTheme.primaryPink.withOpacity(0.2),
                           labelStyle: TextStyle(
                             color: isSelected ? KawaiiTheme.primaryPink : KawaiiTheme.textPrimary,
                           ),
@@ -1043,7 +1043,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                                   }
                                 });
                               },
-                              selectedColor: KawaiiTheme.primaryPink.withValues(alpha: 0.2),
+                              selectedColor: KawaiiTheme.primaryPink.withOpacity(0.2),
                               checkmarkColor: KawaiiTheme.primaryPink,
                               labelStyle: TextStyle(
                                 color: isSelected ? KawaiiTheme.primaryPink : KawaiiTheme.textPrimary,
@@ -1142,9 +1142,9 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: KawaiiTheme.softPink.withValues(alpha: 0.3),
+          color: KawaiiTheme.softPink.withOpacity(0.3),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: KawaiiTheme.primaryPink.withValues(alpha: 0.5)),
+          border: Border.all(color: KawaiiTheme.primaryPink.withOpacity(0.5)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

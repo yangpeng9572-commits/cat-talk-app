@@ -194,9 +194,9 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: themeColor.withValues(alpha: 0.15),
+        color: themeColor.withOpacity(0.15),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: themeColor.withValues(alpha: 0.3)),
+        border: Border.all(color: themeColor.withOpacity(0.3)),
       ),
       child: Column(
         children: [
@@ -285,7 +285,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -300,7 +300,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
               Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: themeColor.withValues(alpha: 0.15),
+                    color: themeColor.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text('今天情緒：${_catEmotion.emoji}', style: TextStyle(fontSize: 12, color: themeColor)),
@@ -323,7 +323,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: themeColor.withValues(alpha: 0.1),
+                color: themeColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -353,10 +353,10 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? themeColor : themeColor.withValues(alpha: 0.1),
+          color: isSelected ? themeColor : themeColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? themeColor : themeColor.withValues(alpha: 0.3),
+            color: isSelected ? themeColor : themeColor.withOpacity(0.3),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -390,7 +390,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -427,7 +427,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: themeColor.withValues(alpha: 0.15),
+                color: themeColor.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -485,7 +485,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
             margin: EdgeInsets.only(left: i > 0 ? 4 : 0, right: i < _maxInteractions - 1 ? 4 : 0),
             height: 8,
             decoration: BoxDecoration(
-              color: isCompleted ? themeColor : themeColor.withValues(alpha: 0.2),
+              color: isCompleted ? themeColor : themeColor.withOpacity(0.2),
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -502,7 +502,7 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -527,9 +527,9 @@ class _SummerWindowPageState extends State<SummerWindowPage> {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: themeColor.withValues(alpha: 0.1),
+                  color: themeColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: themeColor.withValues(alpha: 0.3)),
+                  border: Border.all(color: themeColor.withOpacity(0.3)),
                 ),
                 child: Text(
                   _getItemDisplayName(itemId),

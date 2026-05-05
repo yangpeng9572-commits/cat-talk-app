@@ -87,7 +87,7 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
             Positioned(
               bottom: 100,
               right: 35,
-              child: Text('🐾', style: TextStyle(fontSize: 24, color: const Color(0xFFFFB07C).withValues(alpha: 0.6),),),
+              child: Text('🐾', style: TextStyle(fontSize: 24, color: const Color(0xFFFFB07C).withOpacity(0.6),),),
             ),
             // 裝飾 - 中間小愛心
             const Positioned(
@@ -121,7 +121,7 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFCFA0).withValues(alpha: 0.5),
+                          color: const Color(0xFFFFCFA0).withOpacity(0.5),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
@@ -144,11 +144,11 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
                   width: 160,
                   height: 160,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.55),
+                    color: Colors.white.withOpacity(0.55),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFFFCFA0).withValues(alpha: 0.3),
+                        color: const Color(0xFFFFCFA0).withOpacity(0.3),
                         blurRadius: 24,
                         offset: const Offset(0, 8),
                       ),
@@ -209,12 +209,12 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
                       decoration: BoxDecoration(
                         color: index == _currentStep
                             ? const Color(0xFFFF9E6B) // 暖橘 active
-                            : const Color(0xFFFFE4CC).withValues(alpha: 0.5), // 淡米 inactive
+                            : const Color(0xFFFFE4CC).withOpacity(0.5), // 淡米 inactive
                         borderRadius: BorderRadius.circular(5),
                         boxShadow: index == _currentStep
                             ? [
                                 BoxShadow(
-                                  color: const Color(0xFFFF9E6B).withValues(alpha: 0.4),
+                                  color: const Color(0xFFFF9E6B).withOpacity(0.4),
                                   blurRadius: 6,
                                 ),
                               ]
@@ -239,7 +239,7 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFFF9E6B).withValues(alpha: 0.4),
+                            color: const Color(0xFFFF9E6B).withOpacity(0.4),
                             blurRadius: 16,
                             offset: const Offset(0, 6),
                           ),
