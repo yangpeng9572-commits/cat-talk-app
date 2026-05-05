@@ -218,7 +218,6 @@ class AboutPage extends StatelessWidget {
               title: '使用協議',
               description: '使用前請詳閱本 App 之服務條款',
               onTap: () {
-                if (!mounted) return;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -237,7 +236,6 @@ class AboutPage extends StatelessWidget {
               title: '隱私政策',
               description: '了解錄音、資料的使用方式',
               onTap: () {
-                if (!mounted) return;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
